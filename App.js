@@ -1,73 +1,109 @@
-import React from 'react';
-import * as ImagePicker from 'expo-image-picker';
-import Constants from 'expo-constants';
-import * as Permissions from 'expo-permissions';
-import { Button, Image, StyleSheet, Text, View } from 'react-native';
-import { Video } from 'expo-av';
+import React from "react";
+import { createAppContainer, createSwitchNavigator } from "react-navigation";
+import { createStackNavigator } from "react-navigation-stack";
+import { createBottomTabNavigator } from "react-navigation-tabs";
+import { Ionicons } from "@expo/vector-icons";
+import LoadingScreen from "./screens/LoadingScreen";
+import LoginScreen from "./screens/LoginScreen";
+import RegisterScreen from "./screens/RegisterScreen";
+import HomeScreen from "./screens/HomeScreen";
+import MessageScreen from "./screens/MessageScreen";
+import PostScreen from "./screens/PostScreen";
+import NotificationScreen from "./screens/NotificationScreen";
+import ProfileScreen from "./screens/ProfileScreen";
+import firebase from "firebase";
 
-export default class App extends React.Component {
-  state = {
-    image: null,
-  };
-  
-  render() {
-    return (
-      <View style={styles.container}>
-        <Text>Ciao mbare!</Text>
-        <Button
-            title="Pick an image from camera roll"
-            onPress={this._pickImage}
-          />
-          <Video
-          source={{ uri: this.state.image }}
-          rate={1.0}
-          volume={1.0}
-          isMuted={false}
-          resizeMode="cover"
-          shouldPlay
-          isLooping
-          style={{ width: 300, height: 300 }}
-        />
-
-      </View>
-    );
-  }
-
-  componentDidMount() {
-    this.getPermissionAsync();
-    console.log('hi');
-  }
-  
-  getPermissionAsync = async () => {
-    if (Constants.platform.ios) {
-      const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
-      if (status !== 'granted') {
-        alert('Sorry, we need camera roll permissions to make this work!');
-      }
+const AppContainer = createStackNavigator(
+    {
+        default: createBottomTabNavigator(
+            {
+                Home: {
+                    screen: HomeScreen,
+                    navigationOptions: {
+                        tabBarIcon: ({ tintColor }) => <Ionicons name="ios-home" size={24} color={tintColor} />
+                    }
+                },
+                Message: {
+                    screen: MessageScreen,
+                    navigationOptions: {
+                        tabBarIcon: ({ tintColor }) => <Ionicons name="ios-chatboxes" size={24} color={tintColor} />
+                    }
+                },
+                Post: {
+                    screen: PostScreen,
+                    navigationOptions: {
+                        tabBarIcon: ({ tintColor }) => (
+                            <Ionicons
+                                name="ios-add-circle"
+                                size={48}
+                                color="#E9446A"
+                                style={{
+                                    shadowColor: "#E9446A",
+                                    shadowOffset: { width: 0, height: 10 },
+                                    shadowRadius: 10,
+                                    shadowOpacity: 0.3
+                                }}
+                            />
+                        )
+                    }
+                },
+                Notification: {
+                    screen: NotificationScreen,
+                    navigationOptions: {
+                        tabBarIcon: ({ tintColor }) => <Ionicons name="ios-notifications" size={24} color={tintColor} />
+                    }
+                },
+                Profile: {
+                    screen: ProfileScreen,
+                    navigationOptions: {
+                        tabBarIcon: ({ tintColor }) => <Ionicons name="ios-person" size={24} color={tintColor} />
+                    }
+                }
+            },
+            {
+                defaultNavigationOptions: {
+                    tabBarOnPress: ({ navigation, defaultHandler }) => {
+                        if (navigation.state.key === "Post") {
+                            navigation.navigate("postModal");
+                        } else {
+                            defaultHandler();
+                        }
+                    }
+                },
+                tabBarOptions: {
+                    activeTintColor: "#161F3D",
+                    inactiveTintColor: "#B8BBC4",
+                    showLabel: false
+                }
+            }
+        ),
+        postModal: {
+            screen: PostScreen
+        }
+    },
+    {
+        mode: "modal",
+        headerMode: "none"
+        // initialRouteName: "postModal"
     }
-  }
+);
 
-  _pickImage = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Videos,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1
-    });
-
-    console.log(result);
-
-    if (!result.cancelled) {
-      this.setState({ image: result.uri });
-    }
-  };
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+const AuthStack = createStackNavigator({
+    Login: LoginScreen,
+    Register: RegisterScreen
 });
+
+export default createAppContainer(
+    createSwitchNavigator(
+        {
+            Loading: LoadingScreen,
+            App: AppContainer,
+            Auth: AuthStack
+        },
+        {
+            initialRouteName: "Loading"
+        }
+    )
+);
+
+
