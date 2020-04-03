@@ -1,6 +1,6 @@
 import FirebaseKeys from "./keys";
 import firebase, { database } from "firebase";
-require("firebase/firestore");
+import '@firebase/firestore';
 
 class Fire {
     constructor() {
@@ -45,7 +45,7 @@ class Fire {
             let db = this.firestore.collection("users").doc(this.uid);
 
             db.set({
-                name: user.username,
+                name: user.name,
                 email: user.email,
                 followed:{},
                 follower:{},
@@ -65,8 +65,7 @@ class Fire {
     };
 
     signIn = () =>{
-        firebase.auth().signInWithEmailAndPassword(user.email, user.password).catch(function(error) {
-          });
+        firebase.auth().signInWithEmailAndPassword(user.email, user.password).catch(function(error) {});
     }
 
     signOut = () => {
