@@ -6,7 +6,9 @@ import * as Facebook from 'expo-facebook';
 
 
 export default class App extends React.Component {
-
+  static navigationOptions = {
+    headerShown: false
+};
   constructor(props) {
     super(props)
 
@@ -134,7 +136,8 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         alignItems: "center",
-        justifyContent: "center"
+        justifyContent: "center",
+        backgroundColor:"#ffff"
     },
 
     title:{

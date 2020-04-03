@@ -7,7 +7,9 @@ import *as firebase from "firebase";
 import * as Facebook from 'expo-facebook';
 
 export default class RegisterScreen extends React.Component {
-
+    static navigationOptions = {
+        headerShown: false
+    };
     state = {
         user: {
             name: "",
@@ -144,7 +146,9 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         alignItems: "center",
-        justifyContent: "center"
+        justifyContent: "center",
+        backgroundColor:"#ffff"
+
     },
 
     title:{
