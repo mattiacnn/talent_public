@@ -1,10 +1,11 @@
 import FirebaseKeys from "./keys";
-import firebase, { database } from "firebase";
-import '@firebase/firestore';
+import firebase from 'firebase';
+import 'firebase/firestore';
 
 class Fire {
     constructor() {
         firebase.initializeApp(FirebaseKeys);
+        var dbh = firebase.firestore();
     }
 
     uploadPhotoAsync = (uri, filename) => {
@@ -42,6 +43,19 @@ class Fire {
         firebase.auth().createUserWithEmailAndPassword(user.email, user.password)
         .then((u)=>{
             console.log(u)
+            let id = u.user.uid
+            console.log(id)
+
+            firebase.firestore().collection("users").doc(id)
+            .set({
+                    name: user.name,
+                    email: user.email,
+                    followed:{},
+                    follower:{},
+                    latitude:null,
+                    longitude:null,
+                    avatar: null
+                });
         }).catch((err)=>{
             console.log(err);
             alert("Error: ", err);
