@@ -12,16 +12,19 @@ import PostScreen from "./screens/PostScreen";
 import NotificationScreen from "./screens/NotificationScreen";
 import ProfileScreen from "./screens/ProfileScreen";
 import firebase from "firebase";
+import { Title } from "react-native-paper";
+
 
 const AppContainer = createStackNavigator(
     {
-        default: createBottomTabNavigator(
+        Talent: createBottomTabNavigator(
             {
                 Home: {
                     screen: HomeScreen,
                     navigationOptions: {
                         tabBarIcon: ({ tintColor }) => <Ionicons name="ios-home" size={24} color={tintColor} />
                     }
+                    
                 },
                 Message: {
                     screen: MessageScreen,
@@ -64,7 +67,7 @@ const AppContainer = createStackNavigator(
                 defaultNavigationOptions: {
                     tabBarOnPress: ({ navigation, defaultHandler }) => {
                         if (navigation.state.key === "Post") {
-                            navigation.navigate("postModal");
+                            navigation.navigate("Carica");
                         } else {
                             defaultHandler();
                         }
@@ -77,7 +80,7 @@ const AppContainer = createStackNavigator(
                 }
             }
         ),
-        postModal: {
+        Carica: {
             screen: PostScreen
         }
     },
@@ -105,5 +108,3 @@ export default createAppContainer(
         }
     )
 );
-
-
