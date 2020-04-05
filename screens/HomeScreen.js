@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, StyleSheet, Button } from "react-native";
+import { View, Text, StyleSheet, Button, StatusBar } from "react-native";
 import *as firebase from "firebase";
 import { Video } from 'expo-av';
 import * as ImagePicker from 'expo-image-picker';
@@ -11,7 +11,8 @@ export default class HomeScreen extends React.Component {
     render() {
       return (
           <View style={styles.container}>
-              <Text>Home Screen</Text>
+              <StatusBar backgroundColor="blue" barStyle="dark-content" ></StatusBar>
+              <Text>Timeline</Text>
           </View>
       );
     }
@@ -36,6 +37,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         alignItems: "center",
-        justifyContent: "center"
+        justifyContent: "center",
+        backgroundColor: '#ECF0F1',
     }
 });

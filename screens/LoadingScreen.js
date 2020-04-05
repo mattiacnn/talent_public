@@ -5,23 +5,22 @@ import LoginScreen from "./LoginScreen";
 
 class LoadingScreen extends React.Component {
 
-   componentDidMount() {
+    componentDidMount() {
         this.checkIfLoggedIn();
-       }
-       
-    checkIfLoggedIn = () =>{
-        firebase.auth().onAuthStateChanged(function(user){
-            if(user)
-            {
+    }
+
+    checkIfLoggedIn = () => {
+        firebase.auth().onAuthStateChanged(function (user) {
+            if (user) {
                 this.props.navigation.navigate('Home');
             }
-            else{
+            else {
                 this.props.navigation.navigate('Login');
             }
         }.bind(this)
         );
     };
-  
+
 
     render() {
         return (
@@ -31,7 +30,7 @@ class LoadingScreen extends React.Component {
             </View>
         );
     }
-}export default LoginScreen
+} export default LoginScreen
 
 const styles = StyleSheet.create({
     container: {
