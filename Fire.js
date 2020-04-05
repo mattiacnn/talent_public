@@ -49,11 +49,10 @@ class Fire {
             firebase.firestore().collection("users").doc(id)
             .set({
                     name: user.name,
+                    surname: user.surname,
                     email: user.email,
                     followed:{},
                     follower:{},
-                    latitude:null,
-                    longitude:null,
                     avatar: null
                 });
         }).catch((err)=>{

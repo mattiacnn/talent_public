@@ -78,7 +78,7 @@ export default class RegisterScreen extends React.Component {
                       <Text style={styles.inputTitle}>Nome</Text>
                       <TextInput
                           style={styles.input}
-                          autoCapitalize="none"
+                          autoCapitalize="words"
                           onChangeText={name => this.setState({ user: { ...this.state.user, name } })}
                       ></TextInput>
                   </View>
@@ -86,7 +86,7 @@ export default class RegisterScreen extends React.Component {
                       <Text style={styles.inputTitle}>Cognome</Text>
                       <TextInput
                           style={styles.input}
-                          autoCapitalize="none"
+                          autoCapitalize="words"
                           onChangeText={surname => this.setState({ user: { ...this.state.user, surname } })}
                       ></TextInput>
                   </View>
