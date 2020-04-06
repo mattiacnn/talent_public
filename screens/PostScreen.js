@@ -124,6 +124,7 @@ export default class PostScreen extends React.Component {
 
 
   uploadImageAsync = async () => {
+    var newvideo;
     // Why are we using XMLHttpRequest? See:
     // https://github.com/expo/expo/issues/2402#issuecomment-443726662
     const id = firebase.auth().currentUser.uid;
@@ -172,16 +173,35 @@ export default class PostScreen extends React.Component {
         console.log('File available at', downloadURL);
         return downloadURL;
       })
-        .then(path => { return VideoThumbnails.getThumbnailAsync(path, { time: 1 }) })
+        .then(path => { return VideoThumbnails.getThumbnailAsync(path, { time: 1, compress:0}) })
         .then(res => {
           
           console.log("thumb got");
           console.log(res.uri);
-
-          firebase.firestore().collection("videos").doc(id)
-            .collection("user_videos").doc(vid)
-            .set({ description: "default desc", likes: 0, thumbnail: res.uri });
+          return fetch(res.uri);}
+          )
+        .then(r=>{
+          return r.blob();
         })
+        .then(file => {
+          return firebase.storage().ref().child(`@thumb-${vid}`).put(file);
+        })
+        .then(snap => {return snap.ref.getDownloadURL();})
+        .then(url=>{
+          newvideo = { description: "default desc", likes: 0, thumbnail: url, id:vid};
+          return firebase.firestore().collection("videos").doc(id)
+            .collection("user_videos").doc(vid)
+            .set(newvideo);
+        }).then(()=>{return firebase.firestore().collection("users").doc(id).get();
+          })
+          .then((user)=>{
+            let uv = user.data().user_videos;
+            if(!uv){
+              uv = [];
+            }
+            uv.push(newvideo);
+            return firebase.firestore().collection("users").doc(id).update({user_videos:uv});
+          })
         .catch(err => { console.log(err) });
 
     });

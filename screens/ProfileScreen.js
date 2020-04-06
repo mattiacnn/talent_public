@@ -33,17 +33,21 @@ export default class ProfileScreen extends React.Component {
         }
     }
 
+    getThumbnails () {
+        
+    }
+
     componentDidMount() {
         this.getImage();
         this._onRefresh();
 
-        var that = this;
-        let items = Array.apply(null, Array(60)).map((v, i) => {
-            return { id: i, src: 'http://placehold.it/200x200?text=' + (i + 1) };
-        });
-        that.setState({
-            dataSource: items,
-        });
+        // var that = this;
+        // let items = Array.apply(null, Array(60)).map((v, i) => {
+        //     return { id: i, src: 'http://placehold.it/200x200?text=' + (i + 1) };
+        // });
+        // that.setState({
+        //     dataSource: items,
+        // });
     }
 
     _pickImage = async () => {
@@ -179,30 +183,10 @@ export default class ProfileScreen extends React.Component {
 
                 this.setState({
                     ...this.state,
-                    user: doc.data()
+                    user: doc.data(),
+                    refreshing: false
                 });
-
-            })
-            .then(() => {
-                firebase.firestore().collection('videos').doc(id)
-                    .collection("user_videos").get()
-                    .then(docs => {
-                        let uv = [];
-                        docs.forEach(video => {
-                            const data = video.data();
-                            const id = video.id;
-                            uv.push({ video: data, id: id });
-                        })
-                        const updt_u = { ...this.state.user, user_videos: uv };
-
-                        this.setState({
-                            ...this.state,
-                            user: updt_u,
-                            refreshing: false
-                        });
-
-                        console.log(this.state.user);
-                    })
+                console.log(this.state.user);
             })
             .catch(err => {
                 console.log('Error getting documents', err);
@@ -275,14 +259,14 @@ export default class ProfileScreen extends React.Component {
                     </View>
                     <View style={styles.MainContainer}>
                         <FlatList
-                            data={this.state.dataSource}
+                            data={this.state.user.user_videos}
                             renderItem={({ item }) => (
                                 <View style={{ flex: 1, flexDirection: 'column', margin: 1 }}>
-                                    <Image style={styles.imageThumbnail} source={{ uri: item.src }} />
+                                    <Image style={styles.imageThumbnail} source={{ uri: item.thumbnail }} />
                                 </View>
                             )}
                             //Setting the number of column
-                            numColumns={3}
+                            numColumns={2}
                             keyExtractor={(item, index) => index.toString()}
                         />
                     </View>
@@ -350,6 +334,6 @@ const styles = StyleSheet.create({
     imageThumbnail: {
         justifyContent: 'center',
         alignItems: 'center',
-        height: 100,
+        height:200,
     },
 });
