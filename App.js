@@ -12,7 +12,7 @@ import RegisterScreen from "./screens/RegisterScreen";
 import HomeScreen from "./screens/HomeScreen";
 import MessageScreen from "./screens/MessageScreen";
 import PostScreen from "./screens/PostScreen";
-import NotificationScreen from "./screens/NotificationScreen";
+import SearchScreen from "./screens/SearchScreen";
 import ProfileScreen from "./screens/ProfileScreen";
 import firebase from "firebase";
 import { Title } from "react-native-paper";
@@ -64,7 +64,9 @@ function LogoTitle() {
 
 const AppContainer = createStackNavigator(
     {
+        
         Talent: createBottomTabNavigator(
+        
             {
                 Home: {
                     screen: HomeScreen,
@@ -99,10 +101,11 @@ const AppContainer = createStackNavigator(
                         )
                     }
                 },
-                Notification: {
-                    screen: NotificationScreen,
+                Search: {
+                    screen: SearchScreen,
                     navigationOptions: {
-                        tabBarIcon: ({ tintColor }) => <Ionicons name="ios-notifications" size={24} color={tintColor} />
+                        headerShown: false,
+                        tabBarIcon: ({ tintColor }) => <Ionicons name="ios-search" size={24} color={tintColor} />
                     }
                 },
                 Profile: {
@@ -136,7 +139,7 @@ const AppContainer = createStackNavigator(
     {
         mode: "modal",
         
-        defaultNavigationOptions: { headerTitle: props => <LogoTitle {...props} /> }
+        defaultNavigationOptions: { headerTitle: props => <LogoTitle {...props} />,  headerShown: false,   }
     }
       
 );

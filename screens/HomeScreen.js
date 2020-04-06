@@ -5,6 +5,7 @@ import { Video } from 'expo-av';
 import * as ImagePicker from 'expo-image-picker';
 import Constants from 'expo-constants';
 import * as Permissions from 'expo-permissions';
+import Fire from "../Fire";
 
 export default class HomeScreen extends React.Component {
 
@@ -13,6 +14,12 @@ export default class HomeScreen extends React.Component {
           <View style={styles.container}>
               <StatusBar backgroundColor="blue" barStyle="dark-content" ></StatusBar>
               <Text>Timeline</Text>
+              <Button
+                            onPress={() => {
+                                Fire.shared.signOut();
+                            }}
+                            title="Log out"
+                        />
           </View>
       );
     }

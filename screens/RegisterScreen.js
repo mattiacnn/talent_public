@@ -5,6 +5,7 @@ import Fire from "../Fire";
 
 import *as firebase from "firebase";
 import * as Facebook from 'expo-facebook';
+import * as ImagePicker from 'expo-image-picker';
 
 export default class RegisterScreen extends React.Component {
     static navigationOptions = {
@@ -57,7 +58,7 @@ export default class RegisterScreen extends React.Component {
       if (type === 'success') {
 
         const credential = firebase.auth.FacebookAuthProvider.credential(token)
-
+        console.log(pubblica_profile.first_name);
         firebase.auth().signInWithCredential(credential).catch((error) => {
           console.log(error)
         });
@@ -68,11 +69,54 @@ export default class RegisterScreen extends React.Component {
       alert(`Facebook Login Error: ${message}`);
     }
   }
+  _pickImage = async () => {
+
+    let result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 1
+    });
+    console.log(result);
+
+    if (!result.cancelled) {
+        const source = { uri: result.uri };
+        AsyncStorage.setItem("profilePic", JSON.stringify(source));
+        this.setState({
+            ...this.state,
+            profilePic: source,
+            isImageAvailable: true
+        });
+
+        this.uploadImageAsync(result.uri).then((uri) => {
+            const updt_u = { ...this.state.user, avatar: uri };
+
+            this.setState({
+                ...this.state,
+                user: updt_u
+            });
+
+            console.log(this.state.user);
+        })
+    }
+
+};
     render() {
         return (
             <View style={styles.container}>
-                <Image style={styles.logo} source={require('../assets/logo.jpeg')}/>
                 <Text style={styles.title}>ISCRIVITI</Text>
+                <View style={styles.avatarContainer}>
+                                <TouchableOpacity activeOpacity={.5} onPress={this._pickImage}>
+                                    <Image
+                                        source={
+                                            this.state.isImageAvailable
+                                                ? this.state.profilePic
+                                                : require("../assets/tempAvatar.jpg")
+                                        }
+                                        style={styles.avatar}
+                                    />
+                                </TouchableOpacity>
+                            </View>
                 <View style={styles.form}>
                 <View>
                       <Text style={styles.inputTitle}>Nome</Text>
@@ -112,10 +156,10 @@ export default class RegisterScreen extends React.Component {
 
              <TouchableOpacity style={styles.button} onPress={this.handleSignUp}>
                  <View style={{display:"flex", flexDirection:"row",alignItems:"stretch",justifyContent:"space-around", }}>
-                      <Text style={{ color: "#FFF", fontWeight: "500",letterSpacing:2,alignSelf:"center",fontSize:15,marginTop:-3 }}>MOSTRA IL TUO TALENTO</Text>
+                      <Text style={{ color: "#FFF", fontWeight: "500",letterSpacing:2,alignSelf:"center",fontSize:15,marginTop:-3 }}>REGISTRATI</Text>
                     </View>
              </TouchableOpacity>
-             <Text style={{ fontWeight: "500", color: "#FF5166",marginBottom:20,marginTop:20}}>OPPURE</Text>
+             <Text style={{ fontWeight: "500", color: "#FF5166",marginBottom:10,marginTop:10}}>OPPURE</Text>
              <TouchableOpacity style={styles.FBbutton} onPress={() => this.loginWithFacebook()}>
                  <View style={{display:"flex", flexDirection:"row",alignItems:"stretch",justifyContent:"space-around", }}>
                       <Text style={{ color: "#FFF", fontWeight: "500",letterSpacing:2,alignSelf:"center",fontSize:15,marginTop:-3 }}>CONTINUA SU FACEBOOK</Text>
@@ -123,7 +167,7 @@ export default class RegisterScreen extends React.Component {
              </TouchableOpacity>
 
              <TouchableOpacity
-                  style={{ marginTop: 32 }}
+                  style={{ marginTop: 2 }}
                   onPress={() => this.props.navigation.navigate("Login")}
               >
                   <Text style={{ color: "#414959", fontSize: 13 }}>
@@ -148,10 +192,11 @@ const styles = StyleSheet.create({
         fontSize:35,
         fontWeight:"600",
         letterSpacing:2,
-        marginBottom:20
+        marginBottom:20,
+        marginTop:20
     },
     form: {
-        marginBottom: 48,
+        marginBottom: 18,
         justifyContent:"space-between",
     
     },
@@ -194,5 +239,16 @@ const styles = StyleSheet.create({
         fontSize: 13,
         fontWeight: "600",
         textAlign: "center"
-    }
+    },
+    avatarContainer: {
+        shadowColor: "#151734",
+        shadowRadius: 30,
+        shadowOpacity: 0.4,
+        marginBottom:10
+    },
+    avatar: {
+        width: 106,
+        height: 106,
+        borderRadius: 68
+    },
 });

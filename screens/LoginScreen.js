@@ -95,7 +95,7 @@ export default class App extends React.Component {
                   ></TextInput>
               </View>
 
-              <View style={{ marginTop: 32 }}>
+              <View style={{ marginTop: 32, }}>
                   <Text style={styles.inputTitle}>Password</Text>
                   <TextInput
                       style={styles.input}
@@ -119,7 +119,7 @@ export default class App extends React.Component {
              </TouchableOpacity>
 
          <TouchableOpacity
-              style={{ marginTop: 32 }}
+              style={{ marginTop: 12 }}
               onPress={() => this.props.navigation.navigate("Register")}
           >
               <Text style={{ color: "#414959", fontSize: 13 }}>
@@ -146,7 +146,8 @@ const styles = StyleSheet.create({
         letterSpacing:2
     },
     form: {
-        marginBottom: 48,
+        marginBottom: 28,
+        marginTop:-30
     },
     inputTitle: {
         color: "#8A8F9E",

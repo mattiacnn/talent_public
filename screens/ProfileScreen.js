@@ -1,13 +1,16 @@
 import React from "react";
-import { View, Text, StyleSheet, Button, Image, TouchableOpacity, SafeAreaView, RefreshControl } from "react-native";
+import { View, Text, StyleSheet, Button, Image, TouchableOpacity, SafeAreaView, RefreshControl,Modal} from "react-native";
 import Fire from "../Fire";
 import firebase from 'firebase';
 import 'firebase/firestore';
-import { ScrollView, FlatList } from "react-native-gesture-handler";
+import { ScrollView, FlatList, TextInput } from "react-native-gesture-handler";
 import * as ImagePicker from 'expo-image-picker';
 import uuid from 'react-uuid'
 import { AsyncStorage } from 'react-native';
+import {  } from "react-native-paper";
+import { Ionicons } from "@expo/vector-icons";
 
+  
 export default class ProfileScreen extends React.Component {
 
     constructor(props) {
@@ -17,9 +20,14 @@ export default class ProfileScreen extends React.Component {
             refreshing: false,
             isImageAvailable: false,
             profilePic: null,
+            visible: false,
             dataSource:[]
+            
         };
     }
+
+    _showModal = () => this.setState({ visible: true });
+    _hideModal = () => this.setState({ visible: false });
 
     getImage = async () => {
         const profilePic = await AsyncStorage.getItem("profilePic");
@@ -148,20 +156,6 @@ export default class ProfileScreen extends React.Component {
             .catch(err => {
                 console.log('Error getting documents', err);
             });
-
-        // firebase.firestore().collection("users").doc(id).get()
-        //     .then(doc => {
-        //         if (!doc.exists) {
-        //             console.log('No such document!');
-        //         } else {
-        //             console.log('Document data:', doc.data());
-        //             this.setState({ user: { name: doc.data().name, surname: doc.data().surname, followed: doc.data().followed } })
-        //             //var followedNum = doc.data().followed.length;
-        //         }
-        //     })
-        //     .catch(err => {
-        //         console.log('Error getting document', err);
-        //     });
         return true;
     }
 
@@ -207,17 +201,25 @@ export default class ProfileScreen extends React.Component {
             .catch(err => {
                 console.log('Error getting documents', err);
             });
+    }
 
-        // this.getUserData()
-        //     .then(() => {
-        //         this.setState({ refreshing: false });
-        //     }).catch(err => {
-        //         console.log('Error getting document', err);
-        //     });
+    updateData = ()  =>{
+
+        let id = firebase.auth().currentUser.uid;
+       firebase.firestore().collection("users").doc(id)
+            .update({
+                    name: this.state.user.name,
+                    surname: this.state.user.surname,
+                    email: this.state.user.email,
+                })
+      .catch((err)=>{
+            console.log(err);
+            alert("Error: ", err);
+        })
+        this.setState({visible:false})
     }
 
     render() {
-
         return (
             <SafeAreaView>
                 <ScrollView
@@ -226,10 +228,10 @@ export default class ProfileScreen extends React.Component {
                             refreshing={this.state.refreshing}
                             onRefresh={this._onRefresh}
                         />
-                    }
+                                    }
                 >
                     <View style={styles.container}>
-                        <View style={{ marginTop: 64, alignItems: "center" }}>
+                        <View style={{ marginTop: 34, alignItems: "center" }}>
                             <View style={styles.avatarContainer}>
                                 <TouchableOpacity activeOpacity={.5} onPress={this._pickImage}>
                                     <Image
@@ -261,17 +263,12 @@ export default class ProfileScreen extends React.Component {
                                 <Text style={styles.statTitle}>Following</Text>
                             </View>
                         </View>
-                        <TouchableOpacity style={styles.button} onPress={() => this.loginUser(this.state.email, this.state.password)}>
+                        <TouchableOpacity style={styles.button} onPress={this._showModal}>
                             <View style={{ display: "flex", flexDirection: "row", alignItems: "stretch", justifyContent: "space-around", }}>
                                 <Text style={{ color: "#FFF", fontWeight: "500", letterSpacing: 2, alignSelf: "center", fontSize: 12, marginTop: -3 }}>Modifica Profilo</Text>
                             </View>
                         </TouchableOpacity>
-                        <Button
-                            onPress={() => {
-                                Fire.shared.signOut();
-                            }}
-                            title="Log out"
-                        />
+
                     </View>
                     <View style={styles.MainContainer}>
                         <FlatList
@@ -286,6 +283,58 @@ export default class ProfileScreen extends React.Component {
                             keyExtractor={(item, index) => index.toString()}
                         />
                     </View>
+                    <Modal visible={this.state.visible}>
+
+                      <View style={styles.container}>
+                          <SafeAreaView>
+
+                          <View style={styles.header}>
+                            <TouchableOpacity onPress={() => this.setState({visible:false})} >
+                                <Text style={{color:"black", fontSize:18}}>Annulla</Text>
+                            </TouchableOpacity>
+                            <Text style={{ fontWeight: "600",alignSelf:"center",fontSize:17,marginTop:-2 }}>Modifica il profilo</Text>
+                            <TouchableOpacity>
+                                <Text style={{color:"#369AFB", fontSize:18, fontWeight:"500",}} onPress={() => this.updateData()}>Fine</Text>
+                            </TouchableOpacity>
+                            </View>
+
+                            <View style={{ marginTop: 34, alignItems: "center" }}>
+                                <View style={styles.avatarContainer}>
+                                        <Image
+                                            source={
+                                                this.state.isImageAvailable
+                                                    ? this.state.profilePic
+                                                    : require("../assets/tempAvatar.jpg")
+                                            }
+                                            style={styles.avatar}
+                                        />
+                                </View>
+                            </View>
+
+                            <View style={styles.formContainer}>
+                                <View style={styles.column}>
+                                    <Text style={styles.label}>Nome</Text>
+                                    <Text style={styles.label}>Cognome</Text>
+                                    <Text style={styles.label}>Email</Text>
+                                    <Text style={styles.label}>Password</Text>
+                                </View>    
+
+                                <View style={styles.column2}>
+                                    <TextInput placeholder={this.state.user.name} style={styles.input} onChangeText={name => this.setState({ user: { ...this.state.user, name } })}></TextInput>
+                                    <TextInput placeholder={this.state.user.surname} style={styles.input} onChangeText={surname => this.setState({ user: { ...this.state.user, surname } })}></TextInput>
+                                    <TextInput placeholder={this.state.user.email} style={styles.input} onChangeText={email => this.setState({ user: { ...this.state.user, email } })}></TextInput>
+                                    <TextInput style={{height:20,marginBottom:10}}></TextInput>
+                                </View>   
+
+                            </View>
+                            <TouchableOpacity onPress={() => { Fire.shared.signOut();}} style={styles.logout}>
+                            <View style={{display:"flex", flexDirection:"row",alignItems:"stretch",justifyContent:"space-around", }}>
+                                <Text style={{ color: "#FFF", fontWeight: "500",letterSpacing:2,alignSelf:"center",fontSize:15,marginTop:-3 }}>ESCI</Text>
+                            </View>                            
+                            </TouchableOpacity>    
+                          </SafeAreaView>
+                      </View>          
+                    </Modal>
                 </ScrollView>
             </SafeAreaView >
 
@@ -293,9 +342,52 @@ export default class ProfileScreen extends React.Component {
     }
 }
 
+
 const styles = StyleSheet.create({
     container: {
         flex: 1
+    },
+    logout:{
+        backgroundColor: "#FF5166",
+        padding: 18,
+        width: "50%",
+        alignSelf: "center",
+        marginTop:50
+    },
+    formContainer:{
+        borderBottomWidth:1,
+        borderTopWidth:1,
+        borderBottomColor:"#E4E4E4",
+        borderTopColor:"#E4E4E4",
+        flexDirection:"row",
+        height:300,
+        paddingTop:20,
+        paddingBottom:10,
+        marginTop:30
+    },
+    column:{
+        flexDirection:"column",
+        width:"30%",
+        justifyContent:"space-between",
+        marginLeft:"5%"
+    },
+    column2:{
+        flexDirection:"column",
+        width:"65%",
+        justifyContent:"space-between"
+    },
+    label:{
+        fontWeight:"300",
+        fontSize:16,
+        margin:10
+    },
+    input:{
+        borderBottomWidth:1,
+        borderBottomColor:"#E4E4E4",
+        margin:10,
+        fontSize:17,
+        padding:3
+
     },
     profile: {
         marginTop: 64,
@@ -307,8 +399,8 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.4
     },
     avatar: {
-        width: 136,
-        height: 136,
+        width: 106,
+        height: 106,
         borderRadius: 68
     },
     name: {
@@ -330,11 +422,32 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: "300"
     },
+    modal:{
+        backgroundColor:"red",
+        opacity:1.0
+    },
     button: {
         backgroundColor: "#FF5166",
         padding: 18,
-        width: "40%",
+        width: "50%",
         alignSelf: "center"
+    },
+    header: {
+        flexDirection: "row",
+        paddingHorizontal: 32,
+        paddingVertical: 12,
+        borderBottomWidth: 1,
+        borderBottomColor: "#D8D9DB",
+        justifyContent:"space-between"
+    },
+    modalLogout:{
+        backgroundColor: "#FF5166",
+        padding: 18,
+        width: "50%",
+        alignSelf: "center",
+        alignSelf:"center",
+        justifyContent:"center",
+        marginTop:300
     },
     statTitle: {
         color: "#C3C5CD",

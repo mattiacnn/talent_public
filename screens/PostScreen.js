@@ -14,15 +14,35 @@ import * as VideoThumbnails from 'expo-video-thumbnails';
 
 export default class PostScreen extends React.Component {
   state = {
+    user: {},
     video: null,
-    text: null,
+    text: "",
   };
 
   componentDidMount() {
     this.getPermissionAsync();
     this._pickImage();
+    this.getUserData();
   }
+  getUserData() {
+    let id = firebase.auth().currentUser.uid;
 
+firebase.firestore().collection("users").doc(id).get()
+             .then(doc => {
+                 if (!doc.exists) {
+                     console.log('No such document!');
+                 } else {
+                     console.log('Document data:', doc.data());
+                     this.setState({ user: { name: doc.data().name, surname: doc.data().surname, followed: doc.data().followed } })
+                     //var followedNum = doc.data().followed.length;
+                 }
+             })
+         .catch(err => {
+               console.log('Error getting document', err);
+                  });
+
+    return true;
+}
 
   render() {
 
@@ -40,14 +60,6 @@ export default class PostScreen extends React.Component {
 
     return (
       <SafeAreaView style={styles.container}>
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => this.props.navigation.goBack()}>
-            <Ionicons name="md-arrow-back" size={24} color="#D8D9DB"></Ionicons>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={this.handlePost}>
-            <Text style={{ fontWeight: "500" }}>Post</Text>
-          </TouchableOpacity>
-        </View>
 
         <View style={styles.inputContainer}>
           <View style={{ flexDirection: "row", }}>
@@ -57,8 +69,8 @@ export default class PostScreen extends React.Component {
         </View>
 
         <TextInput
-          multiline={true}
           numberOfLines={4}
+          keyboardShouldPersistTaps='handled'
           style={styles.textBox}
           placeholder="Want to share something?"
           onChangeText={text => this.setState({ text })}
