@@ -29,19 +29,20 @@ if (!global.atob) { global.atob = decode; }
 
 const styles = StyleSheet.create({
     container: {
-        flex:1,
+        width:360,
         flexDirection:"row",
         justifyContent:"flex-start",
-        backgroundColor: '#ECF0F1',
+        alignItems:"center"
     },
     applogo:{
         height:48,
-        width:48,
+        flex: 1,
         padding:5,
         position:"relative",
         left: 0,
     },
     title:{
+        flex:5,
         fontSize:20
     }
 });

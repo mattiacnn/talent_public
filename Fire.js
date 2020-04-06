@@ -43,17 +43,17 @@ class Fire {
         firebase.auth().createUserWithEmailAndPassword(user.email, user.password)
         .then((u)=>{
             console.log(u)
-            let id = u.user.uid
-            console.log(id)
+            u = u.user;
+            //console.log(u.uid)
 
-            firebase.firestore().collection("users").doc(id)
+            firebase.firestore().collection("users").doc(u.uid)
             .set({
                     name: user.name,
                     surname: user.surname,
-                    email: user.email,
-                    followed:{},
-                    follower:{},
-                    avatar: null
+                    email: u.email,
+                    followed:{id_users:[]},
+                    followers:{id_users:[]},
+                    avatar: u.photoURL
                 });
         }).catch((err)=>{
             console.log(err);
