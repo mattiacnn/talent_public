@@ -139,7 +139,7 @@ const AppContainer = createStackNavigator(
     {
         mode: "modal",
         
-        defaultNavigationOptions: { headerTitle: props => <LogoTitle {...props} />,  headerShown: false,   }
+        defaultNavigationOptions: { headerTitle: props => <LogoTitle {...props} />,  }
     }
       
 );
