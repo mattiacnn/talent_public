@@ -126,7 +126,9 @@ export default class PostScreen extends React.Component {
   uploadImageAsync = async () => {
     // Why are we using XMLHttpRequest? See:
     // https://github.com/expo/expo/issues/2402#issuecomment-443726662
+    const id = firebase.auth().currentUser.uid;
     let uri = this.state.video;
+    
     const blob = await new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
       xhr.onload = function () {
@@ -168,32 +170,22 @@ export default class PostScreen extends React.Component {
       // Handle successful uploads on complete
       uploadTask.snapshot.ref.getDownloadURL().then(function (downloadURL) {
         console.log('File available at', downloadURL);
-      });
+        return downloadURL;
+      })
+        .then(path => { return VideoThumbnails.getThumbnailAsync(path, { time: 1 }) })
+        .then(res => {
+          
+          console.log("thumb got");
+          console.log(res.uri);
+
+          firebase.firestore().collection("videos").doc(id)
+            .collection("user_videos").doc(vid)
+            .set({ description: "default desc", likes: 0, thumbnail: res.uri });
+        })
+        .catch(err => { console.log(err) });
+
     });
-
-
-    const videoURL = await snapshot.ref.getDownloadURL();
-    const id = firebase.auth().currentUser.uid;
-
-    this.saveThumbnail(videoURL);
-    console.log("thumb got");
-    console.log(thumb);
-    try {
-      firebase.firestore().collection("videos").doc(id)
-        .collection("user_videos")
-        .doc(vid)
-        .set({
-          description: "default desc",
-          likes: 0,
-          thumbnail: thumb
-        });
-
-    } catch (error) {
-      console.log(error);
-      alert(erro);
-    }
-    return videoURL;
-  }
+  };
 
 }
 
