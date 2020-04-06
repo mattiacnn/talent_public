@@ -7,6 +7,9 @@ import { ScrollView, FlatList } from "react-native-gesture-handler";
 import * as ImagePicker from 'expo-image-picker';
 import uuid from 'react-uuid'
 import { AsyncStorage } from 'react-native';
+import { YellowBox } from 'react-native';
+
+YellowBox.ignoreWarnings(['VirtualizedLists should never be nested']);
 
 export default class ProfileScreen extends React.Component {
 
