@@ -1,11 +1,13 @@
 import React from "react";
-import { View, Text, StyleSheet,TextInput,TouchableOpacity,Image } from "react-native";
+import { View, Text,Modal, StyleSheet,TextInput,TouchableOpacity,Image,AsyncStorage,SafeAreaView,ImageBackground } from "react-native";
 
 import Fire from "../Fire";
+import { CheckBox } from 'react-native-elements'
 
 import *as firebase from "firebase";
 import * as Facebook from 'expo-facebook';
 import * as ImagePicker from 'expo-image-picker';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 export default class RegisterScreen extends React.Component {
     static navigationOptions = {
@@ -15,10 +17,15 @@ export default class RegisterScreen extends React.Component {
         user: {
             name: "",
             surname:"",
+            username:"",
             email: "",
             password: "",
+            date:""
         },
-        errorMessage: null
+        visible:false,
+        profilePic: null,
+        errorMessage: null,
+        checked:false,
     };
 
     // CREATE NEW USER AND STORE IT ON FIRESTORE
@@ -69,6 +76,7 @@ export default class RegisterScreen extends React.Component {
       alert(`Facebook Login Error: ${message}`);
     }
   }
+  
   _pickImage = async () => {
 
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -87,20 +95,20 @@ export default class RegisterScreen extends React.Component {
             profilePic: source,
             isImageAvailable: true
         });
-
-        this.uploadImageAsync(result.uri).then((uri) => {
-            const updt_u = { ...this.state.user, avatar: uri };
-
-            this.setState({
-                ...this.state,
-                user: updt_u
-            });
-
-            console.log(this.state.user);
-        })
     }
 
 };
+condition = () =>{
+    if (this.state.checked == false)
+    {
+        this.setState({checked:true})
+    }
+    else
+    {
+        this.setState({checked:false})
+
+    }
+}
     render() {
         return (
             <View style={styles.container}>
@@ -154,27 +162,69 @@ export default class RegisterScreen extends React.Component {
                   </View>
              </View>
 
-             <TouchableOpacity style={styles.button} onPress={this.handleSignUp}>
+             <TouchableOpacity style={styles.button} onPress={() => this.setState({visible:true})}>
                  <View style={{display:"flex", flexDirection:"row",alignItems:"stretch",justifyContent:"space-around", }}>
                       <Text style={{ color: "#FFF", fontWeight: "500",letterSpacing:2,alignSelf:"center",fontSize:15,marginTop:-3 }}>REGISTRATI</Text>
                     </View>
              </TouchableOpacity>
-             <Text style={{ fontWeight: "500", color: "#FF5166",marginBottom:10,marginTop:10}}>OPPURE</Text>
-             <TouchableOpacity style={styles.FBbutton} onPress={() => this.loginWithFacebook()}>
-                 <View style={{display:"flex", flexDirection:"row",alignItems:"stretch",justifyContent:"space-around", }}>
-                      <Text style={{ color: "#FFF", fontWeight: "500",letterSpacing:2,alignSelf:"center",fontSize:15,marginTop:-3 }}>CONTINUA SU FACEBOOK</Text>
-                    </View>
-             </TouchableOpacity>
 
              <TouchableOpacity
-                  style={{ marginTop: 2 }}
+                  style={{ marginTop: 9 }}
                   onPress={() => this.props.navigation.navigate("Login")}
               >
                   <Text style={{ color: "#414959", fontSize: 13 }}>
                     Hai già un account? <Text style={{ fontWeight: "500", color: "#FF5166" }}>ACCEDI</Text>
                   </Text>
               </TouchableOpacity>    
+                <Modal
+                animationType="fade"
+                visible={this.state.visible}
+                >
+                        <View style={styles.container}>
+                          <SafeAreaView>
+                            <View style={{ marginTop: 14, alignItems: "center" }}>
+                                <View style={styles.avatarContainer}>
+                                        <Image
+                                            source={
+                                                this.state.isImageAvailable
+                                                    ? this.state.profilePic
+                                                    : require("../assets/tempAvatar.jpg")
+                                            }
+                                            style={styles.avatar}
+                                        />
+                                </View>
+                            </View>
+
+                            <View style={styles.formContainer}>
+                                <View style={styles.column}>
+                                    <Text style={styles.label}>Username</Text>
+                                    <Text style={styles.label}>Data di nascita</Text>
+                                </View>    
+
+                                <View style={styles.column2}>
+                                    <TextInput placeholder="username" style={styles.input} onChangeText={username => this.setState({ user: { ...this.state.user, username } })}></TextInput>
+                                    <TextInput placeholder="data di nscita" style={styles.input} onChangeText={date => this.setState({ user: { ...this.state.user, date } })}></TextInput>
+
+                                </View>   
+                           </View>
+                            <CheckBox
+                                title='Accetto i temini e le condizioni di talent'
+                                checked={this.state.checked}
+                                onPress={() => this.condition()}
+                                containerStyle={styles.checkContainer}
+                                checkedColor="red"
+                                /> 
+                            <TouchableOpacity onPress={() => { this.handleSignUp()}} style={styles.register}>
+                            <View style={{display:"flex", flexDirection:"row",alignItems:"stretch",justifyContent:"space-around", }}>
+                                <Text style={{ color: "#FFF", fontWeight: "500",letterSpacing:2,alignSelf:"center",fontSize:15,marginTop:-3 }}>REGISTRATI</Text>
+                            </View>                            
+                            </TouchableOpacity>   
+                             <Text style={{alignSelf:"center",marginTop:30}}>Condizioni e termini di servizio di talent</Text>                   
+                          </SafeAreaView>
+                          </View>
+                </Modal>
             </View>
+            
         );
     }
 }
@@ -187,9 +237,15 @@ const styles = StyleSheet.create({
         backgroundColor:"#ffff"
 
     },
-
+    checkContainer:
+    {
+        backgroundColor:"#fff",
+        borderWidth:0,
+        alignSelf:"center",
+        marginTop:10
+    },
     title:{
-        fontSize:35,
+        fontSize:30,
         fontWeight:"600",
         letterSpacing:2,
         marginBottom:20,
@@ -219,13 +275,11 @@ const styles = StyleSheet.create({
         padding: 18,
         width:"70%",  
         marginBottom:10,
-        borderRadius:30
     },
     button: {
         backgroundColor: "#FF5166",
         padding: 18,
         width:"70%",        
-        borderRadius:30
 
     },
     errorMessage: {
@@ -250,5 +304,34 @@ const styles = StyleSheet.create({
         width: 106,
         height: 106,
         borderRadius: 68
+    },
+    register:{
+        backgroundColor: "#FF5166",
+        padding: 18,
+        width: "70%",
+        alignSelf: "center",
+        marginTop:20 
+    },
+    formContainer:{
+        flexDirection:"row",
+        height:200,
+        marginTop:30,
+    },
+    column:{
+        flexDirection:"column",
+        width:"30%",
+        justifyContent:"space-around",
+        marginLeft:"5%",
+    },
+    column2:{
+        flexDirection:"column",
+        width:"65%",
+        justifyContent:"space-around"
+
+    },
+    label:{
+        fontWeight:"300",
+        fontSize:16,
+        margin:10
     },
 });

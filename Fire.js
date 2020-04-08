@@ -50,6 +50,8 @@ class Fire {
             .set({
                     name: user.name,
                     surname: user.surname,
+                    username: user.username,
+                    date: user.date,
                     email: u.email,
                     followed:{id_users:[]},
                     followers:{id_users:[]},
@@ -83,6 +85,7 @@ class Fire {
         // } catch (error) {
         //     alert("Error: ", error);
         // }
+
     };
 
     signIn = () =>{

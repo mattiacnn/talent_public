@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, StyleSheet, Button, Image, TouchableOpacity, SafeAreaView, RefreshControl,Modal} from "react-native";
+import { View, Text, StyleSheet, Button, Image, TouchableOpacity, SafeAreaView, RefreshControl,Modal, ImageBackground} from "react-native";
 import Fire from "../Fire";
 import firebase from 'firebase';
 import 'firebase/firestore';
@@ -22,8 +22,9 @@ export default class ProfileScreen extends React.Component {
             isImageAvailable: false,
             profilePic: null,
             visible: false,
-            dataSource:[]
-            
+            dataSource:[],
+            newPassword:"",
+            currentPassword:""
         };
     }
 
@@ -188,6 +189,22 @@ export default class ProfileScreen extends React.Component {
             });
     }
 
+    reauthenticate = () => {
+        var user = firebase.auth().currentUser;
+        var cred = firebase.auth.EmailAuthProvider.credential(
+            user.email, this.state.currentPassword);
+        return user.reauthenticateWithCredential(cred);
+      }
+
+    changePassword = () => {
+        this.reauthenticate(this.state.currentPassword).then(() => {
+          var user = firebase.auth().currentUser;
+          user.updatePassword(this.state.newPassword).then(() => {
+            console.log("Password updated!");
+          }).catch((error) => { console.log(error); });
+        }).catch((error) => { console.log(error); });
+      }
+
     updateData = ()  =>{
 
         let id = firebase.auth().currentUser.uid;
@@ -201,6 +218,7 @@ export default class ProfileScreen extends React.Component {
             console.log(err);
             alert("Error: ", err);
         })
+        this.changePassword();
         this.setState({visible:false})
     }
 
@@ -229,7 +247,7 @@ export default class ProfileScreen extends React.Component {
                                     />
                                 </TouchableOpacity>
                             </View>
-                            <View style={{ flexDirection: "row", }}>
+                        <View style={{ flexDirection: "row", }}>
                                 <Text style={styles.name}>{this.state.user.name} </Text>
                                 <Text style={styles.name}>{this.state.user.surname}</Text>
                             </View>
@@ -300,15 +318,20 @@ export default class ProfileScreen extends React.Component {
                                 <View style={styles.column}>
                                     <Text style={styles.label}>Nome</Text>
                                     <Text style={styles.label}>Cognome</Text>
+                                    <Text style={styles.label}>username</Text>
                                     <Text style={styles.label}>Email</Text>
-                                    <Text style={styles.label}>Password</Text>
+                                    <Text style={styles.label}>Password Corrente</Text>
+                                    <Text style={styles.label}>Nuova Password</Text>
                                 </View>    
 
                                 <View style={styles.column2}>
                                     <TextInput placeholder={this.state.user.name} style={styles.input} onChangeText={name => this.setState({ user: { ...this.state.user, name } })}></TextInput>
                                     <TextInput placeholder={this.state.user.surname} style={styles.input} onChangeText={surname => this.setState({ user: { ...this.state.user, surname } })}></TextInput>
+                                    <TextInput placeholder={this.state.user.username} style={styles.input} onChangeText={username => this.setState({ user: { ...this.state.user, username } })}></TextInput>
                                     <TextInput placeholder={this.state.user.email} style={styles.input} onChangeText={email => this.setState({ user: { ...this.state.user, email } })}></TextInput>
-                                    <TextInput style={{height:20,marginBottom:10}}></TextInput>
+                                    <TextInput placeholder="password" style={styles.input} onChangeText={currentPassword => this.setState({currentPassword})}></TextInput>
+                                    <TextInput placeholder="password" style={styles.input} onChangeText={newPassword => this.setState({newPassword})}></TextInput>
+
                                 </View>   
 
                             </View>
@@ -345,9 +368,9 @@ const styles = StyleSheet.create({
         borderBottomColor:"#E4E4E4",
         borderTopColor:"#E4E4E4",
         flexDirection:"row",
-        height:300,
+        height:370,
         paddingTop:20,
-        paddingBottom:10,
+        paddingBottom:20,
         marginTop:30
     },
     column:{
@@ -364,12 +387,12 @@ const styles = StyleSheet.create({
     label:{
         fontWeight:"300",
         fontSize:16,
-        margin:10
+        margin:15,
     },
     input:{
         borderBottomWidth:1,
         borderBottomColor:"#E4E4E4",
-        margin:10,
+        margin:15,
         fontSize:17,
         padding:3
 
@@ -395,8 +418,8 @@ const styles = StyleSheet.create({
     },
     statsContainer: {
         flexDirection: "row",
-        justifyContent: "space-between",
-        margin: 32
+        justifyContent: "space-around",
+        margin: 32,
     },
     stat: {
         alignItems: "center",
@@ -425,15 +448,6 @@ const styles = StyleSheet.create({
         borderBottomColor: "#D8D9DB",
         justifyContent:"space-between"
     },
-    modalLogout:{
-        backgroundColor: "#FF5166",
-        padding: 18,
-        width: "50%",
-        alignSelf: "center",
-        alignSelf:"center",
-        justifyContent:"center",
-        marginTop:300
-    },
     statTitle: {
         color: "#C3C5CD",
         fontSize: 12,
@@ -450,4 +464,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         height:200,
     },
+    cover:{
+        width:300,
+        height:300
+    }
 });
