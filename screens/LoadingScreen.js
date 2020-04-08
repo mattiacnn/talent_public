@@ -5,21 +5,8 @@ import LoginScreen from "./LoginScreen";
 
 class LoadingScreen extends React.Component {
 
-    componentDidMount() {
-        this.checkIfLoggedIn();
-    }
 
-    checkIfLoggedIn = () => {
-        firebase.auth().onAuthStateChanged(function (user) {
-            if (user) {
-                this.props.navigation.navigate('Home');
-            }
-            else {
-                this.props.navigation.navigate('Login');
-            }
-        }.bind(this)
-        );
-    };
+    
 
 
     render() {

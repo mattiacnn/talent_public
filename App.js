@@ -14,6 +14,7 @@ import MessageScreen from "./screens/MessageScreen";
 import PostScreen from "./screens/PostScreen";
 import SearchScreen from "./screens/SearchScreen";
 import ProfileScreen from "./screens/ProfileScreen";
+
 import firebase from "firebase";
 import { Title } from "react-native-paper";
 import { View, Text, StyleSheet, Button, StatusBar, Image, TouchableOpacity } from "react-native";
@@ -170,7 +171,7 @@ const AppContainer = createStackNavigator(
 
 const AuthStack = createStackNavigator({
     Login: LoginScreen,
-    Register: RegisterScreen
+    Register: RegisterScreen,
 });
 
 export default createAppContainer(
