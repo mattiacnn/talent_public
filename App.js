@@ -5,7 +5,7 @@ import { createStackNavigator } from "react-navigation-stack";
 import { createBottomTabNavigator } from "react-navigation-tabs";
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
 
-import { Ionicons } from "@expo/vector-icons";
+import { Entypo } from "@expo/vector-icons";
 import LoadingScreen from "./screens/LoadingScreen";
 import LoginScreen from "./screens/LoginScreen";
 import RegisterScreen from "./screens/RegisterScreen";
@@ -29,68 +29,92 @@ if (!global.atob) { global.atob = decode; }
 
 const styles = StyleSheet.create({
     container: {
-        width:360,
-        flexDirection:"row",
-        justifyContent:"flex-start",
-        alignItems:"center"
+        display: "flex",
+        flexDirection: "row",
+        justifyContent: "space-around",
+        alignItems: "center",
+        width: "100%",
+        height: "100%",
+        backgroundColor: "#ea1043",
     },
-    applogo:{
-        height:48,
+    applogo: {
+        height:24,
+        width:"100%",
         flex: 1,
-        padding:5,
-        position:"relative",
-        left: 0,
+        padding:20,
+        margin:5,
+        shadowColor: "black",
+        shadowOffset: { width: 0, height: 1 },
+        shadowRadius: 1,
+        shadowOpacity: 0.5,
     },
-    title:{
-        flex:5,
-        fontSize:20
+    title: {
+        flex: 4,
+        fontSize: 30,
+        fontWeight: "600",
+        color: "white",
+        shadowColor: "black",
+        shadowOffset: { width: 0, height: 1 },
+        shadowRadius: 2,
+        shadowOpacity: 0.2,
+        textAlign:"left"
+    },
+    notification: {
+        flex: 1,
+        color:"white",
+        shadowColor: "black",
+        shadowOffset: { width: 0, height: 1 },
+        shadowRadius: 2,
+        shadowOpacity: 0.2,
+        textAlign:"center"
     }
 });
 
 function LogoTitle() {
     return (
         <>
-        <View style={styles.container}>
-            <Image
-        style={styles.applogo}
-        source={require('./assets/logo.png')}
-      />
-      <Text style={styles.title}>Talent</Text>
-        </View>
-      
-      </>
+            <View style={styles.container}>
+                <Image
+                    style={styles.applogo}
+                    source={require('./assets/logo.png')}
+                />
+                <Text style={styles.title}>Talent</Text>
+                <Entypo style={styles.notification} name="notification" size={24} />
+            </View>
+
+        </>
     );
-  }
+}
 
 const AppContainer = createStackNavigator(
     {
-        
+
         Talent: createBottomTabNavigator(
-        
+
             {
                 Home: {
                     screen: HomeScreen,
                     navigationOptions: {
-                        tabBarIcon: ({ tintColor }) => <Ionicons name="ios-home" size={24} color={tintColor} />
+                        tabBarIcon: ({ tintColor }) => <Entypo name="home" size={24} color={tintColor} />
                     }
-                    
+
                 },
                 Message: {
                     screen: MessageScreen,
                     navigationOptions: {
-                        tabBarIcon: ({ tintColor }) => <Ionicons name="ios-chatboxes" size={24} color={tintColor} />
+                        tabBarIcon: ({ tintColor }) => <Entypo name="chat" size={24} color={tintColor} />
                     }
                 },
                 Post: {
                     screen: PostScreen,
                     navigationOptions: {
                         tabBarIcon: ({ tintColor }) => (
-                            <Ionicons
-                                name="ios-add-circle"
-                                size={64}
-                                color="#E9446A"
+                            <Entypo
+                                name="clapperboard"
+                                size={32}
+                                color="#ea1043"
                                 style={{
-                                    shadowColor: "#E9446A",
+                                    shadowColor: "#bf0e37",
                                     shadowOffset: { width: 0, height: 5 },
                                     shadowRadius: 5,
                                     shadowOpacity: 0.3,
@@ -105,13 +129,13 @@ const AppContainer = createStackNavigator(
                     screen: SearchScreen,
                     navigationOptions: {
                         headerShown: false,
-                        tabBarIcon: ({ tintColor }) => <Ionicons name="ios-search" size={24} color={tintColor} />
+                        tabBarIcon: ({ tintColor }) => <Entypo name="magnifying-glass" size={24} color={tintColor} />
                     }
                 },
                 Profile: {
                     screen: ProfileScreen,
                     navigationOptions: {
-                        tabBarIcon: ({ tintColor }) => <Ionicons name="ios-person" size={24} color={tintColor} />
+                        tabBarIcon: ({ tintColor }) => <Entypo name="user" size={24} color={tintColor} />
                     }
                 }
             },
@@ -138,10 +162,10 @@ const AppContainer = createStackNavigator(
     },
     {
         mode: "modal",
-        
-        defaultNavigationOptions: { headerTitle: props => <LogoTitle {...props} />,  }
+
+        defaultNavigationOptions: { headerTitle: props => <LogoTitle {...props} />, }
     }
-      
+
 );
 
 const AuthStack = createStackNavigator({
