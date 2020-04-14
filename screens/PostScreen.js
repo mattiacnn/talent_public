@@ -1,5 +1,5 @@
-import React from "react";
-import { View, Image, Text, StyleSheet, Button, SafeAreaView, TouchableOpacity } from "react-native";
+import React, { Component } from "react";
+import { View, Image, StyleSheet, SafeAreaView, TouchableOpacity, ScrollView } from "react-native";
 import { Video } from 'expo-av';
 import * as ImagePicker from 'expo-image-picker';
 import Constants from 'expo-constants';
@@ -11,92 +11,150 @@ import Modal from 'react-native-modal';
 import { Ionicons } from "@expo/vector-icons";
 import * as VideoThumbnails from 'expo-video-thumbnails';
 import * as ImageManipulator from "expo-image-manipulator";
+import { useNavigation } from '@react-navigation/native';
+import { Dimensions } from 'react-native';
+import { Text, Button, Block, Input, Card, Radio } from 'galio-framework'
+import SectionedMultiSelect from 'react-native-sectioned-multi-select';
 
+const items = [
+  // this is the parent or 'item'
+  {
+    name: 'Categorie',
+    id: 0,
+    // these are the children or 'sub items'
+    children: [
+      {
+        name: 'Apple',
+        id: 10,
+      },
+      {
+        name: 'Strawberry',
+        id: 17,
+      },
+      {
+        name: 'Pineapple',
+        id: 13,
+      },
+      {
+        name: 'Banana',
+        id: 14,
+      },
+      {
+        name: 'Watermelon',
+        id: 15,
+      },
+      {
+        name: 'Kiwi fruit',
+        id: 16,
+      },
+    ],
+  }
+
+];
 
 export default class PostScreen extends React.Component {
-  state = {
-    user: {},
-    video: null,
-    text: "",
-  };
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      user: {},
+      video: null,
+      text: "",
+      loading: false,
+      selectedItems: [],
+    }
+  }
+
+  onSelectedItemsChange = (selectedItems) => {
+    this.setState({ selectedItems });
+  }
 
   componentDidMount() {
     this.getPermissionAsync();
     this._pickImage();
-    this.getUserData();
-  }
-  //GET  USER INFO
-  getUserData() {
-    let id = firebase.auth().currentUser.uid;
-
-    firebase.firestore().collection("users").doc(id).get()
-      .then(doc => {
-        if (!doc.exists) {
-          console.log('No such document!');
-        } else {
-          console.log('Document data:', doc.data());
-          this.setState({ user: { name: doc.data().name, surname: doc.data().surname, followed: doc.data().followed } })
-          //var followedNum = doc.data().followed.length;
-        }
-      })
-      .catch(err => {
-        console.log('Error getting document', err);
-      });
-
-    return true;
   }
 
   render() {
 
-    let bottone = null;
-
-    if (this.state.video) {
-      bottone = (
-        <TouchableOpacity style={styles.button} onPress={this.uploadImageAsync} >
-          <View style={{ display: "flex", flexDirection: "row", alignItems: "stretch", justifyContent: "space-around", }}>
-            <Text style={{ color: "#FFF", fontWeight: "500", letterSpacing: 2, alignSelf: "center", fontSize: 15, marginTop: -3 }}>CARICA</Text>
-          </View>
-        </TouchableOpacity>
-      );
-    }
-
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={{ backgroundColor: "#fff", height: Dimensions.get('screen').height - 90, display: "flex" }}>
 
-        <View style={styles.inputContainer}>
-          <View style={{ flexDirection: "row", }}>
-            <Image source={require("../assets/tempAvatar.jpg")} style={styles.avatar}></Image>
-            <Text>Mattia Cannavò</Text>
+        <View style={{
+          padding: 20, flex: 1, flexDirection: "column", justifyContent: "space-evenly", alignItems: "center"
+        }}>
+
+          <View style={{
+            shadowColor: "#471863",
+            shadowOffset: {
+              width: 0,
+              height: 1,
+            },
+            shadowOpacity: 0.72,
+            shadowRadius: 3.22,
+
+            elevation: 3,
+          }}>
+            <TouchableOpacity onPress={this._pickImage} style={
+              {
+                width: Dimensions.get('screen').width / 2,
+                height: Dimensions.get('screen').width / 2,
+                backgroundColor: "#471863",
+                borderRadius: Dimensions.get('screen').width,
+                overflow: "hidden",
+                alignContent: "center",
+                justifyContent: "center"
+              }
+            }>
+              <Video source={{ uri: this.state.video }} style={{
+                height: Dimensions.get('screen').width / 2,
+                width: Dimensions.get('screen').width / 2,
+                zIndex: 3,
+                position:"absolute",
+                alignSelf:"center"
+              }} />
+              <Ionicons
+                name='ios-add'
+                size={64}
+                color='#fafafa'
+                style={{ zIndex: 2, position: "absolute", alignSelf: "center" ,lineHeight:Dimensions.get('screen').width / 2}}
+              ></Ionicons>
+            </TouchableOpacity>
           </View>
+
+          <Input placeholder="Descrizione del video" right icon="text-fields" family="MaterialCommunityIcons" />
+
+            <SectionedMultiSelect
+              items={items}
+              uniqueKey="id"
+              subKey="children"
+              selectText="Scegli una o più categorie"
+              showDropDowns={true}
+              readOnlyHeadings={true}
+              onSelectedItemsChange={this.onSelectedItemsChange}
+              selectedItems={this.state.selectedItems}
+              confirmText="conferma"
+              selectedText="selezionate"
+              searchPlaceholderText="Cerca categoria"
+              colors={{ primary: "#B23AFC" }}
+              styles={{
+                selectToggle: {
+                  width: 320,
+                },
+
+                selectToggleText: {
+                  color: '#471863',
+                  zIndex: 10
+                }
+              }}
+
+            />
+
+          <Block center>
+            <Button size="small" round uppercase style={{}} onPress={this.uploadImageAsync} loading={this.state.loading}>carica</Button>
+          </Block>
+
         </View>
 
-        <TextInput
-          numberOfLines={4}
-          keyboardShouldPersistTaps='handled'
-          style={styles.textBox}
-          placeholder="Want to share something?"
-          onChangeText={text => this.setState({ text })}
-          value={this.state.text}
-        >
-
-        </TextInput>
-        <TouchableOpacity style={styles.photo} onPress={this.pickImage}>
-          <Ionicons name="md-camera" size={32} color="#D8D9DB"></Ionicons>
-        </TouchableOpacity>
-
-        <View style={{ marginHorizontal: 32, marginTop: 32 }}>
-          <Video
-            source={{ uri: this.state.video }}
-            rate={1.0}
-            volume={1.0}
-            isMuted={false}
-            resizeMode="cover"
-            shouldPlay={false}
-            isLooping
-            style={{ height: 300 }}
-          />
-          {bottone}
-        </View>
       </SafeAreaView>
     );
   }
@@ -120,25 +178,25 @@ export default class PostScreen extends React.Component {
   }
 
   _pickImage = async () => {
-    if (!this.state.video) {
-      let result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Videos,
-        allowsEditing: true,
-        aspect: [4, 3],
-        quality: 0,
-        videoExportPreset: 5
-      });
-      console.log(result);
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Videos,
+      allowsEditing: true,
+      aspect: [9,16],
+      quality: 0,
+      videoExportPreset: 2
+    });
+    console.log(result);
 
-      if (!result.cancelled) {
-        this.setState({ video: result.uri });
-      }
+    if (!result.cancelled) {
+      this.setState({ video: result.uri });
     }
 
   };
 
 
   uploadImageAsync = async () => {
+    this.setState({ loading: true });
+    var this_ = this;
     var newvideo;
     // Why are we using XMLHttpRequest? See:
     // https://github.com/expo/expo/issues/2402#issuecomment-443726662
@@ -147,13 +205,8 @@ export default class PostScreen extends React.Component {
 
     const blob = await new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
-      xhr.onload = function () {
-        resolve(xhr.response);
-      };
-      xhr.onerror = function (e) {
-        console.log(e);
-        reject(new TypeError('Network request failed'));
-      };
+      xhr.onload = function () { resolve(xhr.response); };
+      xhr.onerror = function (e) { reject(new TypeError('Network request failed')); };
       xhr.responseType = 'blob';
       xhr.open('GET', uri, true);
       xhr.send(null);
@@ -190,16 +243,14 @@ export default class PostScreen extends React.Component {
         return downloadURL;
       })
         .then(path => { return VideoThumbnails.getThumbnailAsync(path, { time: 1 }) })
-        .then(res => { console.log("thumb got"); return fetch(res.uri); })
-        .then(r => { return r.blob(); })
+        .then(res => { return fetch(res.uri); }).then(r => { return r.blob(); })
         .then(file => { return firebase.storage().ref().child(`@thumb-${vid}`).put(file); })
         .then(snap => { return snap.ref.getDownloadURL(); })
         .then(url => {
-          newvideo = { ...newvideo, description: "default desc", likes: 0, thumbnail: url, id: vid };
-          return firebase.firestore().collection("videos").doc(id)
-            .collection("user_videos").doc(vid)
-            .set(newvideo);
-        }).then(() => {
+          newvideo = { ...newvideo, description: "default desc", likes: 0, thumbnail: url, user: id };
+          return firebase.firestore().collection("videos").doc(vid).set(newvideo);
+        })
+        .then(() => {
           return firebase.firestore().collection("users").doc(id).get();
         })
         .then((user) => {
@@ -210,55 +261,11 @@ export default class PostScreen extends React.Component {
           uv.push(newvideo);
           return firebase.firestore().collection("users").doc(id).update({ user_videos: uv });
         })
+        .then(() => { this_.setState({ loading: false }); alert("Caricamento riuscito"); this_.props.navigation.goBack(); })
         .catch(err => { console.log(err) });
     });
   };
 
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "white",
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingHorizontal: 32,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: "#D8D9DB"
-  },
-  button: {
-    backgroundColor: "#FF5166",
-    padding: 18,
-    width: "70%",
-    borderRadius: 30,
-    alignSelf: "center",
-    marginTop: 20
-
-  },
-  inputContainer: {
-    margin: 20,
-    flexDirection: "column",
-  },
-  avatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    marginRight: 16
-  },
-  photo: {
-    alignItems: "flex-end",
-    marginHorizontal: 32
-  },
-  textBox: {
-    backgroundColor: "white",
-    borderWidth: 1,
-    borderColor: "#E7E7E7",
-    width: "95%",
-    alignSelf: "center"
-  }
-});
 
 

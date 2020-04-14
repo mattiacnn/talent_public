@@ -14,7 +14,9 @@ import MessageScreen from "./screens/MessageScreen";
 import PostScreen from "./screens/PostScreen";
 import SearchScreen from "./screens/SearchScreen";
 import ProfileScreen from "./screens/ProfileScreen";
+import Home2Screen from "./screens/Home2Screen";
 
+import { AsyncStorage, Dimensions } from 'react-native';
 import firebase from "firebase";
 import { Title } from "react-native-paper";
 import { View, Text, StyleSheet, Button, StatusBar, Image, TouchableOpacity } from "react-native";
@@ -23,7 +25,6 @@ import { decode, encode } from 'base-64'
 import { Row } from "native-base";
 global.crypto = require("@firebase/firestore");
 global.crypto.getRandomValues = byteArray => { for (let i = 0; i < byteArray.length; i++) { byteArray[i] = Math.floor(256 * Math.random()); } }
-
 if (!global.btoa) { global.btoa = encode; }
 
 if (!global.atob) { global.atob = decode; }
@@ -32,11 +33,11 @@ const styles = StyleSheet.create({
     container: {
         display: "flex",
         flexDirection: "row",
-        justifyContent: "space-around",
+        justifyContent: "space-between",
         alignItems: "center",
-        width: "100%",
         height: "100%",
-        backgroundColor: "#ea1043",
+        width: Dimensions.get('window').width - 20,
+        backgroundColor: "white",
     },
     applogo: {
         height:24,
@@ -44,30 +45,21 @@ const styles = StyleSheet.create({
         flex: 1,
         padding:20,
         margin:5,
-        shadowColor: "black",
-        shadowOffset: { width: 0, height: 1 },
-        shadowRadius: 1,
-        shadowOpacity: 0.5,
     },
     title: {
-        flex: 4,
         fontSize: 30,
         fontWeight: "600",
-        color: "white",
-        shadowColor: "black",
-        shadowOffset: { width: 0, height: 1 },
-        shadowRadius: 2,
-        shadowOpacity: 0.2,
-        textAlign:"left"
+        color: "#EA1043",
     },
     notification: {
-        flex: 1,
-        color:"white",
+        color:"#EA1043",
         shadowColor: "black",
         shadowOffset: { width: 0, height: 1 },
         shadowRadius: 2,
-        shadowOpacity: 0.2,
-        textAlign:"center"
+        shadowOpacity: 0.1,
+    },
+    tabBar:{
+        backgroundColor:"#F7F7FF",
     }
 });
 
@@ -75,10 +67,7 @@ function LogoTitle() {
     return (
         <>
             <View style={styles.container}>
-                <Image
-                    style={styles.applogo}
-                    source={require('./assets/logo.png')}
-                />
+                
                 <Text style={styles.title}>Talent</Text>
                 <Entypo style={styles.notification} name="notification" size={24} />
             </View>
@@ -87,76 +76,96 @@ function LogoTitle() {
     );
 }
 
+
+const talentStack = createBottomTabNavigator(
+    {
+        Home: {
+            screen: Home2Screen,
+            navigationOptions: {
+                tabBarIcon: ({ tintColor }) => <Entypo name="home" size={24} color={tintColor} />
+            }
+
+        },
+
+        // Prova: {
+        //     screen: Home2Screen,
+        //     navigationOptions: {
+        //         tabBarIcon: ({ tintColor }) => <Entypo name="home" size={24} color={tintColor} />
+        //     }
+
+        // },
+        Message: {
+            screen: MessageScreen,
+            navigationOptions: {
+                tabBarIcon: ({ tintColor }) => <Entypo name="chat" size={24} color={tintColor} />
+            }
+        },
+        Post: {
+            screen: PostScreen,
+            navigationOptions: {
+                tabBarLabel:' ',
+                tabBarIcon: ({ tintColor }) => (
+                    <View style={{
+                        backgroundColor:"#EA1043", 
+                        height:70,
+                        width:70,
+                        borderRadius:35,
+                        shadowColor: "#bf0e37",
+                        shadowOffset: { width: 0, height: 5 },
+                        shadowRadius: 5,
+                        shadowOpacity: 0.5,
+                        }}>
+                        <Entypo
+                        name="clapperboard"
+                        size={32}
+                        color= '#fff'
+                        style={{
+                            lineHeight:70,
+                            textAlign:"center",
+
+                        }}
+                    />
+                    </View>
+                    
+                )
+            }
+        },
+        Search: {
+            screen: SearchScreen,
+            navigationOptions: {
+                headerShown: false,
+                tabBarIcon: ({ tintColor }) => <Entypo name="magnifying-glass" size={24} color={tintColor} />
+            }
+        },
+        Profile: {
+            screen: ProfileScreen,
+            navigationOptions: {
+                tabBarIcon: ({ tintColor }) => <Entypo name="user" size={24} color={tintColor} />
+            }
+        }
+    },
+    {
+        defaultNavigationOptions: {
+            tabBarOnPress: ({ navigation, defaultHandler }) => {
+                if (navigation.state.key === "Post") {
+                    navigation.navigate("Carica");
+                } else {
+                    defaultHandler();
+                }
+            }
+        },
+        tabBarOptions: {
+            activeTintColor: "#161F3D",
+            inactiveTintColor: "#B3ABAF",
+            style: styles.tabBar
+        }
+    }
+);
+
 const AppContainer = createStackNavigator(
     {
 
-        Talent: createBottomTabNavigator(
-
-            {
-                Home: {
-                    screen: HomeScreen,
-                    navigationOptions: {
-                        tabBarIcon: ({ tintColor }) => <Entypo name="home" size={24} color={tintColor} />
-                    }
-
-                },
-                Message: {
-                    screen: MessageScreen,
-                    navigationOptions: {
-                        tabBarIcon: ({ tintColor }) => <Entypo name="chat" size={24} color={tintColor} />
-                    }
-                },
-                Post: {
-                    screen: PostScreen,
-                    navigationOptions: {
-                        tabBarIcon: ({ tintColor }) => (
-                            <Entypo
-                                name="clapperboard"
-                                size={32}
-                                color="#ea1043"
-                                style={{
-                                    shadowColor: "#bf0e37",
-                                    shadowOffset: { width: 0, height: 5 },
-                                    shadowRadius: 5,
-                                    shadowOpacity: 0.3,
-                                    position: "absolute",
-
-                                }}
-                            />
-                        )
-                    }
-                },
-                Search: {
-                    screen: SearchScreen,
-                    navigationOptions: {
-                        headerShown: false,
-                        tabBarIcon: ({ tintColor }) => <Entypo name="magnifying-glass" size={24} color={tintColor} />
-                    }
-                },
-                Profile: {
-                    screen: ProfileScreen,
-                    navigationOptions: {
-                        tabBarIcon: ({ tintColor }) => <Entypo name="user" size={24} color={tintColor} />
-                    }
-                }
-            },
-            {
-                defaultNavigationOptions: {
-                    tabBarOnPress: ({ navigation, defaultHandler }) => {
-                        if (navigation.state.key === "Post") {
-                            navigation.navigate("Carica");
-                        } else {
-                            defaultHandler();
-                        }
-                    }
-                },
-                tabBarOptions: {
-                    activeTintColor: "#161F3D",
-                    inactiveTintColor: "#B8BBC4",
-                    showLabel: false
-                }
-            }
-        ),
+        Talent: talentStack,
         Carica: {
             screen: PostScreen
         },
@@ -164,7 +173,7 @@ const AppContainer = createStackNavigator(
     {
         mode: "modal",
 
-        defaultNavigationOptions: { headerTitle: props => <LogoTitle {...props} />, }
+        // defaultNavigationOptions: { headerTitle: props => <LogoTitle {...props} />, }
     }
 
 );

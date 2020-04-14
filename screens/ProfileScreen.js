@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, StyleSheet, Button, Image, TouchableOpacity, SafeAreaView, RefreshControl,Modal, ImageBackground} from "react-native";
+import { View, Text, StyleSheet, Button, Image, TouchableOpacity, SafeAreaView, RefreshControl, Modal, ImageBackground } from "react-native";
 import Fire from "../Fire";
 import firebase from 'firebase';
 import 'firebase/firestore';
@@ -14,36 +14,47 @@ YellowBox.ignoreWarnings(['VirtualizedLists should never be nested']);
 import VideoModal from "@paraboly/react-native-video-modal";
 import { Entypo } from "@expo/vector-icons";
 import userLikesVideo from "../services/Interactions";
+import * as c from "../config";
+
 export default class ProfileScreen extends React.Component {
 
     constructor(props) {
         super(props);
         this.state = {
-            user: { followers: { id_users: [] }, followed: { id_users: [] } },
+            user: { followers: { id_users: [] }, followed: { id_users: [] }, avatar: null },
             refreshing: false,
             isImageAvailable: false,
-            profilePic: null,
             visible: false,
             dataSource: [],
             selectedVideo: null,
-            newPassword:"",
-            currentPassword:""
+            newPassword: "",
+            currentPassword: ""
         };
     }
 
     _showModal = () => this.setState({ visible: true });
     _hideModal = () => this.setState({ visible: false });
 
-    getImage = async () => {
-        const profilePic = await AsyncStorage.getItem("profilePic");
-        if (profilePic) {
-            this.setState({
-                ...this.state,
-                isImageAvailable: true,
-                profilePic: JSON.parse(profilePic)
-            });
+    getLastUser = async () => {
+        // AsyncStorage.getItem("profilePic")
+        //     .then((profilePic) => {
+        //         if (profilePic) {
+        //             this.setState({
+        //                 user: { ...this.state.user, avatar: profilePic },
+        //                 isImageAvailable: true,
+        //             });
 
-        }
+        //         }
+        //     });
+
+        AsyncStorage.getItem('lastUser').then((JSONuser) => {
+            if (JSONuser) {
+                const usr = JSON.parse(JSONuser);
+                this.setState({ user: usr });
+            }
+
+        })
+
     }
 
     pressVideo(item) {
@@ -53,45 +64,46 @@ export default class ProfileScreen extends React.Component {
     }
 
     componentDidMount() {
-        this.getImage();
+        this.getLastUser();
         this._onRefresh();
     }
 
     _pickImage = async () => {
 
-        let result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
-            allowsEditing: true,
-            aspect: [4, 3],
-            quality: 1
-        });
-        console.log(result);
+        ImagePicker.launchImageLibraryAsync(c.avatarPicker)
+            .then((result) => {
+                if (result.cancelled) { return };
 
-        if (!result.cancelled) {
-            const source = { uri: result.uri };
-            AsyncStorage.setItem("profilePic", JSON.stringify(source));
-            this.setState({
-                ...this.state,
-                profilePic: source,
-                isImageAvailable: true
-            });
+                const imgUri = result.uri;
+                const updt_u = { ...this.state.user, avatar: imgUri };
+                // imposta stato di aggiornamento dell'avatar
+                this.setState({ refreshingAvatar: true });
 
-            this.uploadImageAsync(result.uri).then((uri) => {
-                const updt_u = { ...this.state.user, avatar: uri };
-
+                // aggiorno in memoria locale l'intero utente
+                AsyncStorage.setItem("lastUser", JSON.stringify(updt_u));
+                // aggiorno lo stato
                 this.setState({
-                    ...this.state,
-                    user: updt_u
+                    user: updt_u,
+                    isImageAvailable: true
                 });
-
-                console.log(this.state.user);
+                // aggiorno i dati sul server
+                this.uploadImageAsync(imgUri)
             })
-        }
+            .catch((err) => {
+                console.log(err);
+                this.setState({ refreshingAvatar: false });
+            })
 
     };
 
-
+    // questa funzione riceve l'uri di un'immagine e la salva su firestore
+    // prima nello storage, e poi aggiorna l'utente con il nuovo riferimento
     uploadImageAsync = async (uri) => {
+
+        const id = firebase.auth().currentUser.uid;
+        // avatar avrà sempre lo stesso nome - ne salviamo uno per utente
+        const id_avatar = `@avatar-${id}`;
+
         // Why are we using XMLHttpRequest? See:
         // https://github.com/expo/expo/issues/2402#issuecomment-443726662
         const blob = await new Promise((resolve, reject) => {
@@ -108,40 +120,24 @@ export default class ProfileScreen extends React.Component {
             xhr.send(null);
         });
 
-        const id_avatar = uuid();
+        // carica nello storage
+        firebase.storage().ref().child(id_avatar).put(blob)
+            .then((snapshot) => { blob.close(); return snapshot.ref.getDownloadURL() })
+            // carica nel database
+            .then((url) => {
+                let u = this.state.user;
+                // aggiorna avatar con il riferimento dello storage
+                u.avatar = url;
+                firebase.firestore().collection("users").doc(id).update(u);
+            })
+            .then(() => { this.setState({ refreshingAvatar: false }); }
+            )
+            .catch((error) => {
+                console.log(error);
+                this.setState({ refreshingAvatar: false });
+                alert("Ops! Riprovaci...");
+            })
 
-        const ref = firebase
-            .storage()
-            .ref()
-            .child(id_avatar);
-        const snapshot = await ref.put(blob);
-
-        // We're done with the blob, close and release it
-        blob.close();
-
-        const id = firebase.auth().currentUser.uid;
-        try {
-            let u = this.state.user;
-            u.avatar = id_avatar;
-            firebase.firestore().collection("users").doc(id)
-                .set(u);
-        } catch (error) {
-            console.log(error);
-            alert("Ops! Riprovaci...");
-        }
-
-        const source = { uri: uri };
-
-        // You can also display the image using data:
-        // const source = { uri: 'data:image/jpeg;base64,' + response.data };
-        AsyncStorage.setItem("profilePic", JSON.stringify(source));
-        this.setState({
-            ...this.state,
-            profilePic: source,
-            isImageAvailable: true
-        });
-
-        return await snapshot.ref.getDownloadURL();
     }
 
 
@@ -191,32 +187,32 @@ export default class ProfileScreen extends React.Component {
         var cred = firebase.auth.EmailAuthProvider.credential(
             user.email, this.state.currentPassword);
         return user.reauthenticateWithCredential(cred);
-      }
+    }
 
     changePassword = () => {
         this.reauthenticate(this.state.currentPassword).then(() => {
-          var user = firebase.auth().currentUser;
-          user.updatePassword(this.state.newPassword).then(() => {
-            console.log("Password updated!");
-          }).catch((error) => { console.log(error); });
+            var user = firebase.auth().currentUser;
+            user.updatePassword(this.state.newPassword).then(() => {
+                console.log("Password updated!");
+            }).catch((error) => { console.log(error); });
         }).catch((error) => { console.log(error); });
-      }
+    }
 
-    updateData = ()  =>{
+    updateData = () => {
 
         let id = firebase.auth().currentUser.uid;
         firebase.firestore().collection("users").doc(id)
             .update({
-                    name: this.state.user.name,
-                    surname: this.state.user.surname,
-                    email: this.state.user.email,
-                })
-      .catch((err)=>{
-            console.log(err);
-            alert("Error: ", err);
-        })
+                name: this.state.user.name,
+                surname: this.state.user.surname,
+                email: this.state.user.email,
+            })
+            .catch((err) => {
+                console.log(err);
+                alert("Error: ", err);
+            })
         this.changePassword();
-        this.setState({visible:false})
+        this.setState({ visible: false })
     }
 
     render() {
@@ -260,37 +256,37 @@ export default class ProfileScreen extends React.Component {
         return (
             <SafeAreaView>
                 <Modal visible={this.state.selectedVideo != null}
-                transition="fade">
-                    <View style={{justifyContent:"flex-start", flexDirection:"column", alignItems:"stretch"}}>
+                    transition="fade">
+                    <View style={{ justifyContent: "flex-start", flexDirection: "column", alignItems: "stretch" }}>
                         <SafeAreaView>
-                            <View style={{display:"flex", flexDirection:"row", justifyContent:"space-between", alignItems:"flex-start", marginHorizontal:10}}>
+                            <View style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginHorizontal: 10 }}>
                                 <TouchableOpacity onPress={() => this.setState({ ...this.state, selectedVideo: null })} >
                                     <Text style={{ color: "black", fontSize: 18 }}>Indietro</Text>
                                 </TouchableOpacity>
                                 <Text style={{ fontWeight: "600", alignSelf: "center", fontSize: 17 }}>Visualizza video</Text>
                             </View>
-                            <View style={{display:"flex", justifyContent:"center",alignItems:"space-between"}}>
-                                
+                            <View style={{ display: "flex", justifyContent: "center", alignItems: "space-between" }}>
+
                                 <View>
                                     <Video
-                                    source={{ uri: this.state.selectedVideo?.uri }}
-                                    rate={1.0}
-                                    volume={1.0}
-                                    isMuted={false}
-                                    resizeMode="cover"
-                                    shouldPlay={true}
-                                    isLooping={false}
-                                    useNativeControls={true}
-                                    style={{ height:300,width:180}}
+                                        source={{ uri: this.state.selectedVideo?.uri }}
+                                        rate={1.0}
+                                        volume={1.0}
+                                        isMuted={false}
+                                        resizeMode="cover"
+                                        shouldPlay={true}
+                                        isLooping={false}
+                                        useNativeControls={true}
+                                        style={{ height: 300, width: 180 }}
                                     />
                                 </View>
                                 <View>
                                     <Text>{this.state.selectedVideo?.description}</Text>
                                     <TouchableOpacity onPress={() => this.like(this.state.selectedVideo.id)} >
-                                    <Entypo name="star-outlined" size={32} color={"black"} />
-                                </TouchableOpacity>
+                                        <Entypo name="star-outlined" size={32} color={"black"} />
+                                    </TouchableOpacity>
                                 </View>
-                                
+
                             </View>
                         </SafeAreaView>
                     </View>
@@ -310,21 +306,21 @@ export default class ProfileScreen extends React.Component {
                                     <Image
                                         source={
                                             this.state.isImageAvailable
-                                                ? this.state.profilePic
+                                                ? { uri: this.state.profilePic }
                                                 : require("../assets/tempAvatar.jpg")
                                         }
                                         style={styles.avatar}
                                     />
                                 </TouchableOpacity>
                             </View>
-                        <View style={{ flexDirection: "row", }}>
-                                <Text style={styles.name}>{this.state.user.name} </Text>
-                                <Text style={styles.name}>{this.state.user.surname}</Text>
+                            <View style={{ flexDirection: "row", }}>
+                                <Text style={styles.name}>{this.state.user?.name} </Text>
+                                <Text style={styles.name}>{this.state.user?.surname}</Text>
                             </View>
                         </View>
                         <View style={styles.statsContainer}>
                             <View style={styles.stat}>
-                                <Text style={styles.statAmount}>{this.state.user.user_videos ? this.state.user.user_videos.length : "0"}</Text>
+                                <Text style={styles.statAmount}>{this.state.user?.user_videos ? this.state.user.user_videos.length : "0"}</Text>
                                 <Text style={styles.statTitle}>Posts</Text>
                             </View>
                             <View style={styles.stat}>
@@ -340,6 +336,9 @@ export default class ProfileScreen extends React.Component {
                             <View style={{ display: "flex", flexDirection: "row", alignItems: "stretch", justifyContent: "space-around", }}>
                                 <Text style={{ color: "#FFF", fontWeight: "500", letterSpacing: 2, alignSelf: "center", fontSize: 12, marginTop: -3 }}>Modifica Profilo</Text>
                             </View>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.button} onPress={()=>{Fire.shared.signOut()}}>
+                                <Text>Esci</Text>
                         </TouchableOpacity>
 
                     </View>
@@ -389,25 +388,25 @@ export default class ProfileScreen extends React.Component {
                                     </View>
                                 </View>
 
-                            <View style={styles.formContainer}>
-                                <View style={styles.column}>
-                                    <Text style={styles.label}>Nome</Text>
-                                    <Text style={styles.label}>Cognome</Text>
-                                    <Text style={styles.label}>username</Text>
-                                    <Text style={styles.label}>Email</Text>
-                                    <Text style={styles.label}>Password Corrente</Text>
-                                    <Text style={styles.label}>Nuova Password</Text>
-                                </View>    
+                                <View style={styles.formContainer}>
+                                    <View style={styles.column}>
+                                        <Text style={styles.label}>Nome</Text>
+                                        <Text style={styles.label}>Cognome</Text>
+                                        <Text style={styles.label}>username</Text>
+                                        <Text style={styles.label}>Email</Text>
+                                        <Text style={styles.label}>Password Corrente</Text>
+                                        <Text style={styles.label}>Nuova Password</Text>
+                                    </View>
 
-                                <View style={styles.column2}>
-                                    <TextInput placeholder={this.state.user.name} style={styles.input} onChangeText={name => this.setState({ user: { ...this.state.user, name } })}></TextInput>
-                                    <TextInput placeholder={this.state.user.surname} style={styles.input} onChangeText={surname => this.setState({ user: { ...this.state.user, surname } })}></TextInput>
-                                    <TextInput placeholder={this.state.user.username} style={styles.input} onChangeText={username => this.setState({ user: { ...this.state.user, username } })}></TextInput>
-                                    <TextInput placeholder={this.state.user.email} style={styles.input} onChangeText={email => this.setState({ user: { ...this.state.user, email } })}></TextInput>
-                                    <TextInput placeholder="password" style={styles.input} onChangeText={currentPassword => this.setState({currentPassword})}></TextInput>
-                                    <TextInput placeholder="password" style={styles.input} onChangeText={newPassword => this.setState({newPassword})}></TextInput>
+                                    <View style={styles.column2}>
+                                        <TextInput placeholder={this.state.user.name} style={styles.input} onChangeText={name => this.setState({ user: { ...this.state.user, name } })}></TextInput>
+                                        <TextInput placeholder={this.state.user.surname} style={styles.input} onChangeText={surname => this.setState({ user: { ...this.state.user, surname } })}></TextInput>
+                                        <TextInput placeholder={this.state.user.username} style={styles.input} onChangeText={username => this.setState({ user: { ...this.state.user, username } })}></TextInput>
+                                        <TextInput placeholder={this.state.user.email} style={styles.input} onChangeText={email => this.setState({ user: { ...this.state.user, email } })}></TextInput>
+                                        <TextInput placeholder="password" style={styles.input} onChangeText={currentPassword => this.setState({ currentPassword })}></TextInput>
+                                        <TextInput placeholder="password" style={styles.input} onChangeText={newPassword => this.setState({ newPassword })}></TextInput>
 
-                                </View>   
+                                    </View>
 
                                 </View>
                                 <TouchableOpacity onPress={() => { Fire.shared.signOut(); }} style={styles.logout}>
@@ -429,8 +428,8 @@ export default class ProfileScreen extends React.Component {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        alignContent:"center",
-        alignItems:"center"
+        alignContent: "center",
+        alignItems: "center"
     },
     logout: {
         backgroundColor: "#FF5166",
@@ -439,16 +438,16 @@ const styles = StyleSheet.create({
         alignSelf: "center",
         marginTop: 50
     },
-    formContainer:{
-        borderBottomWidth:1,
-        borderTopWidth:1,
-        borderBottomColor:"#E4E4E4",
-        borderTopColor:"#E4E4E4",
-        flexDirection:"row",
-        height:370,
-        paddingTop:20,
-        paddingBottom:20,
-        marginTop:30
+    formContainer: {
+        borderBottomWidth: 1,
+        borderTopWidth: 1,
+        borderBottomColor: "#E4E4E4",
+        borderTopColor: "#E4E4E4",
+        flexDirection: "row",
+        height: 370,
+        paddingTop: 20,
+        paddingBottom: 20,
+        marginTop: 30
     },
     column: {
         flexDirection: "column",
@@ -461,17 +460,17 @@ const styles = StyleSheet.create({
         width: "65%",
         justifyContent: "space-between"
     },
-    label:{
-        fontWeight:"300",
-        fontSize:16,
-        margin:15,
+    label: {
+        fontWeight: "300",
+        fontSize: 16,
+        margin: 15,
     },
-    input:{
-        borderBottomWidth:1,
-        borderBottomColor:"#E4E4E4",
-        margin:15,
-        fontSize:17,
-        padding:3
+    input: {
+        borderBottomWidth: 1,
+        borderBottomColor: "#E4E4E4",
+        margin: 15,
+        fontSize: 17,
+        padding: 3
 
     },
     profile: {
@@ -541,8 +540,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         height: 200,
     },
-    cover:{
-        width:300,
-        height:300
+    cover: {
+        width: 300,
+        height: 300
     }
 });

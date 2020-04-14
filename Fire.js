@@ -37,54 +37,9 @@ class Fire {
         }); 
     };
     
-    createUser = async user => {
-        let remoteUri = null;
+    createUser = async (user) => {
 
-        firebase.auth().createUserWithEmailAndPassword(user.email, user.password)
-        .then((u)=>{
-            console.log(u)
-            u = u.user;
-            //console.log(u.uid)
-
-            firebase.firestore().collection("users").doc(u.uid)
-            .set({
-                    name: user.name,
-                    surname: user.surname,
-                    username: user.username,
-                    date: user.date,
-                    email: u.email,
-                    followed:{id_users:[]},
-                    followers:{id_users:[]},
-                    avatar: u.photoURL
-                });
-        }).catch((err)=>{
-            console.log(err);
-            alert("Error: ", err);
-        })
-
-        // try {
-        //     await firebase.auth().createUserWithEmailAndPassword(user.email, user.password);
-
-        //     let db = this.firestore.collection("users").doc(this.uid);
-
-        //     db.set({
-        //         name: user.name,
-        //         email: user.email,
-        //         followed:{},
-        //         follower:{},
-        //         latitude:null,
-        //         longitude:null,
-        //         avatar: null
-        //     });
-
-        //     if (user.avatar) {
-        //         remoteUri = await this.uploadPhotoAsync(user.avatar, `avatars/${this.uid}`);
-
-        //         db.set({ avatar: remoteUri }, { merge: true });
-        //     }
-        // } catch (error) {
-        //     alert("Error: ", error);
-        // }
+        return firebase.auth().createUserWithEmailAndPassword(user.email, user.password)
 
     };
 
