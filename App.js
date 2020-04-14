@@ -15,6 +15,7 @@ import PostScreen from "./screens/PostScreen";
 import SearchScreen from "./screens/SearchScreen";
 import ProfileScreen from "./screens/ProfileScreen";
 import Home2Screen from "./screens/Home2Screen";
+import UserScreen from "./screens/UserScreen";
 
 import { AsyncStorage, Dimensions } from 'react-native';
 import firebase from "firebase";
@@ -169,6 +170,9 @@ const AppContainer = createStackNavigator(
         Carica: {
             screen: PostScreen
         },
+        User: {
+            screen:UserScreen
+        }
     },
     {
 
