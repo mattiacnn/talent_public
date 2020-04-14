@@ -14,7 +14,9 @@ import MessageScreen from "./screens/MessageScreen";
 import PostScreen from "./screens/PostScreen";
 import SearchScreen from "./screens/SearchScreen";
 import ProfileScreen from "./screens/ProfileScreen";
-
+import GlobalFeed from "./screens/GlobalFeed";
+import UserScreen from "./screens/UserScreen";
+import Chat from "./screens/Chat";
 import firebase from "firebase";
 import { Title } from "react-native-paper";
 import { View, Text, StyleSheet, Button, StatusBar, Image, TouchableOpacity } from "react-native";
@@ -30,7 +32,6 @@ if (!global.atob) { global.atob = decode; }
 
 const styles = StyleSheet.create({
     container: {
-        display: "flex",
         flexDirection: "row",
         justifyContent: "space-around",
         alignItems: "center",
@@ -126,13 +127,14 @@ const AppContainer = createStackNavigator(
                         )
                     }
                 },
-                Search: {
-                    screen: SearchScreen,
+                Global: {
+                    screen: GlobalFeed,
                     navigationOptions: {
                         headerShown: false,
                         tabBarIcon: ({ tintColor }) => <Entypo name="magnifying-glass" size={24} color={tintColor} />
                     }
                 },
+
                 Profile: {
                     screen: ProfileScreen,
                     navigationOptions: {
@@ -155,16 +157,27 @@ const AppContainer = createStackNavigator(
                     inactiveTintColor: "#B8BBC4",
                     showLabel: false
                 }
+                
             }
         ),
+        Search: {
+            screen:SearchScreen
+        },
+        User: {
+            screen:UserScreen
+        },
+        Chat: {
+            screen: Chat
+        },
         Carica: {
             screen: PostScreen
         },
     },
     {
-        mode: "modal",
 
-        defaultNavigationOptions: { headerTitle: props => <LogoTitle {...props} />, }
+        defaultNavigationOptions: { headerTitle: props => <LogoTitle {...props} />, headerStyle: {
+            backgroundColor: '#ea1043',
+          },}
     }
 
 );

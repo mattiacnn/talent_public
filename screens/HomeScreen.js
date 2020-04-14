@@ -11,6 +11,7 @@ export default class HomeScreen extends React.Component {
 
     render() {
       return (
+          
           <View style={styles.container}>
               <StatusBar backgroundColor="blue" barStyle="dark-content" ></StatusBar>
               <Text>Timeline</Text>
