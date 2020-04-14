@@ -31,7 +31,6 @@ if (!global.atob) { global.atob = decode; }
 
 const styles = StyleSheet.create({
     container: {
-        display: "flex",
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
@@ -152,6 +151,7 @@ const talentStack = createBottomTabNavigator(
                 } else {
                     defaultHandler();
                 }
+                
             }
         },
         tabBarOptions: {
@@ -171,7 +171,6 @@ const AppContainer = createStackNavigator(
         },
     },
     {
-        mode: "modal",
 
         // defaultNavigationOptions: { headerTitle: props => <LogoTitle {...props} />, }
     }
