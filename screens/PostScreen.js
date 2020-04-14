@@ -15,6 +15,7 @@ import { useNavigation } from '@react-navigation/native';
 import { Dimensions } from 'react-native';
 import { Text, Button, Block, Input, Card, Radio } from 'galio-framework'
 import SectionedMultiSelect from 'react-native-sectioned-multi-select';
+import Fire from '../Fire';
 
 const items = [
   // this is the parent or 'item'
@@ -58,15 +59,29 @@ export default class PostScreen extends React.Component {
     super(props);
     this.state = {
       user: {},
-      video: null,
+      video: {
+        likes : 0,
+        description : '',
+        owner : Fire.shared.uid,
+        categories: [],
+        uri: null
+      },
       text: "",
       loading: false,
       selectedItems: [],
     }
   }
 
+  onChangeText = (text) => {
+    let v = this.state.video;
+    v.description = text;
+    this.setState({ video:v });
+  }
+
   onSelectedItemsChange = (selectedItems) => {
-    this.setState({ selectedItems });
+    let v = this.state.video;
+    v.categories = selectedItems;
+    this.setState({ video:v, selectedItems });
   }
 
   componentDidMount() {
@@ -77,7 +92,7 @@ export default class PostScreen extends React.Component {
   render() {
 
     return (
-      <SafeAreaView style={{ backgroundColor: "#fff", height: Dimensions.get('screen').height - 90, display: "flex" }}>
+      <SafeAreaView style={{ backgroundColor: "#fff", height: "100%", display: "flex" }}>
 
         <View style={{
           padding: 20, flex: 1, flexDirection: "column", justifyContent: "space-evenly", alignItems: "center"
@@ -105,7 +120,7 @@ export default class PostScreen extends React.Component {
                 justifyContent: "center"
               }
             }>
-              <Video source={{ uri: this.state.video }} style={{
+              <Video source={{ uri: this.state.video?.uri }} style={{
                 height: Dimensions.get('screen').width / 2,
                 width: Dimensions.get('screen').width / 2,
                 zIndex: 3,
@@ -121,11 +136,11 @@ export default class PostScreen extends React.Component {
             </TouchableOpacity>
           </View>
 
-          <Input placeholder="Descrizione del video" right icon="text-fields" family="MaterialCommunityIcons" />
+          <Input placeholder="Descrizione del video" right icon="text-fields" family="MaterialCommunityIcons" onChangeText={text => this.onChangeText(text)}/>
 
             <SectionedMultiSelect
               items={items}
-              uniqueKey="id"
+              uniqueKey="name"
               subKey="children"
               selectText="Scegli una o più categorie"
               showDropDowns={true}
@@ -150,7 +165,7 @@ export default class PostScreen extends React.Component {
             />
 
           <Block center>
-            <Button size="small" round uppercase style={{}} onPress={this.uploadImageAsync} loading={this.state.loading}>carica</Button>
+            <Button size="small" round uppercase style={{}} onPress={this._uploadVideo} loading={this.state.loading}>carica</Button>
           </Block>
 
         </View>
@@ -188,27 +203,30 @@ export default class PostScreen extends React.Component {
     console.log(result);
 
     if (!result.cancelled) {
-      this.setState({ video: result.uri });
+      let v = this.state.video;
+      v.uri = result.uri;
+      this.setState({ video: v });
     }
 
   };
 
 
-  uploadImageAsync = async () => {
+  _uploadVideo = async () => {
     this.setState({ loading: true });
     var this_ = this;
-    var newvideo;
+    var newvideo = this.state.video;
+
+    if(!newvideo && !newvideo.uri) return;
     // Why are we using XMLHttpRequest? See:
     // https://github.com/expo/expo/issues/2402#issuecomment-443726662
     const id = firebase.auth().currentUser.uid;
-    let uri = this.state.video;
-
+    
     const blob = await new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
       xhr.onload = function () { resolve(xhr.response); };
       xhr.onerror = function (e) { reject(new TypeError('Network request failed')); };
       xhr.responseType = 'blob';
-      xhr.open('GET', uri, true);
+      xhr.open('GET', newvideo.uri, true);
       xhr.send(null);
     });
 
@@ -239,7 +257,7 @@ export default class PostScreen extends React.Component {
       // Handle successful uploads on complete
       uploadTask.snapshot.ref.getDownloadURL().then(function (downloadURL) {
         console.log('File available at', downloadURL);
-        newvideo = { uri: downloadURL };
+        newvideo.uri = downloadURL ;
         return downloadURL;
       })
         .then(path => { return VideoThumbnails.getThumbnailAsync(path, { time: 1 }) })
@@ -247,7 +265,8 @@ export default class PostScreen extends React.Component {
         .then(file => { return firebase.storage().ref().child(`@thumb-${vid}`).put(file); })
         .then(snap => { return snap.ref.getDownloadURL(); })
         .then(url => {
-          newvideo = { ...newvideo, description: "default desc", likes: 0, thumbnail: url, user: id };
+          newvideo.thumbnail = url;
+          newvideo.id = vid;
           return firebase.firestore().collection("videos").doc(vid).set(newvideo);
         })
         .then(() => {

@@ -16,6 +16,8 @@ import { Entypo } from "@expo/vector-icons";
 import userLikesVideo from "../services/Interactions";
 import * as c from "../config";
 
+
+
 export default class ProfileScreen extends React.Component {
 
     constructor(props) {
@@ -219,6 +221,8 @@ export default class ProfileScreen extends React.Component {
 
         const videoSelezionato = this.state.selectedVideo;
         let modale;
+        const { height, width } = Dimensions.get('window');
+        const itemWidth = (width - 15) / 3 - 5;
 
         if (videoSelezionato) {
             modale = (
@@ -291,6 +295,7 @@ export default class ProfileScreen extends React.Component {
                         </SafeAreaView>
                     </View>
                 </Modal>
+                
                 <ScrollView
                     refreshControl={
                         <RefreshControl
@@ -337,27 +342,54 @@ export default class ProfileScreen extends React.Component {
                                 <Text style={{ color: "#FFF", fontWeight: "500", letterSpacing: 2, alignSelf: "center", fontSize: 12, marginTop: -3 }}>Modifica Profilo</Text>
                             </View>
                         </TouchableOpacity>
-                        <TouchableOpacity style={styles.button} onPress={()=>{Fire.shared.signOut()}}>
-                                <Text>Esci</Text>
+                        <TouchableOpacity style={styles.button} onPress={() => { Fire.shared.signOut() }}>
+                            <Text>Esci</Text>
                         </TouchableOpacity>
 
                     </View>
-                    <View style={styles.MainContainer}>
-                        <FlatList
-                            data={this.state.user.user_videos}
-                            renderItem={({ item }) => (
+                    <FlatList
+                        contentContainerStyle={{ marginTop: 20 }}
+                        horizontal={false}
+                        numColumns={3}
+                        data={this.state.user?.user_videos}
+                        renderItem={({ item }) => (
 
-                                <View style={{ flex: 1, flexDirection: 'column', margin: 1 }}>
-                                    <TouchableOpacity onPress={() => this.pressVideo(item)} >
-                                        <Image style={styles.imageThumbnail} source={{ uri: item.thumbnail }} />
+                            <View style={
+                                {
+                                    flex: 1 / 3,
+                                    margin: 5,
+                                    backgroundColor: '#fafafa',
+                                    height: 200,
+                                    borderRadius: 5,
+                                    shadowColor: "#000",
+                                    shadowOffset: {
+                                        width: 0,
+                                        height: 2,
+                                    },
+                                    shadowOpacity: 0.25,
+                                    shadowRadius: 9.84,
+
+                                    elevation: 5,
+
+                                }
+                            }>
+                                <View style={{ height: "100%", width: "100%", flexDirection: "column", overflow: "hidden" }}>
+                                    <TouchableOpacity style={{ flex: 8 }} onPress={this.}>
+                                        <Image source={{ uri: item.thumbnail }}  style={{ flex: 1, borderRadius: 5 }}></Image>
                                     </TouchableOpacity>
+                                    <View style={{ flex: 1, flexDirection: "row", justifyContent: "center", alignItems: "flex-end", height: "100%" }}>
+                                        <Text style={{ fontSize: 16, lineHeight: 24 }}>{item.likes} </Text>
+                                        <Entypo name="star-outlined" size={18} color={"#ea1043"} />
+                                    </View>
                                 </View>
-                            )}
-                            //Setting the number of column
-                            numColumns={2}
-                            keyExtractor={(item) => item.id}
-                        />
-                    </View>
+
+
+
+                            </View>
+                        )}
+                        //Setting the number of column
+                        keyExtractor={(item) => item.id}
+                    />
 
 
                     <Modal visible={this.state.visible}>
@@ -531,13 +563,8 @@ const styles = StyleSheet.create({
         marginTop: 4
     },
     MainContainer: {
-        justifyContent: 'center',
-        flex: 1,
-        paddingTop: 30,
     },
     imageThumbnail: {
-        justifyContent: 'center',
-        alignItems: 'center',
         height: 200,
     },
     cover: {
