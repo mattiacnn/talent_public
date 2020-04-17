@@ -20,10 +20,12 @@ import UserScreen from "./screens/UserScreen";
 import { AsyncStorage, Dimensions } from 'react-native';
 import firebase from "firebase";
 import { Title } from "react-native-paper";
-import { View, Text, StyleSheet, Button, StatusBar, Image, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, Button, StatusBar, Image, TouchableOpacity,TouchableHighlight } from "react-native";
 
 import { decode, encode } from 'base-64'
 import { Row } from "native-base";
+import VideoScreen from "./screens/VideoScreen";
+import EditProfileScreen from "./screens/EditProfileScreen";
 global.crypto = require("@firebase/firestore");
 global.crypto.getRandomValues = byteArray => { for (let i = 0; i < byteArray.length; i++) { byteArray[i] = Math.floor(256 * Math.random()); } }
 if (!global.btoa) { global.btoa = encode; }
@@ -40,11 +42,11 @@ const styles = StyleSheet.create({
         backgroundColor: "white",
     },
     applogo: {
-        height:24,
-        width:"100%",
+        height: 24,
+        width: "100%",
         flex: 1,
-        padding:20,
-        margin:5,
+        padding: 20,
+        margin: 5,
     },
     title: {
         fontSize: 30,
@@ -52,14 +54,20 @@ const styles = StyleSheet.create({
         color: "#EA1043",
     },
     notification: {
-        color:"#EA1043",
+        color: "#EA1043",
         shadowColor: "black",
         shadowOffset: { width: 0, height: 1 },
         shadowRadius: 2,
         shadowOpacity: 0.1,
     },
-    tabBar:{
-        backgroundColor:"#F7F7FF",
+    tabBar: {
+        backgroundColor: "#0a0003",
+        borderBottomWidth: 0,
+        borderTopWidth:0,
+        shadowRadius: 0,
+        shadowOffset: {
+            height: 0,
+        },
     }
 });
 
@@ -67,7 +75,7 @@ function LogoTitle() {
     return (
         <>
             <View style={styles.container}>
-                
+
                 <Text style={styles.title}>Talent</Text>
                 <Entypo style={styles.notification} name="notification" size={24} />
             </View>
@@ -76,12 +84,59 @@ function LogoTitle() {
     );
 }
 
+const ProfileContainer = createStackNavigator(
+    {
+
+        Profilo: {
+            screen: ProfileScreen,
+            navigationOptions: {
+                headerStyle: {
+                    backgroundColor: '#0a0003', borderBottomWidth: 0, shadowRadius: 0,
+                    shadowOffset: {
+                        height: 0,
+                    },
+                },
+
+            }
+        },
+        Video: {
+            screen: VideoScreen,
+            navigationOptions: {
+                headerTransparent: true,
+                headerBackTitleVisible: false,
+                headerTitle: ' ',
+            }
+        },
+        Modifica: {
+            screen: EditProfileScreen,
+            navigationOptions: {
+                headerStyle: {
+                    backgroundColor: '#0a0003', borderBottomWidth: 0, shadowRadius: 0,
+                    shadowOffset: {
+                        height: 0,
+                    },
+                },
+
+            }
+        },
+    },
+    {
+
+        defaultNavigationOptions: {
+            headerShown: true,
+            headerTintColor: "#EA1043",
+            shadowColor: 'transparent'
+        }
+    }
+
+);
 
 const talentStack = createBottomTabNavigator(
     {
         Home: {
             screen: Home2Screen,
             navigationOptions: {
+                unmountOnBlur: true,
                 tabBarIcon: ({ tintColor }) => <Entypo name="home" size={24} color={tintColor} />
             }
 
@@ -103,30 +158,31 @@ const talentStack = createBottomTabNavigator(
         Post: {
             screen: PostScreen,
             navigationOptions: {
-                tabBarLabel:' ',
+                headerShown: true,
+                tabBarLabel: ' ',
                 tabBarIcon: ({ tintColor }) => (
                     <View style={{
-                        backgroundColor:"#EA1043", 
-                        height:70,
-                        width:70,
-                        borderRadius:35,
+                        backgroundColor: "#EA1043",
+                        height: 58,
+                        width: 58,
+                        borderRadius: 32,
                         shadowColor: "#bf0e37",
                         shadowOffset: { width: 0, height: 5 },
                         shadowRadius: 5,
                         shadowOpacity: 0.5,
-                        }}>
+                    }}>
                         <Entypo
-                        name="clapperboard"
-                        size={32}
-                        color= '#fff'
-                        style={{
-                            lineHeight:70,
-                            textAlign:"center",
+                            name="clapperboard"
+                            size={26}
+                            color='#fff'
+                            style={{
+                                lineHeight: 58,
+                                textAlign: "center",
 
-                        }}
-                    />
+                            }}
+                        />
                     </View>
-                    
+
                 )
             }
         },
@@ -138,8 +194,9 @@ const talentStack = createBottomTabNavigator(
             }
         },
         Profile: {
-            screen: ProfileScreen,
+            screen: ProfileContainer,
             navigationOptions: {
+                headerShown: false,
                 tabBarIcon: ({ tintColor }) => <Entypo name="user" size={24} color={tintColor} />
             }
         }
@@ -152,11 +209,12 @@ const talentStack = createBottomTabNavigator(
                 } else {
                     defaultHandler();
                 }
-                
-            }
+
+            },
+            headerShown: false,
         },
         tabBarOptions: {
-            activeTintColor: "#161F3D",
+            activeTintColor: "#bf0e37",
             inactiveTintColor: "#B3ABAF",
             style: styles.tabBar
         }
@@ -171,12 +229,17 @@ const AppContainer = createStackNavigator(
             screen: PostScreen
         },
         User: {
-            screen:UserScreen
+            screen: UserScreen
         }
     },
     {
 
-        // defaultNavigationOptions: { headerTitle: props => <LogoTitle {...props} />, }
+        defaultNavigationOptions: {
+            headerShown: false,
+            headerTransparent: true,
+
+            headerTintColor: '#fff',
+        }
     }
 
 );
@@ -194,7 +257,7 @@ export default createAppContainer(
             Auth: AuthStack
         },
         {
-            initialRouteName: "Loading"
+            initialRouteName: "Loading",
         }
     )
 );
