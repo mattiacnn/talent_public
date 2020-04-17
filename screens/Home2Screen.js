@@ -141,7 +141,7 @@ class Home2Screen extends Component {
 
                 this.promisedSetState(newState).then(() => {
                     let user = this.state.user;
-                    user.user_videos = dublicateItems(user.user_videos, 33);
+                    //user.user_videos = dublicateItems(user.user_videos, 33);
                     this.setState({ user: user });
                 });
 
@@ -216,16 +216,10 @@ class Home2Screen extends Component {
                     <View style={{ flex: .5, flexDirection: 'row' }}>
                         <View style={{ flex: .5 }}>
                             <View style={styles.tag}>
-                                <Text style={styles.tagtitle}>{this.state.myText} {this.state.currentIndex}</Text>
+        <Text style={styles.tagtitle}>{this.user?.username}</Text>
                             </View>
                             <ScrollView showsVerticalScrollIndicator={false}>
-                                <Text style={styles.username}>1.Cruch the ginger</Text>
-                                <Text style={styles.commentsBottom}>2.Slice Onion</Text>
-                                <Text style={styles.commentsBottom}>3.Chop tomatoes</Text>
-                                <Text style={styles.commentsBottom}>4.Add dalta</Text>
-                                <Text style={styles.commentsBottom}>5.Add Cruched ginergarlic paste</Text>
-                                <Text style={styles.commentsBottom}>6.Add lime juice</Text>
-                                <Text style={styles.commentsBottom}>7.Add the Ghee</Text>
+                                <Text style={styles.username}>{item?.description}</Text>
                             </ScrollView>
                         </View>
                         <View style={{ flex: .5, justifyContent: 'flex-end' }}>
@@ -309,7 +303,7 @@ const styles = StyleSheet.create({
     username: {
         fontWeight: 'bold',
         color: 'white',
-        marginLeft: 8
+        marginLeft: 16
     },
     commentsBottom: {
         color: 'white',

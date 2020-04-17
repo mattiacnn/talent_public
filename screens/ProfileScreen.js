@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, StyleSheet, Button, Image, TouchableOpacity, SafeAreaView, RefreshControl, Modal, ImageBackground } from "react-native";
+import { View, StyleSheet, Image, TouchableOpacity, SafeAreaView, RefreshControl, Modal, ImageBackground } from "react-native";
 import Fire from "../Fire";
 import firebase from 'firebase';
 import 'firebase/firestore';
@@ -15,6 +15,11 @@ import VideoModal from "@paraboly/react-native-video-modal";
 import { Entypo } from "@expo/vector-icons";
 import userLikesVideo from "../services/Interactions";
 import * as c from "../config";
+import Icon2 from 'react-native-vector-icons/MaterialIcons';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { Text, Button, Block, Input, Card, Radio } from 'galio-framework'
+
+
 
 export default class ProfileScreen extends React.Component {
 
@@ -216,207 +221,125 @@ export default class ProfileScreen extends React.Component {
     }
 
     render() {
-
-        const videoSelezionato = this.state.selectedVideo;
-        let modale;
-
-        if (videoSelezionato) {
-            modale = (
-                <Modal>
-                    <View style={styles.container}>
-                        <SafeAreaView>
-                            <View style={styles.header}>
-                                <TouchableOpacity onPress={() => this.setState({ ...this.state, selectedVideo: {} })} >
-                                    <Text style={{ color: "black", fontSize: 18 }}>Indietro</Text>
-                                </TouchableOpacity>
-                                <Text style={{ fontWeight: "600", alignSelf: "center", fontSize: 17, marginTop: -2 }}>Visualizza video</Text>
-                            </View>
-                            <View style={{ marginTop: 34, alignItems: "center" }}>
-                                <Video
-                                    source={{ uri: this.state.selectedVideo?.uri }}
-                                    rate={1.0}
-                                    volume={1.0}
-                                    isMuted={false}
-                                    resizeMode="cover"
-                                    shouldPlay
-                                    isLooping
-                                    style={{ width: 300, height: 300 }}
-                                />
-                            </View>
-                        </SafeAreaView>
-                    </View>
-                </Modal>
-            );
-        } else {
-            modale = (
-                <View></View>
-            );
-        }
+        const { height, width } = Dimensions.get('window');
 
         return (
-            <SafeAreaView>
-                <Modal visible={this.state.selectedVideo != null}
-                    transition="fade">
-                    <View style={{ justifyContent: "flex-start", flexDirection: "column", alignItems: "stretch" }}>
-                        <SafeAreaView>
-                            <View style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginHorizontal: 10 }}>
-                                <TouchableOpacity onPress={() => this.setState({ ...this.state, selectedVideo: null })} >
-                                    <Text style={{ color: "black", fontSize: 18 }}>Indietro</Text>
-                                </TouchableOpacity>
-                                <Text style={{ fontWeight: "600", alignSelf: "center", fontSize: 17 }}>Visualizza video</Text>
-                            </View>
-                            <View style={{ display: "flex", justifyContent: "center", alignItems: "space-between" }}>
+            <SafeAreaView style={{ backgroundColor: "#0f0104" }}>
 
-                                <View>
-                                    <Video
-                                        source={{ uri: this.state.selectedVideo?.uri }}
-                                        rate={1.0}
-                                        volume={1.0}
-                                        isMuted={false}
-                                        resizeMode="cover"
-                                        shouldPlay={true}
-                                        isLooping={false}
-                                        useNativeControls={true}
-                                        style={{ height: 300, width: 180 }}
-                                    />
-                                </View>
-                                <View>
-                                    <Text>{this.state.selectedVideo?.description}</Text>
-                                    <TouchableOpacity onPress={() => this.like(this.state.selectedVideo.id)} >
-                                        <Entypo name="star-outlined" size={32} color={"black"} />
-                                    </TouchableOpacity>
-                                </View>
-
-                            </View>
-                        </SafeAreaView>
-                    </View>
-                </Modal>
                 <ScrollView
+                    tintColor="white"
                     refreshControl={
                         <RefreshControl
+                            tintColor="#EA1043"
                             refreshing={this.state.refreshing}
                             onRefresh={this._onRefresh}
                         />
                     }
                 >
-                    <View style={styles.container}>
-                        <View style={{ marginTop: 34, alignItems: "center" }}>
-                            <View style={styles.avatarContainer}>
-                                <TouchableOpacity activeOpacity={.5} onPress={this._pickImage}>
-                                    <Image
-                                        source={
-                                            this.state.isImageAvailable
-                                                ? { uri: this.state.profilePic }
-                                                : require("../assets/tempAvatar.jpg")
-                                        }
-                                        style={styles.avatar}
-                                    />
-                                </TouchableOpacity>
-                            </View>
-                            <View style={{ flexDirection: "row", }}>
-                                <Text style={styles.name}>{this.state.user?.name} </Text>
-                                <Text style={styles.name}>{this.state.user?.surname}</Text>
-                            </View>
+                    <View style={{ marginTop: 10, alignItems: "center", justifyContent: "space-around", height: Dimensions.get('screen').height / 2 - 35 }}>
+                        <View style={styles.avatarContainer}>
+                            <TouchableOpacity activeOpacity={.5} onPress={this._pickImage}>
+                                <Image
+                                    source={
+                                        this.state.user.avatar
+                                            ? { uri: this.state.user.avatar }
+                                            : require("../assets/tempAvatar.jpg")
+                                    }
+                                    style={styles.avatar}
+                                />
+                            </TouchableOpacity>
                         </View>
+
+                        <View style={{ flexDirection: "row", justifyContent: "center", padding: 5 }}>
+                            <View style={{ margin: 5, flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
+                                <TouchableOpacity style={{ margin: 5, flexDirection: "row", justifyContent: "center", alignItems: "center" }}
+                                    onPress={() => this.props.navigation.navigate('Modifica', {
+                                        editingUser: this.state.user
+                                    })} >
+                                    <Icon2 name="settings" size={24} color="#EA1043" />
+                                    <Text style={{ color: "#C3C5CD", fontSize: 12, }}>Modifica profilo</Text>
+                                </TouchableOpacity>
+
+                            </View>
+
+                            <View style={{ margin: 5, flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
+                                <TouchableOpacity style={{ margin: 5, flexDirection: "row", justifyContent: "center", alignItems: "center" }}
+                                    onPress={() => { Fire.shared.signOut() }} >
+                                    <Icon name="logout" size={24} color="#EA1043" />
+                                    <Text style={{ color: "#C3C5CD", fontSize: 12, }}>Esci</Text>
+                                </TouchableOpacity>
+
+                            </View>
+
+                        </View>
+
+
+                        <View style={{ flexDirection: "row", }}>
+                            <Text h4 color="white">{this.state.user?.name} </Text>
+                            <Text h4 color="white">{this.state.user?.surname} </Text>
+                        </View>
+
                         <View style={styles.statsContainer}>
                             <View style={styles.stat}>
                                 <Text style={styles.statAmount}>{this.state.user?.user_videos ? this.state.user.user_videos.length : "0"}</Text>
-                                <Text style={styles.statTitle}>Posts</Text>
+                                <Text style={styles.statTitle}>Video</Text>
                             </View>
                             <View style={styles.stat}>
                                 <Text style={styles.statAmount}>{this.state.user.followers?.id_users ? this.state.user.followers.id_users.length : "0"}</Text>
-                                <Text style={styles.statTitle}>Followers</Text>
+                                <Text style={styles.statTitle}>Follower</Text>
                             </View>
                             <View style={styles.stat}>
                                 <Text style={styles.statAmount}>{this.state.user.followed?.id_users ? this.state.user.followed.id_users.length : "0"}</Text>
-                                <Text style={styles.statTitle}>Following</Text>
+                                <Text style={styles.statTitle}>Seguiti</Text>
                             </View>
                         </View>
-                        <TouchableOpacity style={styles.button} onPress={this._showModal}>
-                            <View style={{ display: "flex", flexDirection: "row", alignItems: "stretch", justifyContent: "space-around", }}>
-                                <Text style={{ color: "#FFF", fontWeight: "500", letterSpacing: 2, alignSelf: "center", fontSize: 12, marginTop: -3 }}>Modifica Profilo</Text>
+                    </View>
+
+                    <FlatList
+                        contentContainerStyle={{ marginTop: 20 }}
+                        horizontal={false}
+                        numColumns={3}
+                        data={this.state.user?.user_videos}
+                        renderItem={({ item }) => (
+
+                            <View style={
+                                {
+                                    flex: 1 / 3,
+                                    margin: 5,
+                                    backgroundColor: '#fafafa',
+                                    height: 200,
+                                    borderRadius: 5,
+                                    shadowColor: "#000",
+                                    shadowOffset: {
+                                        width: 0,
+                                        height: 2,
+                                    },
+                                    shadowOpacity: 0.25,
+                                    shadowRadius: 9.84,
+
+                                    elevation: 5,
+
+                                }
+                            }>
+                                <View style={{ height: "100%", width: "100%", flexDirection: "column", overflow: "hidden" }}>
+                                    <TouchableOpacity style={{ flex: 8 }} onPress={() => this.props.navigation.navigate('Video', {
+                                        video: item
+                                    })}>
+                                        <Image source={{ uri: item.thumbnail }} style={{ flex: 1, borderRadius: 5 }}></Image>
+                                    </TouchableOpacity>
+                                    <View style={{ flex: 1, flexDirection: "row", justifyContent: "center", alignItems: "flex-end", height: "100%" }}>
+                                        <Text style={{ fontSize: 16, lineHeight: 24 }}>{item.likes} </Text>
+                                        <Entypo name="star-outlined" size={18} color={"#ea1043"} />
+                                    </View>
+                                </View>
+
+
+
                             </View>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={styles.button} onPress={()=>{Fire.shared.signOut()}}>
-                                <Text>Esci</Text>
-                        </TouchableOpacity>
-
-                    </View>
-                    <View style={styles.MainContainer}>
-                        <FlatList
-                            data={this.state.user.user_videos}
-                            renderItem={({ item }) => (
-
-                                <View style={{ flex: 1, flexDirection: 'column', margin: 1 }}>
-                                    <TouchableOpacity onPress={() => this.pressVideo(item)} >
-                                        <Image style={styles.imageThumbnail} source={{ uri: item.thumbnail }} />
-                                    </TouchableOpacity>
-                                </View>
-                            )}
-                            //Setting the number of column
-                            numColumns={2}
-                            keyExtractor={(item) => item.id}
-                        />
-                    </View>
-
-
-                    <Modal visible={this.state.visible}>
-
-                        <View style={styles.container}>
-                            <SafeAreaView>
-
-                                <View style={styles.header}>
-                                    <TouchableOpacity onPress={() => this.setState({ visible: false })} >
-                                        <Text style={{ color: "black", fontSize: 18 }}>Annulla</Text>
-                                    </TouchableOpacity>
-                                    <Text style={{ fontWeight: "600", alignSelf: "center", fontSize: 17, marginTop: -2 }}>Modifica il profilo</Text>
-                                    <TouchableOpacity>
-                                        <Text style={{ color: "#369AFB", fontSize: 18, fontWeight: "500", }} onPress={() => this.updateData()}>Fine</Text>
-                                    </TouchableOpacity>
-                                </View>
-
-                                <View style={{ marginTop: 34, alignItems: "center" }}>
-                                    <View style={styles.avatarContainer}>
-                                        <Image
-                                            source={
-                                                this.state.isImageAvailable
-                                                    ? this.state.profilePic
-                                                    : require("../assets/tempAvatar.jpg")
-                                            }
-                                            style={styles.avatar}
-                                        />
-                                    </View>
-                                </View>
-
-                                <View style={styles.formContainer}>
-                                    <View style={styles.column}>
-                                        <Text style={styles.label}>Nome</Text>
-                                        <Text style={styles.label}>Cognome</Text>
-                                        <Text style={styles.label}>username</Text>
-                                        <Text style={styles.label}>Email</Text>
-                                        <Text style={styles.label}>Password Corrente</Text>
-                                        <Text style={styles.label}>Nuova Password</Text>
-                                    </View>
-
-                                    <View style={styles.column2}>
-                                        <TextInput placeholder={this.state.user.name} style={styles.input} onChangeText={name => this.setState({ user: { ...this.state.user, name } })}></TextInput>
-                                        <TextInput placeholder={this.state.user.surname} style={styles.input} onChangeText={surname => this.setState({ user: { ...this.state.user, surname } })}></TextInput>
-                                        <TextInput placeholder={this.state.user.username} style={styles.input} onChangeText={username => this.setState({ user: { ...this.state.user, username } })}></TextInput>
-                                        <TextInput placeholder={this.state.user.email} style={styles.input} onChangeText={email => this.setState({ user: { ...this.state.user, email } })}></TextInput>
-                                        <TextInput placeholder="password" style={styles.input} onChangeText={currentPassword => this.setState({ currentPassword })}></TextInput>
-                                        <TextInput placeholder="password" style={styles.input} onChangeText={newPassword => this.setState({ newPassword })}></TextInput>
-
-                                    </View>
-
-                                </View>
-                                <TouchableOpacity onPress={() => { Fire.shared.signOut(); }} style={styles.logout}>
-                                    <View style={{ display: "flex", flexDirection: "row", alignItems: "stretch", justifyContent: "space-around", }}>
-                                        <Text style={{ color: "#FFF", fontWeight: "500", letterSpacing: 2, alignSelf: "center", fontSize: 15, marginTop: -3 }}>ESCI</Text>
-                                    </View>
-                                </TouchableOpacity>
-                            </SafeAreaView>
-                        </View>
-                    </Modal>
+                        )}
+                        //Setting the number of column
+                        keyExtractor={(item) => item.id}
+                    />
                 </ScrollView>
             </SafeAreaView >
 
@@ -493,16 +416,16 @@ const styles = StyleSheet.create({
         fontWeight: "600"
     },
     statsContainer: {
+        width: 250,
         flexDirection: "row",
-        justifyContent: "space-around",
-        margin: 32,
+        justifyContent: "center",
     },
     stat: {
         alignItems: "center",
         flex: 1
     },
     statAmount: {
-        color: "#4F566D",
+        color: "#EA1043",
         fontSize: 18,
         fontWeight: "300"
     },
@@ -525,19 +448,14 @@ const styles = StyleSheet.create({
         justifyContent: "space-between"
     },
     statTitle: {
-        color: "#C3C5CD",
+        color: "#E4E4E4",
         fontSize: 12,
         fontWeight: "500",
         marginTop: 4
     },
     MainContainer: {
-        justifyContent: 'center',
-        flex: 1,
-        paddingTop: 30,
     },
     imageThumbnail: {
-        justifyContent: 'center',
-        alignItems: 'center',
         height: 200,
     },
     cover: {
