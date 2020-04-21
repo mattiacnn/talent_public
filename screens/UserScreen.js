@@ -1,6 +1,6 @@
 import React from "react";
 import { View, ActivityIndicator, StyleSheet, TouchableOpacity, Image, FlatList, Dimensions, ScrollView, Modal, SafeAreaView } from "react-native";
-import {Text} from 'galio-framework';
+import { Text } from 'galio-framework';
 import firebase from "firebase";
 import LoginScreen from "./LoginScreen";
 import { Video } from 'expo-av';
@@ -27,11 +27,28 @@ class UserScreen extends React.Component {
         //console.log(this.props.route.params);
         console.log("started user screen");
         console.log(this.state.isMine);
+
+        if(!this.state.isMine) {
+            firebase.firestore().collection('videos')
+            .where('owner', '==', this.state.user.id)
+            .get().then((querySnapshot) => {
+                var userVideos = [];
+                querySnapshot.forEach(function (doc) {
+                    // doc.data() is never undefined for query doc snapshots
+                    let video = doc.data();
+                    video.id = doc.id;
+                    userVideos.push(video);
+                    //console.log(doc.id, " => ", doc.data());
+                });
+                this.setState({ userVideos })
+            })
+        }
+        
+        //this.signOut();
     }
 
     signOut = () => {
-        //firebase.auth().signOut();
-        Fire.signOut();
+        firebase.auth().signOut();
         console.log("signout");
     };
 
@@ -112,20 +129,20 @@ class UserScreen extends React.Component {
             const me = firebase.auth().currentUser.uid;
             const hisEmail = this.state.user.email;
             if (this.state.user.id) {
-                firebase.firestore().collection("following").add({ follower: me, followed: this.state.user.id});
-            } else{
+                firebase.firestore().collection("following").add({ follower: me, followed: this.state.user.id });
+            } else {
                 firebase.firestore().collection("users").where("email", "==", hisEmail)
-                .get()
-                .then(function (querySnapshot) {
-                    querySnapshot.forEach(function (doc) {
-                        // doc.data() is never undefined for query doc snapshots
-                        console.log(doc.id, " => ", doc.data());
-                        firebase.firestore().collection("following").add({ follower: me, followed: doc.id });
+                    .get()
+                    .then(function (querySnapshot) {
+                        querySnapshot.forEach(function (doc) {
+                            // doc.data() is never undefined for query doc snapshots
+                            console.log(doc.id, " => ", doc.data());
+                            firebase.firestore().collection("following").add({ follower: me, followed: doc.id });
+                        });
+                    })
+                    .catch(function (error) {
+                        console.log("Error getting documents: ", error);
                     });
-                })
-                .catch(function (error) {
-                    console.log("Error getting documents: ", error);
-                });
             }
         }
     }
@@ -133,11 +150,12 @@ class UserScreen extends React.Component {
     //RENDER
     render() {
         return (
-            <SafeAreaView> 
+            <SafeAreaView>
                 {/* <Text h1 color="white">Is online: {this.props.global.user.name}</Text> */}
                 {this.props.global.user ? (
                     <Profile
                         user={this.state.user}
+                        userVideos={this.state.userVideos}
                         navigation={this.props.navigation}
                         update={this._pickImage}
                         signout={this.signOut}
@@ -146,7 +164,7 @@ class UserScreen extends React.Component {
                     />
 
                 )
-                    : <Text>No User</Text>
+                    : <Text color="white"> No User</Text>
                 }
             </SafeAreaView>
         );

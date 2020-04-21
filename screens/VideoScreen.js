@@ -1,14 +1,13 @@
 import React, { Component } from "react";
-import { StyleSheet, Button, StatusBar, Dimensions, SafeAreaView, TouchableOpacity, ImageBackground } from "react-native";
+import { StyleSheet, Button, StatusBar, Dimensions, SafeAreaView, TouchableOpacity, ImageBackground, View, Text } from "react-native";
 import *as firebase from "firebase";
 import { Video } from 'expo-av';
 import * as ImagePicker from 'expo-image-picker';
 import Constants from 'expo-constants';
 import * as Permissions from 'expo-permissions';
 import Fire from "../Fire";
-// import { DeckSwiper, Block } from 'galio-framework';
 import { Image } from 'react-native';
-import { Container, Header, View, DeckSwiper, Card, CardItem, Thumbnail, Text, Left, Body } from 'native-base';
+import { Container, Header, DeckSwiper, Card, CardItem, Thumbnail, Left, Body, Item, Input } from 'native-base';
 import { ScrollView, FlatList } from "react-native-gesture-handler";
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Icon2 from 'react-native-vector-icons/MaterialIcons';
@@ -18,6 +17,11 @@ import { Actions } from 'react-native-router-flux';
 import Modal, { SlideAnimation, ModalContent, ModalTitle } from 'react-native-modals';
 import { Ionicons } from '@expo/vector-icons';
 import VideoPlayer from 'expo-video-player';
+import * as Crypto from 'expo-crypto';
+import { Snackbar } from 'react-native-paper';
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scrollview";
+import { withGlobalContext } from "../GlobalContext";
+import { Keyboard } from 'react-native'
 
 const playButton = (<Icon2 name="chat-bubble" size={40} color="white" />);
 
@@ -30,15 +34,58 @@ const icon = (name, size = 36) => () => (
         style={{ textAlign: 'center' }}
     />
 );
-export default class VideoScreen extends React.Component {
+
+class VideoScreen extends React.Component {
 
     constructor(props) {
         super(props);
         this.state = {
             user: this.props.route.params.owner,
             showComments: false,
-            video: this.props.route.params.video
+            video: this.props.route.params.video,
+            showToast: false,
+            commentsSubscribed: false
         };
+    }
+
+    _onDismissSnackBar = () => this.setState({ showToast: false });
+
+    handleModalComment = () => {
+        console.log(this.state.video);
+        this.setState({ showComments: !this.state.showComments });
+        if (!this.state.commentsSubscribed) {
+            firebase.firestore().collection("comments").where("video_id", "==", this.state.video.id)
+                .onSnapshot((querySnapshot) => {
+                    //console.log(querySnapshot);
+                    var comments = [];
+                    querySnapshot.forEach(function (doc) {
+                        // doc.data() is never undefined for query doc snapshots
+                        comments.push(doc.data());
+                        //console.log(doc.id, " => ", doc.data());
+                    });
+                    this.setState({ video: { ...this.state.video, comments }, commentsSubscribed:true });
+                })
+                .catch(function (error) {
+                    console.log("Error getting documents: ", error);
+                });
+        }
+    }
+
+    handleComment = () => {
+        console.log(this.state.comment);
+        const newComment = {
+            video_id:this.state.video.id,
+            user_id: firebase.auth().currentUser.uid,
+            user_avatar: this.props.global.user.avatar || null,
+            author: `${this.props.global.user.name || null} ${this.props.global.user.surname || null}`,
+            body: this.state.comment,
+            timestamp: new Date().toLocaleDateString()
+        }
+        let comments = this.state.video.comments;
+        comments.push(newComment);
+        Keyboard.dismiss();
+        this.setState({ video: { ...this.state.video, comments }, comment:'' });
+        firebase.firestore().collection("comments").add(newComment);
     }
 
     handleLike = () => {
@@ -47,24 +94,35 @@ export default class VideoScreen extends React.Component {
         console.log(this.state.video?.id || 'iddidefault');
         console.log(firebase.auth().currentUser.uid);
 
-        var docRef = firebase.firestore().collection("likes").doc("SF");
-        docRef.get().then(function (doc) {
-            if (doc.exists) {
-                console.log("Document data:", doc.data());
-            } else {
-                // doc.data() will be undefined in this case
-                console.log("No such document!");
-            }
-        }).catch(function (error) {
-            console.log("Error getting document:", error);
-        });
-        firebase.firestore().collection("likes").add({})
+        const uId = firebase.auth().currentUser.uid;
+        const vId = this.state.video?.id || 'iddidefault';
+        var docRef;
+        Crypto.digestStringAsync(Crypto.CryptoDigestAlgorithm.SHA1, `${uId}${vId}` )
+            .then(hash => {
+                docRef = firebase.firestore().collection("likes").doc(hash);
+                return docRef.get();
+            })
+            .then((doc) => {
+                if (doc.exists) {
+                    console.log("Document data:", doc.data());
+                    this.setState({ showToast: true, message: 'Video già piaciuto' });
+                } else {
+                    docRef.set({ user_id: uId, video_id: vId });
+                    firebase.firestore().collection("videos").doc(vId).update({likes:this.state.video.likes + 1});
+                    this.setState({video:{...this.state.video, likes: this.state.video.likes +1}});
+                }
+            })
+            .catch(function (error) {
+                console.log("Error getting document:", error);
+            });
+
     }
 
     render() {
 
         return (
             <SafeAreaView style={{ flex: 1, backgroundColor: "black" }}>
+
                 <VideoPlayer
                     playIcon={icon('ios-play')}
                     pauseIcon={icon('ios-pause')}
@@ -82,12 +140,22 @@ export default class VideoScreen extends React.Component {
                         isLooping: false,
                     }}
                 />
-
-                <View style={{ position: "absolute", right: 10, top: 100, display: "flex", flexDirection: "column", justifyContent: "flex-start", alignItems: "center" }}>
+                <Snackbar
+                    visible={this.state.showToast}
+                    onDismiss={this._onDismissSnackBar}
+                    duration={Snackbar.DURATION_SHORT}
+                >
+                    {this.state.message}
+                </Snackbar>
+                <View style={{ position: "absolute", right: 10, top: Dimensions.get('screen').height/2, display: "flex", flexDirection: "column", justifyContent: "flex-start", alignItems: "center" }}>
 
                     <View>
                         <TouchableOpacity>
-                            <ImageBackground source={{ uri: this.state.user?.avatar }} style={{ width: 50, height: 50, borderRadius: 25, marginBottom: 8 }} imageStyle={{ borderRadius: 25 }}>
+                            <ImageBackground source={
+                                this.state.user?.avatar
+                                    ? { uri: this.state.user.avatar }
+                                    : require("../assets/tempAvatar.jpg")
+                            }style={{ width: 50, height: 50, borderRadius: 25, marginBottom: 8 }} imageStyle={{ borderRadius: 25 }}>
                                 <View style={{ flex: 1, alignItems: 'center', justifyContent: 'flex-end' }}>
                                     <Icon2 name="add-circle" size={20} color="#fb2956" />
                                 </View>
@@ -103,7 +171,7 @@ export default class VideoScreen extends React.Component {
                     </View>
 
                     <View>
-                        <TouchableOpacity onPress={() => this.setState({ showComments: !this.state.showComments })} style={styles.icon}>
+                        <TouchableOpacity onPress={this.handleModalComment} style={styles.icon}>
                             <Icon2 name="chat-bubble" size={40} color={COLOR} />
                         </TouchableOpacity>
                         <Text style={styles.counter}>{this.state.video.comments?.length ? this.state.video.comments.length : 0}</Text>
@@ -119,7 +187,7 @@ export default class VideoScreen extends React.Component {
                 <Modal.BottomModal
                     visible={this.state.showComments}
                     onTouchOutside={() => this.setState({ showComments: false })}
-                    height={0.5}
+                    height={0.8}
                     width={1}
                     onSwipeOut={() => this.setState({ showComments: false })}
                     modalTitle={
@@ -129,31 +197,45 @@ export default class VideoScreen extends React.Component {
                         />
                     }
                 >
-                    <ModalContent
-                        style={{
-                            flex: 1,
-                            backgroundColor: 'fff',
-                        }}
+                    <KeyboardAwareScrollView
+                        resetScrollToCoords={{ x: 0, y: 0 }}
+                        contentContainerStyle={styles.container}
+                        scrollEnabled={true}
                     >
-                        <FlatList
-                            numColumns={1}
-                            data={this.state.video.comments ? this.state.video.comments : []}
-                            keyExtractor={(item) => item.id}
-                            renderItem={({ item }) => (
-                                <View>
-                                    <Text p>{item.author}</Text>
-                                    <Text p>{item.body}</Text>
-                                </View>
-                            )}
+                        <ModalContent
+                            style={{
+                                flex: 1,
+                                backgroundColor: 'fff',
+                            }}
                         >
-                        </FlatList>
-                    </ModalContent>
+                            <FlatList
+                                numColumns={1}
+                                data={this.state.video.comments ? this.state.video.comments : []}
+                                keyExtractor={(item) => item.id}
+                                renderItem={({ item }) => (
+                                    <View>
+                                        <Text p>{item.author}</Text>
+                                        <Text p>{item.body}</Text>
+                                    </View>
+                                )}
+                            >
+                            </FlatList>
+                            <Item rounded style={{ flexDirection: "row", justifyContent: "space-between", marginHorizontal: 5 }}>
+                                <Input placeholder='Inserisci commento' onChangeText={comment => this.setState({ comment })} />
+                                <TouchableOpacity style={{ marginHorizontal: 5 }} onPress={this.handleComment}>
+                                    <Text style={{ fontWeight: "bold" }}>Pubblica</Text>
+                                </TouchableOpacity>
+                            </Item>
+                        </ModalContent>
+                    </KeyboardAwareScrollView>
+
                 </Modal.BottomModal>
             </SafeAreaView>
         )
     }
 }
 
+export default withGlobalContext(VideoScreen);
 
 const styles = StyleSheet.create({
     container: {

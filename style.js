@@ -14,7 +14,8 @@ var coloreInput = '#161f3d';
 module.exports = StyleSheet.create({
 
     container: {
-        flex: 1
+        flex: 1,
+        backgroundColor:"white"
     },
     greeting: {
         marginTop: -32,
@@ -27,7 +28,6 @@ module.exports = StyleSheet.create({
         marginHorizontal: 40
     },
     inputTitle: {
-        color: '#8a8f9e',
         fontSize: 10,
         textTransform: 'uppercase'
     },
@@ -36,7 +36,6 @@ module.exports = StyleSheet.create({
         borderBottomWidth: StyleSheet.hairlineWidth,
         height: 40,
         fontSize: 15,
-        color: coloreInput,
     },
     button: {
         marginHorizontal: 40,

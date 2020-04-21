@@ -15,43 +15,44 @@ export default class RegisterScreen extends React.Component {
     static navigationOptions = {
         headerShown: false
     };
-    state = {
-        user: {
-            name: "",
-            surname: "",
-            username: "",
-            email: "",
-            password: "",
-            birthdate: "",
-            avatar: null,
-            followed: { id_users: [] },
-            followers: { id_users: [] },
-        },
-        visible: false,
-        errorMessage: null,
-        checked: false,
-        maxDate: new Date(new Date().setFullYear(new Date().getFullYear() - 18)),
-        minDate: new Date(new Date().setFullYear(new Date().getFullYear() - 30)),
-        date: new Date(),
-        mode: 'date',
-        show: false,
-        message: "Seleziona Data di nascita"
-    };
 
     constructor(props) {
         super(props);
-    }
-
+        this.state = {
+            user: {
+                name: "",
+                surname: "",
+                username: "",
+                email: "",
+                password: "",
+                birthdate: "",
+                avatar: null,
+                followed: { id_users: [] },
+                followers: { id_users: [] },
+            },
+            visible: false,
+            errorMessage: null,
+            checked: false,
+            maxDate: new Date(new Date().setFullYear(new Date().getFullYear() - 18)),
+            minDate: new Date(new Date().setFullYear(new Date().getFullYear() - 30)),
+            date: new Date(),
+            mode: 'date',
+            show: false,
+            message: "Seleziona Data di nascita"
+        };
+      }
 
     // CREATE NEW USER AND STORE IT ON FIRESTORE
     handleSignUp = async () => {
+        console.log(this.state.user);
         const newUser = this.state.user;
         var uid = '';
         // registra utente
         Fire.createUser(newUser)
             .then((res) => {
                 uid = res.user.uid;
-                firebase.firestore().collection("users").doc(uid).set(newUser)
+                delete newUser.password;
+                return firebase.firestore().collection("users").doc(uid).set(newUser)
             })
             .then(async () => {
                 // se c'è avatar lo salviamo nello storage
@@ -61,7 +62,7 @@ export default class RegisterScreen extends React.Component {
                     const id_avatar = `@avatar-${uid}`;
                     // Why are we using XMLHttpRequest? See:
                     // https://github.com/expo/expo/issues/2402#issuecomment-443726662
-                    const blob = await new Promise((resolve, reject) => {
+                    var blob = await new Promise((resolve, reject) => {
                         const xhr = new XMLHttpRequest();
                         xhr.onload = function () {
                             resolve(xhr.response);
@@ -88,22 +89,15 @@ export default class RegisterScreen extends React.Component {
                 }
 
             })
-            .then(() => { AsyncStorage.setItem("lastUser", JSON.stringify(newUser)) })
+            //.then(() => { AsyncStorage.setItem("lastUser", JSON.stringify(newUser)) })
             // TO-DO: non prosegue da qui, naviga direttamente nell'altra pagina
             .then(() => alert("Registrazione avvenuta con successo!"))
-            .then(() => this.checkIfLoggedIn())
+            //.then(() => this.checkIfLoggedIn())
             .catch((error) => {
                 console.log(error);
                 alert("Ops! Riprovaci...");
             });
 
-    }
-
-    //ON RENDER CHECK IF USER IS LOGGED BY THE FUNCTION
-    componentDidMount() {
-        //let today = new Date();
-        //this.setState({maxDate: today.setFullYear( today.getFullYear() - 18,11,31)});
-        
     }
 
     // REDIRECT THE USER TO THE HOMESCREEN IF IS LOGGED
@@ -145,6 +139,7 @@ export default class RegisterScreen extends React.Component {
     }
 
     render() {
+        var s = require('../style');
         const onChange = (event, selectedDate) => {
             const currentDate = selectedDate || date;
             const userUpdate = { ...this.state.user, birthdate: selectedDate };
@@ -154,7 +149,7 @@ export default class RegisterScreen extends React.Component {
         return (
             <KeyboardAwareScrollView
                 resetScrollToCoords={{ x: 0, y: 0 }}
-                contentContainerStyle={styles.container}
+                contentContainerStyle={s.container}
                 scrollEnabled={true}
             >
                 <StatusBar barStyle='light-content'></StatusBar>
@@ -192,7 +187,7 @@ export default class RegisterScreen extends React.Component {
                         onPress={this.handlePickAvatar}
                     >
                         <Image
-                            source={{ uri: this.state.user.avatar }}
+                            source={this.state.user?.avatar?{uri: this.state.user.avatar}: null}
                             style={styles.avatar}
                         />
                         <Ionicons
@@ -333,7 +328,7 @@ export default class RegisterScreen extends React.Component {
                             <TouchableOpacity
                                 style={!this.state.user.username || !this.state.user.birthdate || !this.state.checked ? styles.disabled : styles.button}
                                 disabled={!this.state.user.username || !this.state.user.birthdate || !this.state.checked ? true : false}
-                                onPress={() => { this.handleSignUp() }} >
+                                onPress={ this.handleSignUp} >
                                 <View style={{ display: "flex", flexDirection: "row", alignItems: "stretch", justifyContent: "space-around", }}>
                                     <Text style={{ color: "#FFF", fontWeight: "500", letterSpacing: 2, alignSelf: "center", fontSize: 15, marginTop: -3 }}>Registrati</Text>
                                 </View>
