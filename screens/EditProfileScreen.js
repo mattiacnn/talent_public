@@ -24,20 +24,21 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scrollview'
 
 export default class EditProfileScreen extends React.Component {
 
-    static navigationOptions = ({ navigation }) => {
+    static navigationOptions = ({route}) => {
         return {
-            title: 'Modifica Profilo',
-            headerRight: (
-                <TouchableOpacity>
-                    <Text style={{ color: "#369AFB", fontSize: 18, fontWeight: "500", marginHorizontal: 10 }} onPress={navigation.getParam('save')}>Salva</Text>
+            title: 'Modifica',
+            headerRight: () => (
+                <TouchableOpacity onPress={()=>{route.params.save()}}>
+                    <Text color="white" bold style={{marginHorizontal:10}}>Salva</Text>
                 </TouchableOpacity>
-            )
+              ),
         };
     };
 
     constructor(props) {
         super(props);
-        const { editingUser } = this.props.navigation.state.params;
+        // QUESTO FUNZIONA
+        const { editingUser } = this.props.route.params;
         this.state = {
             user: editingUser,
             refreshing: false,
@@ -50,21 +51,46 @@ export default class EditProfileScreen extends React.Component {
         this.props.navigation.setParams({ save: this.save }); //initialize your function
     }
 
+    reauthenticate = () => {
+        var user = firebase.auth().currentUser;
+        var cred = firebase.auth.EmailAuthProvider.credential(
+            user.email, this.state.currentPassword);
+        return user.reauthenticateWithCredential(cred);
+    }
+
+    changePassword = () => {
+        console.log("changing password");
+        this.reauthenticate(this.state.currentPassword).then(() => {
+            var user = firebase.auth().currentUser;
+            user.updatePassword(this.state.newPassword).then(() => {
+                console.log("Password updated!");
+            }).catch((error) => { console.log(error); });
+        }).catch((error) => { console.log(error); });
+    }
+
     save = () => {
         console.log("saved");
+        console.log(this.state.user);
+        const id = firebase.auth().currentUser.uid;
+        firebase.firestore().collection('users').doc(id).update(this.state.user)
+        .then((value) =>{alert('Salvato!')});
+        if(this.state.currentPassword && this.state.newPassword) {
+            this.changePassword();
+        }
+        
     }
 
     render() {
         var s = require('../style');
 
         return (
-            <View style={{ width: Dimensions.get('window').width, height: Dimensions.get('window').height, backgroundColor: "#0f0104" }}>
+            <View style={{ width: Dimensions.get('window').width, height: Dimensions.get('window').height,  }}>
                 <KeyboardAwareScrollView
                     resetScrollToCoords={{ x: 0, y: 0 }}
-                    contentContainerStyle={{ width: Dimensions.get('window').width, height: Dimensions.get('window').height, backgroundColor: "#0f0104" }}
+                    contentContainerStyle={{ width: Dimensions.get('window').width, height: Dimensions.get('window').height, }}
                     scrollEnabled={true}
                 >
-                    <View style={{ backgroundColor: "#0f0104" }} >
+                    <View >
                         <SafeAreaView >
                             <View style={{ marginHorizontal: 30, marginTop: 20 }}>
                                 <View style={{ marginBottom: 10 }}>
@@ -76,6 +102,18 @@ export default class EditProfileScreen extends React.Component {
                                         placeholderTextColor="white"
                                         placeholder={this.state.user.name}
                                         onChangeText={name => this.setState({ user: { ...this.state.user, name } })}
+                                    />
+                                </View>
+
+                                <View style={{ marginBottom: 10 }}>
+                                    <Text style={{ fontSize: 12, color: "#ea1043", }}>Cognome</Text>
+                                    <Input
+                                        rounded
+                                        color="white"
+                                        style={{ backgroundColor: "transparent", fontSize: 18, borderColor: "#ea1043" }}
+                                        placeholderTextColor="white"
+                                        placeholder={this.state.user.surname}
+                                        onChangeText={surname => this.setState({ user: { ...this.state.user, surname } })}
                                     />
                                 </View>
 
@@ -111,12 +149,14 @@ export default class EditProfileScreen extends React.Component {
                                         color="white" iconColor="#ea1043"
                                         style={{ backgroundColor: "transparent", fontSize: 18, borderColor: "#ea1043" }}
                                         placeholderTextColor="white"
+                                        onChangeText={currentPassword => this.setState({ currentPassword })}
                                     />
                                     <Input placeholder="nuova password" password viewPass
 
                                         color="white" iconColor="#ea1043"
                                         style={{ backgroundColor: "transparent", fontSize: 18, borderColor: "#ea1043" }}
                                         placeholderTextColor="white"
+                                        onChangeText={newPassword => this.setState({ newPassword })}
                                     />
                                     <Input placeholder="ripeti la nuova password" password viewPass
 

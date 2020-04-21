@@ -18,6 +18,7 @@ import * as c from "../config";
 import Icon2 from 'react-native-vector-icons/MaterialIcons';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { Text, Button, Block, Input, Card, Radio } from 'galio-framework'
+import Profile from '../component/Profile';
 
 
 
@@ -26,7 +27,11 @@ export default class ProfileScreen extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            user: { followers: { id_users: [] }, followed: { id_users: [] }, avatar: null },
+            user: { 
+                followers: { id_users: [] }, 
+                followed: { id_users: [] }, 
+                avatar: null,
+                user_videos:[] },
             refreshing: false,
             isImageAvailable: false,
             visible: false,
@@ -236,7 +241,8 @@ export default class ProfileScreen extends React.Component {
                         />
                     }
                 >
-                    <View style={{ marginTop: 10, alignItems: "center", justifyContent: "space-around", height: Dimensions.get('screen').height / 2 - 35 }}>
+                    <Profile user = {this.state.user} navigation = {this.props.navigation} update={this._pickImage}/>
+                    {/* <View style={{ marginTop: 10, alignItems: "center", justifyContent: "space-around", height: Dimensions.get('screen').height / 2 - 35 }}>
                         <View style={styles.avatarContainer}>
                             <TouchableOpacity activeOpacity={.5} onPress={this._pickImage}>
                                 <Image
@@ -264,8 +270,8 @@ export default class ProfileScreen extends React.Component {
 
                             <View style={{ margin: 5, flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
                                 <TouchableOpacity style={{ margin: 5, flexDirection: "row", justifyContent: "center", alignItems: "center" }}
-                                    onPress={() => { Fire.shared.signOut() }} >
-                                    <Icon name="logout" size={24} color="#EE1D52" />
+                                    onPress={() => { Fire.signOut() }} >
+                                    <Icon name="logout" size={24} color="#EA1043" />
                                     <Text style={{ color: "#C3C5CD", fontSize: 12, }}>Esci</Text>
                                 </TouchableOpacity>
 
@@ -323,7 +329,8 @@ export default class ProfileScreen extends React.Component {
                             }>
                                 <View style={{ height: "100%", width: "100%", flexDirection: "column", overflow: "hidden" }}>
                                     <TouchableOpacity style={{ flex: 8 }} onPress={() => this.props.navigation.navigate('Video', {
-                                        video: item
+                                        video: item,
+                                        owner: this.state.user
                                     })}>
                                         <Image source={{ uri: item.thumbnail }} style={{ flex: 1, borderRadius: 5 }}></Image>
                                     </TouchableOpacity>
@@ -339,7 +346,7 @@ export default class ProfileScreen extends React.Component {
                         )}
                         //Setting the number of column
                         keyExtractor={(item) => item.id}
-                    />
+                    /> */}
                 </ScrollView>
             </SafeAreaView >
 

@@ -5,7 +5,8 @@ import 'firebase/firestore';
 class Fire {
     constructor() {
         firebase.initializeApp(FirebaseKeys);
-        var dbh = firebase.firestore();
+        db = firebase.firestore();
+        logged = false;
     }
 
     uploadPhotoAsync = (uri, filename) => {
@@ -31,6 +32,7 @@ class Fire {
             );
         });
     };
+
     handlePost = (text) => {
         firebase.firestore().collection('events').add({
             text: text,
@@ -42,14 +44,17 @@ class Fire {
         return firebase.auth().createUserWithEmailAndPassword(user.email, user.password)
 
     }
+
     signIn = () =>{
-        firebase.auth().signInWithEmailAndPassword(user.email, user.password).catch(function(error) {});
+        firebase.auth().signInWithEmailAndPassword(user.email, user.password)
+        .then((user)=>{
+            if(user){ this.logged = true}
+        }).catch(function(error) {console.log(error)});
     }
 
     signOut = () => {
         firebase.auth().signOut();
     };
-
 
     send = messages => {
         messages.forEach(item => {
@@ -92,15 +97,20 @@ class Fire {
         return (firebase.auth().currentUser || {}).uid;
     }
 
+    get user() {
+        const id = firebase.auth().currentUser.uid;
+        if (id) {
+            firebase.firestore.collection('users').doc(id).get()
+        } 
+    }
+
     get firestore() {
         return firebase.firestore();
     }
-
 
     get timestamp() {
         return Date.now();
     }
 }
 
-Fire.shared = new Fire();
-export default Fire;
+export default new Fire;

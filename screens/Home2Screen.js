@@ -19,23 +19,6 @@ function shuffle(array) {
     array.sort(() => Math.random() - 0.5);
 }
 
-const cards = [
-    {
-        text: 'Card One',
-        name: 'One',
-        uri: require('../assets/sample1.mp4'),
-    },
-    {
-        text: 'Card Two',
-        name: 'Two',
-        uri: require('../assets/sample2.mp4'),
-    },
-    {
-        text: 'Card tre',
-        name: 'tre',
-        uri: require('../assets/sample1.mp4'),
-    },
-];
 
 class Home2Screen extends Component {
     constructor(props) {
@@ -48,16 +31,19 @@ class Home2Screen extends Component {
             currentIndex: 0,
             user: { user_videos: null },
             refreshing: false,
+            nome: this.props.route.params.nome
         };
         this.handleClick = this.handleClick.bind(this);
         this._onRefresh = this._onRefresh.bind(this);
 
     }
+
     componentDidMount() {
-        this._onRefresh();
+        //this._onRefresh();
         this.animation.play();
     }
     handleClick() {
+        console.log(this.state.nome);
         this.setState({
             liked: !this.state.liked,
             likecount: this.state.likecount + 1,
@@ -216,7 +202,7 @@ class Home2Screen extends Component {
                     <View style={{ flex: .5, flexDirection: 'row' }}>
                         <View style={{ flex: .5 }}>
                             <View style={styles.tag}>
-        <Text style={styles.tagtitle}>{this.user?.username}</Text>
+        <Text style={styles.tagtitle}>{this.state.nome}</Text>
                             </View>
                             <ScrollView showsVerticalScrollIndicator={false}>
                                 <Text style={styles.username}>{item?.description}</Text>

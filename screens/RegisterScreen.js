@@ -48,7 +48,7 @@ export default class RegisterScreen extends React.Component {
         const newUser = this.state.user;
         var uid = '';
         // registra utente
-        Fire.shared.createUser(newUser)
+        Fire.createUser(newUser)
             .then((res) => {
                 uid = res.user.uid;
                 firebase.firestore().collection("users").doc(uid).set(newUser)

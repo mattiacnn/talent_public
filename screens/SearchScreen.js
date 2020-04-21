@@ -15,7 +15,7 @@ export default class SearchScreen extends React.Component {
         super(props);
         this.state = {
             user: {},
-            usersFound:{},
+            usersFound:[],
             isImageAvailable: false,
             visible: false,
             profilePic: null,
@@ -36,14 +36,17 @@ export default class SearchScreen extends React.Component {
 
     searchFromDb = async () =>{
         var that = this;
-        firebase.firestore().collection("users").orderBy("username").startAt(this.state.search)
+        const queryText = that.state.search;
+        firebase.firestore().collection("users").orderBy("username").startAt(queryText).endAt(queryText+"\uf8ff")
         .get()
         .then(function(querySnapshot) {
             var usersFound = [];
             querySnapshot.forEach(function(doc) {
-                usersFound.push({id: doc.id, user: doc.data()});
+                const user = doc.data();
+                user.id = doc.id;
+                usersFound.push(user);
             });
-            that.setState({...that.state, usersFound: usersFound});  
+            that.setState({usersFound: usersFound});  
         })
         .catch(function(error) {
             console.log("Error getting documents: ", error);
@@ -144,21 +147,23 @@ export default class SearchScreen extends React.Component {
                     data={this.state.usersFound}
                     renderItem={({ item }) => (
                         <TouchableOpacity style={styles.searchSection} onPress={() => {
-                            this.props.navigation.navigate('User', {
-                                user: item
-                            })
+                            //console.log(item);
+                            this.props.navigation.push('Esplora', {
+                                screen: 'Utente',
+                                params: {
+                                  user:item
+                                },
+                              });
                         }}>
-                            <Image style={styles.roundedAvatar} source={
-                                                this.state.isImageAvailable
-                                                    ? this.state.profilePic
+                            <Image style={styles.roundedAvatar} source={item.avatar?  { uri: item.avatar }
                                                     : require("../assets/tempAvatar.jpg")
                                             } ></Image>
-                            <Text style={{fontWeight:"bold",paddingLeft:20, color:"#EE1D52"}}>{item.user.username}</Text>   
+                            <Text style={{fontWeight:"bold",paddingLeft:20}}>{item.username}</Text>   
                         </TouchableOpacity>
 
                      )}
                             numColumns={1}
-                            keyExtractor={(item) => item.id}
+                            keyExtractor={(item) => item.email}
                         />
                         
                 </ScrollView>
