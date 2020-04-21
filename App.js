@@ -15,6 +15,8 @@ import SearchScreen from "./screens/SearchScreen";
 import ProfileScreen from "./screens/ProfileScreen";
 import Home2Screen from "./screens/Home2Screen";
 import UserScreen from "./screens/UserScreen";
+import Chat from"./screens/Chat";
+import NewChat from"./screens/NewChat";
 import VideoScreen from "./screens/VideoScreen";
 import EditProfileScreen from "./screens/EditProfileScreen";
 
@@ -68,10 +70,10 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 30,
         fontWeight: "600",
-        color: "#EA1043",
+        color: "#EE1D52",
     },
     notification: {
-        color: "#EA1043",
+        color: "#EE1D52",
         shadowColor: "black",
         shadowOffset: { width: 0, height: 1 },
         shadowRadius: 2,

@@ -150,8 +150,8 @@ export default class HomeScreen extends React.Component {
                             <Video
                                 source={{ uri: video.uri }}
                                 rate={1.0}
-                                volume={1.0}
-                                isMuted={false}
+                                volume={0}
+                                isMuted={true}
                                 resizeMode="cover"
                                 shouldPlay
                                 isLooping

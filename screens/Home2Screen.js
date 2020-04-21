@@ -170,7 +170,7 @@ class Home2Screen extends Component {
                     style={{ flex: 1, }}
                 >
                     {/* <Image source={require('../assets/tempImage1.jpg')}></Image> */}
-                    <Video source={{ uri: item?.uri }} resizeMode="cover" style={StyleSheet.absoluteFill} shouldPlay isLooping />
+                    <Video source={{ uri: item?.uri }} resizeMode="cover" style={StyleSheet.absoluteFill}  isLooping />
                     <View style={styles.full}>
                         <View style={{ flex: .5, justifyContent: 'flex-end' }}>
 

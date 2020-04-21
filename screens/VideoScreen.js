@@ -25,7 +25,7 @@ import { Keyboard } from 'react-native'
 
 const playButton = (<Icon2 name="chat-bubble" size={40} color="white" />);
 
-const COLOR = '#EA1043';
+const COLOR = '#EE1D52';
 const icon = (name, size = 36) => () => (
     <Ionicons
         name={name}
@@ -134,7 +134,7 @@ class VideoScreen extends React.Component {
                         source: { uri: this.state.video?.uri },
                         rate: 1.0,
                         volume: 1.0,
-                        isMuted: false,
+                        isMuted: true,
                         resizeMode: "cover",
                         shouldPlay: true,
                         isLooping: false,

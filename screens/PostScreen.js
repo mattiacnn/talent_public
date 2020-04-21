@@ -149,6 +149,7 @@ export default class PostScreen extends React.Component {
               subKey="children"
               selectText="Scegli una o più categorie"
               showDropDowns={true}
+              modalWithSafeAreaView={true}
               readOnlyHeadings={true}
               onSelectedItemsChange={this.onSelectedItemsChange}
               selectedItems={this.state.selectedItems}
