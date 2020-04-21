@@ -1,153 +1,164 @@
 import React from "react";
-import { View, Text, ActivityIndicator, StyleSheet, TouchableOpacity, Image, FlatList,Dimensions,ScrollView,Modal,SafeAreaView } from "react-native";
+import { View, ActivityIndicator, StyleSheet, TouchableOpacity, Image, FlatList, Dimensions, ScrollView, Modal, SafeAreaView } from "react-native";
+import {Text} from 'galio-framework';
 import firebase from "firebase";
 import LoginScreen from "./LoginScreen";
 import { Video } from 'expo-av';
+import Profile from '../component/Profile';
+import Fire from "../Fire";
+import * as ImagePicker from 'expo-image-picker';
+import uuid from 'react-uuid'
+import { AsyncStorage } from 'react-native';
+import * as c from "../config";
+import { withGlobalContext } from '../GlobalContext';
 
-export default class UserScreen extends React.Component {
+class UserScreen extends React.Component {
 
     //STATE
     constructor(props) {
         super(props);
         this.state = {
-          userFound: {user_video:[], followers:[]},
-          selectedVideo: null,
-          visible:false,
+            user: this.props.route.params?.user || {},
+            isMine: this.props.route.params?.isMine ?? false,
         };
-      }
-
-    //ON RENDER  
-    componentDidMount(){
-        this.setState({userFound: this.props.navigation.getParam('user').user})
     }
 
-    //SHOW THE VIDEO
-    pressVideo(item) {
-        this.setState({ ...this.state, selectedVideo: item });
-        console.log(item);
-        this.setState({visible:true})
-        //console.log(this.state);
+    componentDidMount() {
+        //console.log(this.props.route.params);
+        console.log("started user screen");
+        console.log(this.state.isMine);
     }
 
-    follow = () =>{
-        var user = [firebase.auth().currentUser.uid]
-         firebase.firestore().collection("users").doc(this.props.navigation.getParam('user').id)
-            .update({
-                    followers: user
+    signOut = () => {
+        //firebase.auth().signOut();
+        Fire.signOut();
+        console.log("signout");
+    };
+
+    _pickImage = async () => {
+
+        ImagePicker.launchImageLibraryAsync(c.avatarPicker)
+            .then((result) => {
+                if (result.cancelled) { return };
+
+                const imgUri = result.uri;
+                const updt_u = { ...this.state.user, avatar: imgUri };
+                // imposta stato di aggiornamento dell'avatar
+                this.setState({ refreshingAvatar: true });
+
+                // aggiorno in memoria locale l'intero utente
+                AsyncStorage.setItem("lastUser", JSON.stringify(updt_u));
+                // aggiorno lo stato
+                this.setState({
+                    user: updt_u,
+                    isImageAvailable: true
                 });
+                // aggiorno i dati sul server
+                this.uploadImageAsync(imgUri)
+            })
+            .catch((err) => {
+                console.log(err);
+                this.setState({ refreshingAvatar: false });
+            })
+
+    };
+
+    // questa funzione riceve l'uri di un'immagine e la salva su firestore
+    // prima nello storage, e poi aggiorna l'utente con il nuovo riferimento
+    uploadImageAsync = async (uri) => {
+
+        const id = firebase.auth().currentUser.uid;
+        // avatar avrà sempre lo stesso nome - ne salviamo uno per utente
+        const id_avatar = `@avatar-${id}`;
+
+        // Why are we using XMLHttpRequest? See:
+        // https://github.com/expo/expo/issues/2402#issuecomment-443726662
+        const blob = await new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.onload = function () {
+                resolve(xhr.response);
+            };
+            xhr.onerror = function (e) {
+                console.log(e);
+                reject(new TypeError('Network request failed'));
+            };
+            xhr.responseType = 'blob';
+            xhr.open('GET', uri, true);
+            xhr.send(null);
+        });
+
+        // carica nello storage
+        firebase.storage().ref().child(id_avatar).put(blob)
+            .then((snapshot) => { blob.close(); return snapshot.ref.getDownloadURL() })
+            // carica nel database
+            .then((url) => {
+                let u = this.state.user;
+                // aggiorna avatar con il riferimento dello storage
+                u.avatar = url;
+                firebase.firestore().collection("users").doc(id).update(u);
+            })
+            .then(() => { this.setState({ refreshingAvatar: false }); }
+            )
+            .catch((error) => {
+                console.log(error);
+                this.setState({ refreshingAvatar: false });
+                alert("Ops! Riprovaci...");
+            })
+
     }
+
+    follow = () => {
+        if (!this.state.isMine && this.state.user.email) {
+            const me = firebase.auth().currentUser.uid;
+            const hisEmail = this.state.user.email;
+            if (this.state.user.id) {
+                firebase.firestore().collection("following").add({ follower: me, followed: this.state.user.id});
+            } else{
+                firebase.firestore().collection("users").where("email", "==", hisEmail)
+                .get()
+                .then(function (querySnapshot) {
+                    querySnapshot.forEach(function (doc) {
+                        // doc.data() is never undefined for query doc snapshots
+                        console.log(doc.id, " => ", doc.data());
+                        firebase.firestore().collection("following").add({ follower: me, followed: doc.id });
+                    });
+                })
+                .catch(function (error) {
+                    console.log("Error getting documents: ", error);
+                });
+            }
+        }
+    }
+
     //RENDER
     render() {
         return (
-            <View style={styles.container}>
+            <SafeAreaView> 
+                {/* <Text h1 color="white">Is online: {this.props.global.user.name}</Text> */}
+                {this.props.global.user ? (
+                    <Profile
+                        user={this.state.user}
+                        navigation={this.props.navigation}
+                        update={this._pickImage}
+                        signout={this.signOut}
+                        guest={!this.state.isMine}
+                        follow={this.follow}
+                    />
 
-                <View style={{ marginTop: 34, alignItems: "center" }}>
-
-                    <View style={styles.avatarContainer}>
-                        <TouchableOpacity activeOpacity={.5} onPress={this._pickImage}>
-                            <Image
-                                source={
-                                   this.state.userFound.avatar
-                                        ? this.state.userFound.avatar
-                                        : require("../assets/tempAvatar.jpg")
-                                }
-                                style={styles.avatar}
-                            />
-                        </TouchableOpacity>
-                    </View>
-
-                    <View style={{ flexDirection: "row", }}>
-                        <Text style={styles.name}>{this.state.userFound.name} </Text>
-                        <Text style={styles.name}>{this.state.userFound.surname}</Text>
-                    </View>
-
-                </View>
-
-                <View style={styles.statsContainer}>
-                    <View style={styles.stat}>
-                        <Text style={styles.statAmount}>{this.state.userFound.user_videos ? this.state.userFound.user_videos.length : "0"}</Text>
-                        <Text style={styles.statTitle}>Posts</Text>
-                    </View>
-
-                <View style={styles.stat}>
-                    <Text style={styles.statAmount}>{this.state.userFound.followers? this.state.userFound.followers.length : "0"}</Text>
-                    <Text style={styles.statTitle}>Followers</Text>
-                </View>
-
-                <View style={styles.stat}>
-                    <Text style={styles.statAmount}>{this.state.userFound.followed? this.state.userFound.followed.id_users.length : "0"}</Text>
-                    <Text style={styles.statTitle}>Following</Text>
-                </View>
-
-            </View>
-
-            <View style={{width:"100%", flexDirection:"row", alignItems:"center"}}>
-                <TouchableOpacity style={styles.button} onPress={this.follow}>
-                    <View style={{ display: "flex", flexDirection: "row", alignItems: "stretch", justifyContent: "space-around", }}>
-                        <Text style={{ color: "#FFF", fontWeight: "500", letterSpacing: 2, alignSelf: "center", fontSize: 12, marginTop: -3 }}>Segui</Text>
-                    </View>
-                </TouchableOpacity>
-
-                <TouchableOpacity style={styles.chat} onPress={() => {
-                                this.props.navigation.navigate('Chat', {
-                                    user: this.state.userFound,
-                                    id:this.props.navigation.getParam('user').id
-                                })
-                            }}>
-                                <Text style={{ color: "#ea1043", fontWeight: "500", letterSpacing: 2, alignSelf: "center", fontSize: 12, marginTop: -3 }}>Chat</Text>
-                </TouchableOpacity>
-            </View>                    
-
-            <ScrollView style={{width:"100%",paddingTop: 30,}}>
-                     <FlatList
-                            data={this.state.userFound.user_videos}
-                            renderItem={({ item }) => (
-
-                                <View style={{ flex: 1, flexDirection: 'column', margin: 1 }}>
-                                    <TouchableOpacity onPress={() => this.pressVideo(item)} >
-                                        <Image style={styles.imageThumbnail} source={{ uri: item.thumbnail }} />
-                                    </TouchableOpacity>
-                                </View>
-                            )}
-                            //Setting the number of column
-                            numColumns={2}
-                            keyExtractor={(item) => item.uri}
-                        />
-            </ScrollView>
-            <Modal visible = {this.state.visible}>
-                    <View style={styles.container}>
-                        <SafeAreaView>
-                            <View style={styles.header}>
-                                <TouchableOpacity onPress={() => this.setState({ ...this.state, selectedVideo: {} } )} >
-                                    <Text style={{ color: "black", fontSize: 18 }}>Indietro</Text>
-                                </TouchableOpacity>
-                                <Text style={{ fontWeight: "600", alignSelf: "center", fontSize: 17, marginTop: -2 }}>Visualizza video</Text>
-                            </View>
-                            <View style={{ marginTop: 34, alignItems: "center" }}>
-                                <Video
-                                    source={{ uri: this.state.selectedVideo?.uri }}
-                                    rate={1.0}
-                                    volume={1.0}
-                                    isMuted={false}
-                                    resizeMode="cover"
-                                    shouldPlay
-                                    isLooping
-                                    style={{ width: 300, height: 300 }}
-                                />
-                            </View>
-                        </SafeAreaView>
-                    </View>
-                </Modal>
-            </View>
+                )
+                    : <Text>No User</Text>
+                }
+            </SafeAreaView>
         );
     }
-} 
+}
+export default withGlobalContext(UserScreen);
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        alignContent:"center",
-        alignItems:"center"
+        alignContent: "center",
+        alignItems: "center"
     },
     logout: {
         backgroundColor: "#FF5166",
@@ -156,16 +167,16 @@ const styles = StyleSheet.create({
         alignSelf: "center",
         marginTop: 50
     },
-    formContainer:{
-        borderBottomWidth:1,
-        borderTopWidth:1,
-        borderBottomColor:"#E4E4E4",
-        borderTopColor:"#E4E4E4",
-        flexDirection:"row",
-        height:370,
-        paddingTop:20,
-        paddingBottom:20,
-        marginTop:30
+    formContainer: {
+        borderBottomWidth: 1,
+        borderTopWidth: 1,
+        borderBottomColor: "#E4E4E4",
+        borderTopColor: "#E4E4E4",
+        flexDirection: "row",
+        height: 370,
+        paddingTop: 20,
+        paddingBottom: 20,
+        marginTop: 30
     },
     column: {
         flexDirection: "column",
@@ -178,17 +189,17 @@ const styles = StyleSheet.create({
         width: "65%",
         justifyContent: "space-between"
     },
-    label:{
-        fontWeight:"300",
-        fontSize:16,
-        margin:15,
+    label: {
+        fontWeight: "300",
+        fontSize: 16,
+        margin: 15,
     },
-    input:{
-        borderBottomWidth:1,
-        borderBottomColor:"#E4E4E4",
-        margin:15,
-        fontSize:17,
-        padding:3
+    input: {
+        borderBottomWidth: 1,
+        borderBottomColor: "#E4E4E4",
+        margin: 15,
+        fontSize: 17,
+        padding: 3
 
     },
     profile: {
@@ -232,15 +243,15 @@ const styles = StyleSheet.create({
         backgroundColor: "#ea1043",
         padding: 18,
         width: "50%",
-        marginLeft:"15%"
+        marginLeft: "15%"
     },
-    chat:{
+    chat: {
         backgroundColor: "transparent",
-        borderColor:"#ea1043",
-        borderWidth:1,
+        borderColor: "#ea1043",
+        borderWidth: 1,
         padding: 18,
         width: "18%",
-        marginLeft:"5%"
+        marginLeft: "5%"
     },
     header: {
         flexDirection: "row",
@@ -267,9 +278,9 @@ const styles = StyleSheet.create({
         height: 200,
 
     },
-    cover:{
-        width:300,
-        height:300
+    cover: {
+        width: 300,
+        height: 300
     }
 });
 

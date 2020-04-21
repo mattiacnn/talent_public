@@ -11,6 +11,7 @@ import {
 import * as firebase from 'firebase';
 import * as Facebook from 'expo-facebook';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scrollview'
+import Fire from '../Fire';
 
 export default class LoginScreen extends React.Component {
   static navigationOptions = {
@@ -26,10 +27,9 @@ export default class LoginScreen extends React.Component {
   handleLogin = () => {
     const { email, password } = this.state;
 
-    firebase
-      .auth()
-      .signInWithEmailAndPassword(email, password)
-      .catch(error => this.setState({ errorMessage: error.message }));
+    firebase.auth().signInWithEmailAndPassword(email, password).then((user)=>{
+      if(user){ console.log(user);this.navigation.goBack()}
+  }).catch(function(error) {});
   };
 
   //LOGIN WITH FACEBOOK 

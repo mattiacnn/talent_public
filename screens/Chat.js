@@ -87,7 +87,7 @@ export default class Chat extends React.Component {
     }
 
     componentWillUnmount() {
-        Fire.shared.off();
+        Fire.off();
     }
 
     render() {

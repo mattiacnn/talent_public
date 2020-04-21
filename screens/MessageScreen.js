@@ -5,7 +5,7 @@ import Fire from "../Fire";
 import *as firebase from "firebase";
 import 'firebase/firestore';
 
-export default class ChatScreen extends React.Component {
+export default class MessageScreen extends React.Component {
     state = {
         messages: [],
         user:[]
@@ -60,7 +60,7 @@ export default class ChatScreen extends React.Component {
     }
 
     componentDidMount() {
-        Fire.shared.get(message =>
+        Fire.get(message =>
             this.setState(previous => ({
                 messages: GiftedChat.append(previous.messages, message)
             }))
@@ -70,7 +70,7 @@ export default class ChatScreen extends React.Component {
     }
 
     componentWillUnmount() {
-        Fire.shared.off();
+        Fire.off();
     }
 
     render() {

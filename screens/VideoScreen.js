@@ -17,7 +17,7 @@ import Animation from 'lottie-react-native';
 import { Actions } from 'react-native-router-flux';
 import Modal, { SlideAnimation, ModalContent, ModalTitle } from 'react-native-modals';
 import { Ionicons } from '@expo/vector-icons';
-import VideoPlayer from 'expo-video-player'
+import VideoPlayer from 'expo-video-player';
 
 const playButton = (<Icon2 name="chat-bubble" size={40} color="white" />);
 
@@ -35,21 +35,33 @@ export default class VideoScreen extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            liked: false,
-            likecount: 200,
-            commentcount: 9,
-            videoNum: 0,
-            currentIndex: 0,
-            user: { user_videos: null },
-            refreshing: false,
-            showComments: false
+            user: this.props.route.params.owner,
+            showComments: false,
+            video: this.props.route.params.video
         };
     }
 
+    handleLike = () => {
+        //console.log(this.state.user)
+        console.log(this.state.user.id);
+        console.log(this.state.video?.id || 'iddidefault');
+        console.log(firebase.auth().currentUser.uid);
+
+        var docRef = firebase.firestore().collection("likes").doc("SF");
+        docRef.get().then(function (doc) {
+            if (doc.exists) {
+                console.log("Document data:", doc.data());
+            } else {
+                // doc.data() will be undefined in this case
+                console.log("No such document!");
+            }
+        }).catch(function (error) {
+            console.log("Error getting document:", error);
+        });
+        firebase.firestore().collection("likes").add({})
+    }
+
     render() {
-        
-        const { video } = this.props.navigation.state.params;
-        const commentsList = video.comments ? video.comments : [];
 
         return (
             <SafeAreaView style={{ flex: 1, backgroundColor: "black" }}>
@@ -61,7 +73,7 @@ export default class VideoScreen extends React.Component {
                     showFullscreenButton={true}
 
                     videoProps={{
-                        source: { uri: video?.uri },
+                        source: { uri: this.state.video?.uri },
                         rate: 1.0,
                         volume: 1.0,
                         isMuted: false,
@@ -75,7 +87,7 @@ export default class VideoScreen extends React.Component {
 
                     <View>
                         <TouchableOpacity>
-                            <ImageBackground source={{ uri: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSKoh_wxk-fkGGHm4pP_Mwe6v-P6weOYRpuchqAu0K0VYoDj4AVQg' }} style={{ width: 50, height: 50, borderRadius: 25, marginBottom: 8 }} imageStyle={{ borderRadius: 25 }}>
+                            <ImageBackground source={{ uri: this.state.user?.avatar }} style={{ width: 50, height: 50, borderRadius: 25, marginBottom: 8 }} imageStyle={{ borderRadius: 25 }}>
                                 <View style={{ flex: 1, alignItems: 'center', justifyContent: 'flex-end' }}>
                                     <Icon2 name="add-circle" size={20} color="#fb2956" />
                                 </View>
@@ -84,19 +96,24 @@ export default class VideoScreen extends React.Component {
                     </View>
 
                     <View>
-                        <TouchableOpacity onPress={this.handleClick}>
-                            <Icon name="heart" size={40} color='red' />
+                        <TouchableOpacity onPress={this.handleLike} style={styles.icon}>
+                            <Icon name="star" size={40} color={COLOR} />
                         </TouchableOpacity>
-                        <Text style={styles.likecount}>{this.state.likecount}</Text>
+                        <Text style={styles.counter}>{this.state.video?.likes}</Text>
                     </View>
 
                     <View>
-                        <TouchableOpacity onPress={() => this.setState({ showComments: !this.state.showComments })} >
-                            <Icon2 name="chat-bubble" size={40} color="white" />
+                        <TouchableOpacity onPress={() => this.setState({ showComments: !this.state.showComments })} style={styles.icon}>
+                            <Icon2 name="chat-bubble" size={40} color={COLOR} />
                         </TouchableOpacity>
-                        <Text style={styles.commentcount}>{this.state.commentcount}</Text>
+                        <Text style={styles.counter}>{this.state.video.comments?.length ? this.state.video.comments.length : 0}</Text>
                     </View>
+                </View>
 
+                <View style={{ position: "absolute", bottom: 50, left: 0 }}>
+                    <ScrollView showsVerticalScrollIndicator={false}>
+                        <Text style={styles.username}>{this.state.video.description ? this.state.video.description : ''}</Text>
+                    </ScrollView>
                 </View>
 
                 <Modal.BottomModal
@@ -120,7 +137,7 @@ export default class VideoScreen extends React.Component {
                     >
                         <FlatList
                             numColumns={1}
-                            data={commentsList}
+                            data={this.state.video.comments ? this.state.video.comments : []}
                             keyExtractor={(item) => item.id}
                             renderItem={({ item }) => (
                                 <View>
@@ -158,18 +175,9 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center'
     },
-    likecount: {
-        color: 'white',
-        marginLeft: 5,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginBottom: 8
-    },
-    commentcount: {
-        color: 'white',
-        marginLeft: 10,
-        justifyContent: 'center',
-        alignItems: 'center',
+    counter: {
+        color: COLOR,
+        textAlign: "center",
         marginBottom: 8
     },
     share: {
@@ -205,7 +213,17 @@ const styles = StyleSheet.create({
         width: 40,
         height: 40,
         borderRadius: 40 / 2
-    }
+    },
+    icon: {
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.23,
+        shadowRadius: 2.62,
 
+        elevation: 4,
+    }
 
 });

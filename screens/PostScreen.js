@@ -62,7 +62,7 @@ export default class PostScreen extends React.Component {
       video: {
         likes : 0,
         description : '',
-        owner : Fire.shared.uid,
+        owner : Fire.uid,
         categories: [],
         uri: null
       },
@@ -273,12 +273,9 @@ export default class PostScreen extends React.Component {
           return firebase.firestore().collection("users").doc(id).get();
         })
         .then((user) => {
-          let uv = user.data().user_videos;
-          if (!uv) {
-            uv = [];
-          }
+          let uv = user.data()?.user_videos || [];
           uv.push(newvideo);
-          return firebase.firestore().collection("users").doc(id).update({ user_videos: uv });
+          return firebase.firestore().collection("users").doc(id).set({ user_videos: uv });
         })
         .then(() => { this_.setState({ loading: false }); alert("Caricamento riuscito"); this_.props.navigation.goBack(); })
         .catch(err => { console.log(err) });
