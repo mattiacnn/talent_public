@@ -21,7 +21,7 @@ import VideoPlayer from 'expo-video-player'
 
 const playButton = (<Icon2 name="chat-bubble" size={40} color="white" />);
 
-const COLOR = '#EA1043';
+const COLOR = '#EE1D52';
 const icon = (name, size = 36) => () => (
     <Ionicons
         name={name}
@@ -64,7 +64,7 @@ export default class VideoScreen extends React.Component {
                         source: { uri: video?.uri },
                         rate: 1.0,
                         volume: 1.0,
-                        isMuted: false,
+                        isMuted: true,
                         resizeMode: "cover",
                         shouldPlay: true,
                         isLooping: false,

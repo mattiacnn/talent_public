@@ -225,12 +225,12 @@ export default class ProfileScreen extends React.Component {
 
         return (
             <SafeAreaView style={{ backgroundColor: "#0f0104" }}>
-
+                
                 <ScrollView
                     tintColor="white"
                     refreshControl={
                         <RefreshControl
-                            tintColor="#EA1043"
+                            tintColor="#EE1D52"
                             refreshing={this.state.refreshing}
                             onRefresh={this._onRefresh}
                         />
@@ -250,13 +250,13 @@ export default class ProfileScreen extends React.Component {
                             </TouchableOpacity>
                         </View>
 
-                        <View style={{ flexDirection: "row", justifyContent: "center", padding: 5 }}>
+                        <View style={{ flexDirection: "row", justifyContent: "center", padding: 5 ,}}>
                             <View style={{ margin: 5, flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
                                 <TouchableOpacity style={{ margin: 5, flexDirection: "row", justifyContent: "center", alignItems: "center" }}
                                     onPress={() => this.props.navigation.navigate('Modifica', {
                                         editingUser: this.state.user
                                     })} >
-                                    <Icon2 name="settings" size={24} color="#EA1043" />
+                                    <Icon2 name="settings" size={24} color="#EE1D52" />
                                     <Text style={{ color: "#C3C5CD", fontSize: 12, }}>Modifica profilo</Text>
                                 </TouchableOpacity>
 
@@ -265,7 +265,7 @@ export default class ProfileScreen extends React.Component {
                             <View style={{ margin: 5, flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
                                 <TouchableOpacity style={{ margin: 5, flexDirection: "row", justifyContent: "center", alignItems: "center" }}
                                     onPress={() => { Fire.shared.signOut() }} >
-                                    <Icon name="logout" size={24} color="#EA1043" />
+                                    <Icon name="logout" size={24} color="#EE1D52" />
                                     <Text style={{ color: "#C3C5CD", fontSize: 12, }}>Esci</Text>
                                 </TouchableOpacity>
 
@@ -329,7 +329,7 @@ export default class ProfileScreen extends React.Component {
                                     </TouchableOpacity>
                                     <View style={{ flex: 1, flexDirection: "row", justifyContent: "center", alignItems: "flex-end", height: "100%" }}>
                                         <Text style={{ fontSize: 16, lineHeight: 24 }}>{item.likes} </Text>
-                                        <Entypo name="star-outlined" size={18} color={"#ea1043"} />
+                                        <Entypo name="star-outlined" size={18} color={"#EE1D52"} />
                                     </View>
                                 </View>
 
@@ -425,7 +425,7 @@ const styles = StyleSheet.create({
         flex: 1
     },
     statAmount: {
-        color: "#EA1043",
+        color: "#EE1D52",
         fontSize: 18,
         fontWeight: "300"
     },
@@ -434,7 +434,7 @@ const styles = StyleSheet.create({
         opacity: 1.0
     },
     button: {
-        backgroundColor: "#ea1043",
+        backgroundColor: "#EE1D52",
         padding: 18,
         width: "50%",
         alignSelf: "center"

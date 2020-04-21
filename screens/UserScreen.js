@@ -94,7 +94,7 @@ export default class UserScreen extends React.Component {
                                     id:this.props.navigation.getParam('user').id
                                 })
                             }}>
-                                <Text style={{ color: "#ea1043", fontWeight: "500", letterSpacing: 2, alignSelf: "center", fontSize: 12, marginTop: -3 }}>Chat</Text>
+                                <Text style={{ color: "#EE1D52", fontWeight: "500", letterSpacing: 2, alignSelf: "center", fontSize: 12, marginTop: -3 }}>Chat</Text>
                 </TouchableOpacity>
             </View>                    
 
@@ -229,14 +229,14 @@ const styles = StyleSheet.create({
         opacity: 1.0
     },
     button: {
-        backgroundColor: "#ea1043",
+        backgroundColor: "#EE1D52",
         padding: 18,
         width: "50%",
         marginLeft:"15%"
     },
     chat:{
         backgroundColor: "transparent",
-        borderColor:"#ea1043",
+        borderColor:"#EE1D52",
         borderWidth:1,
         padding: 18,
         width: "18%",

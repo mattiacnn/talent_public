@@ -15,13 +15,16 @@ export default class Chat extends React.Component {
         messages.forEach(item => {
             var currentUser =firebase.auth().currentUser.uid;
             var userTo = this.props.navigation.getParam('id');
+
             const message = {
                 text: item.text,
                 timestamp: firebase.database.ServerValue.TIMESTAMP,
                 user: item.user,
-                partecipanti: [currentUser, userTo ]
             };
-            firebase.database().ref("chat/" + currentUser  + userTo).push(message);
+
+            firebase.database().ref("users/" + currentUser + "/" + "chat/" + "messaggi").push(message);
+            firebase.database().ref("users/" + userTo + "/" + "chat/" + "messaggi").push(message);
+
 
         });
     }
@@ -48,15 +51,28 @@ export default class Chat extends React.Component {
 
     get = callback => {
         var currentUser =firebase.auth().currentUser.uid;
-        var userTo = this.props.navigation.getParam('id');
-        console.log(`chat/${currentUser}/${userTo}`)
-        firebase.database().ref(`chat/${currentUser}${userTo}`).on("child_added", snapshot => callback(this.parse(snapshot)));
+        var userTo = this.props.navigation.getParam('user').id;
+        firebase.database().ref("users/" + currentUser + "chat/").once("value", snapshot => {
+            
+            if (snapshot.exists())
+            {
+                console.log("chat già creata");
+            }
+            else
+            {
+                firebase.database().ref("users/" + currentUser + "/" + "chat/").set({
+                    partecipanti: [currentUser, userTo]
+                })         
+
+            }});
+        
+        firebase.database().ref("users/" + currentUser + "/" + "chat/" + "messaggi").on("child_added", snapshot => callback(this.parse(snapshot)));
     };
 
 
 
     parse = message => {
-        const { user, text, timestamp, partecipanti } = message.val();
+        const { user, text, timestamp } = message.val();
         const { key: _id } = message;
         const createdAt = new Date(timestamp);
 
@@ -65,7 +81,6 @@ export default class Chat extends React.Component {
             createdAt,
             text,
             user,
-            partecipanti
         };
     };
     
@@ -78,25 +93,28 @@ export default class Chat extends React.Component {
 
     componentDidMount() {    
         this._onRefresh()
-
+        
         this.get(message =>
             this.setState(previous => ({
                 messages: GiftedChat.append(previous.messages, message)
             }))
         );
+
     }
 
     componentWillUnmount() {
         Fire.shared.off();
     }
 
+
     render() {
-        const chat = <GiftedChat messages={this.state.messages} onSend={this.send} user={this.user} />;
+        const chat = <GiftedChat messages={this.state.messages} onSend={this.send} user={this.user} isTyping = "true" />;
 
         if (Platform.OS === "android") {
             return (
                 <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding" keyboardVerticalOffset={30} enabled>
                     {chat}
+                    
                 </KeyboardAvoidingView>
             );
         }

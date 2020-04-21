@@ -16,6 +16,8 @@ import SearchScreen from "./screens/SearchScreen";
 import ProfileScreen from "./screens/ProfileScreen";
 import Home2Screen from "./screens/Home2Screen";
 import UserScreen from "./screens/UserScreen";
+import Chat from"./screens/Chat";
+import NewChat from"./screens/NewChat";
 
 import { AsyncStorage, Dimensions } from 'react-native';
 import firebase from "firebase";
@@ -51,10 +53,10 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 30,
         fontWeight: "600",
-        color: "#EA1043",
+        color: "#EE1D52",
     },
     notification: {
-        color: "#EA1043",
+        color: "#EE1D52",
         shadowColor: "black",
         shadowOffset: { width: 0, height: 1 },
         shadowRadius: 2,
@@ -124,7 +126,7 @@ const ProfileContainer = createStackNavigator(
 
         defaultNavigationOptions: {
             headerShown: true,
-            headerTintColor: "#EA1043",
+            headerTintColor: "#EE1D52",
             shadowColor: 'transparent'
         }
     }
@@ -152,7 +154,8 @@ const talentStack = createBottomTabNavigator(
         Message: {
             screen: MessageScreen,
             navigationOptions: {
-                tabBarIcon: ({ tintColor }) => <Entypo name="chat" size={24} color={tintColor} />
+                tabBarIcon: ({ tintColor }) => <Entypo name="chat" size={24} color={tintColor} />,
+                
             }
         },
         Post: {
@@ -162,7 +165,7 @@ const talentStack = createBottomTabNavigator(
                 tabBarLabel: ' ',
                 tabBarIcon: ({ tintColor }) => (
                     <View style={{
-                        backgroundColor: "#EA1043",
+                        backgroundColor: "#EE1D52",
                         height: 58,
                         width: 58,
                         borderRadius: 32,
@@ -230,6 +233,12 @@ const AppContainer = createStackNavigator(
         },
         User: {
             screen: UserScreen
+        },
+        Chat: {
+            screen: Chat
+        },
+        NewChat: {
+            screen: NewChat
         }
     },
     {
