@@ -28,11 +28,13 @@ class Profile extends React.Component {
         this.state = {
             followed: false,
             loadingIndicator: false,
+            showUser: {}
         }
     }
 
-    componentDidMount () {
-        this.setState({followed: this.isFollowed()})
+    componentDidMount() {
+        this.setState({ followed: this.isFollowed() })
+        
     }
 
     prova() {
@@ -40,28 +42,38 @@ class Profile extends React.Component {
     }
 
     isFollowed = () => {
-        const userShown = this.props?.user.id || null;
-        const followedList = this.props.global.user.followed.id_users || [];
-        if (userShown) {
-            return (followedList.includes(userShown));
-        } else { return false }
+        if (this.props.guest) {
+            const userShown = this.props?.user.id || null;
+            const followedList = this.props.global.user?.followed.id_users || [];
+            if (userShown) {
+                return (followedList.includes(userShown));
+            } else { return false }
+        } else {
+            return false
+        }
+
     }
 
     followHandler = () => {
         this.props.follow();
-        this.setState({loadingIndicator: true});
+        this.setState({ loadingIndicator: true });
         setTimeout(() => {
-            this.setState({followed: !this.state.followed, loadingIndicator: false});
+            this.setState({ followed: !this.state.followed, loadingIndicator: false });
         }, 500);
     }
 
     render() {
         const { height, width } = Dimensions.get('window');
+
         var showUser;
+        var userVideos;
+
         if (this.props.guest) {
             showUser = this.props.user;
+            userVideos = this.props.userVideos || [];
         } else {
             showUser = this.props.global.user;
+            userVideos = showUser.user_videos || [];
         }
 
         let StatusIcon;
@@ -75,7 +87,7 @@ class Profile extends React.Component {
                     <TouchableOpacity activeOpacity={this.props.guest ? 1 : 0.5} onPress={this.props.guest ? (() => { }) : this.props.update}>
                         <Image
                             source={
-                                showUser.avatar
+                                showUser?.avatar
                                     ? { uri: showUser.avatar }
                                     : require("../assets/tempAvatar.jpg")
                             }
@@ -90,10 +102,10 @@ class Profile extends React.Component {
                             <View style={{ margin: 10, flexDirection: "row", justifyContent: "center", alignItems: "center",}}>
                                 <TouchableOpacity style={{ margin: 5, flexDirection: "row", justifyContent: "center", alignItems: "center" }}
                                     onPress={this.followHandler} >
-                                            <ActivityIndicator size="small" animating={this.state.loadingIndicator} />
+                                    <ActivityIndicator size="small" animating={this.state.loadingIndicator} />
                                     {this.state.followed ?
                                         (<><SimpleLineIcons name="user-unfollow" size={24} color="#EA1043" />
-                                            
+
                                             <Text style={{ color: "#C3C5CD", fontSize: 12, lineHeight: 24, margin: 5 }}>Seguito</Text></>)
                                         :
 
@@ -152,7 +164,7 @@ class Profile extends React.Component {
 
                 <View style={styles.statsContainer}>
                     <View style={styles.stat}>
-                        <Text style={styles.statAmount}>{showUser?.user_videos ?showUser.user_videos.length : "0"}</Text>
+                        <Text style={styles.statAmount}>{userVideos ? userVideos.length : "0"}</Text>
                         <Text style={styles.statTitle}>Video</Text>
                     </View>
                     <View style={styles.stat}>
@@ -160,7 +172,7 @@ class Profile extends React.Component {
                         <Text style={styles.statTitle}>Follower</Text>
                     </View>
                     <View style={styles.stat}>
-                        <Text style={styles.statAmount}>{showUser.followed?.id_users ?showUser.followed.id_users.length : "0"}</Text>
+                        <Text style={styles.statAmount}>{showUser.followed?.id_users ? showUser.followed.id_users.length : "0"}</Text>
                         <Text style={styles.statTitle}>Seguiti</Text>
                     </View>
                 </View>
@@ -169,7 +181,7 @@ class Profile extends React.Component {
                     contentContainerStyle={{ marginTop: 20 }}
                     horizontal={false}
                     numColumns={3}
-                    data={showUser?.user_videos}
+                    data={userVideos}
                     renderItem={({ item }) => (
 
                         <View style={{ width: 100, height: 100, margin: 5, }}>

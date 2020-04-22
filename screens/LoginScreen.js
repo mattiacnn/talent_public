@@ -18,18 +18,22 @@ export default class LoginScreen extends React.Component {
     headerShown: false
   };
 
-  state = {
-    email: '',
-    password: '',
-    errorMessage: null
-  };
+  constructor(props) {
+    super(props);
+    this.state = {
+      email: '',
+      password: '',
+      errorMessage: null
+    };
+  }
+
 
   handleLogin = () => {
     const { email, password } = this.state;
 
-    firebase.auth().signInWithEmailAndPassword(email, password).then((user)=>{
-      if(user){ console.log(user);this.navigation.goBack()}
-  }).catch(function(error) {});
+    firebase.auth().signInWithEmailAndPassword(email, password).then((user) => {
+      if (user) { console.log(user); this.navigation.goBack() }
+    }).catch(function (error) { });
   };
 
   //LOGIN WITH FACEBOOK 
@@ -127,9 +131,9 @@ export default class LoginScreen extends React.Component {
               this.props.navigation.navigate('Registrati');
             }}
           >
-            <Text style={{ color: '#414959', fontSize: 13 }}>
+            <Text style={{ fontSize: 13 }}>
               Sei nuovo su Talent?{' '}
-              <Text style={{ fontWeight: '500', color: '#E9446A' }}>Registrati</Text>
+              <Text style={{ fontWeight: '500' }}>Registrati</Text>
             </Text>
           </TouchableOpacity>
         </View>

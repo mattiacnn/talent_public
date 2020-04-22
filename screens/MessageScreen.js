@@ -5,6 +5,28 @@ import 'firebase/firestore';
 import { Entypo } from "@expo/vector-icons";
 import { Right } from "native-base";
 
+const chats = [
+    {
+        id:1, username:"Mattiacnn",message:"ciao come stai?"
+    },
+    {
+        id:2, username:"Flaviocnn",message:"ciao come stai?"
+    },
+    {
+        id:3, username:"Carlo23",message:"ciao come stai?"
+    },
+    {
+        id:4, username:"Melo86",message:"ciao come stai?"
+    },
+    {
+        id:5, username:"GiuliaSpa",message:"ciao come stai?"
+    },
+    {
+        id:6, username:"GabryTeletabies",message:"ciao come stai?"
+    },
+
+]
+
 export default class ChatScreen extends React.Component {
 
     constructor(props) {
@@ -36,27 +58,7 @@ export default class ChatScreen extends React.Component {
 
 
     render() {
-        const chats = [
-            {
-                id:1, username:"Mattiacnn",message:"ciao come stai?"
-            },
-            {
-                id:2, username:"Flaviocnn",message:"ciao come stai?"
-            },
-            {
-                id:3, username:"Carlo23",message:"ciao come stai?"
-            },
-            {
-                id:4, username:"Melo86",message:"ciao come stai?"
-            },
-            {
-                id:5, username:"GiuliaSpa",message:"ciao come stai?"
-            },
-            {
-                id:6, username:"GabryTeletabies",message:"ciao come stai?"
-            },
-
-        ]
+        
         const { search } = this.state;
 
         return(

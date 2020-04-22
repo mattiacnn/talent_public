@@ -8,7 +8,7 @@ import *as firebase from "firebase";
 import uuid from 'react-uuid'
 import { TextInput } from "react-native-paper";
 import Modal from 'react-native-modal';
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, SimpleLineIcons } from "@expo/vector-icons";
 import * as VideoThumbnails from 'expo-video-thumbnails';
 import * as ImageManipulator from "expo-image-manipulator";
 import { useNavigation } from '@react-navigation/native';
@@ -93,7 +93,12 @@ export default class PostScreen extends React.Component {
 
     return (
       <SafeAreaView style={{ backgroundColor: "#fff", height: "100%", display: "flex" }}>
-
+       <View style={{position: "absolute",backgroundColor:"#EA1043", borderRadius:84, alignSelf: "center", top:-24 }}>
+         <SimpleLineIcons name="arrow-down" size={24}
+                color='#fafafa'
+                style={{ zIndex: 2, padding:20,  alignSelf: "center", top:10 }}/>
+         </View> 
+                
         <View style={{
           padding: 20, flex: 1, flexDirection: "column", justifyContent: "space-evenly", alignItems: "center"
         }}>
@@ -113,14 +118,14 @@ export default class PostScreen extends React.Component {
               {
                 width: Dimensions.get('screen').width / 2,
                 height: Dimensions.get('screen').width / 2,
-                backgroundColor: "#471863",
+                backgroundColor: "#0f0104",
                 borderRadius: Dimensions.get('screen').width,
                 overflow: "hidden",
                 alignContent: "center",
                 justifyContent: "center"
               }
             }>
-              <Video source={{ uri: this.state.video?.uri }} style={{
+              <Video source={{ uri: this.state.video?.uri }} resizeMode="cover" style={{
                 height: Dimensions.get('screen').width / 2,
                 width: Dimensions.get('screen').width / 2,
                 zIndex: 3,
@@ -151,7 +156,7 @@ export default class PostScreen extends React.Component {
               confirmText="conferma"
               selectedText="selezionate"
               searchPlaceholderText="Cerca categoria"
-              colors={{ primary: "#B23AFC" }}
+              colors={{ primary: "#EA1043" }}
               styles={{
                 selectToggle: {
                   width: 320,
@@ -166,7 +171,7 @@ export default class PostScreen extends React.Component {
             />
 
           <Block center>
-            <Button size="small" round uppercase style={{}} onPress={this._uploadVideo} loading={this.state.loading}>carica</Button>
+            <Button size="small" color="#EA1043" round uppercase style={{shadowColor:"#EA1043"}} onPress={this._uploadVideo} loading={this.state.loading}>carica</Button>
           </Block>
 
         </View>
@@ -216,7 +221,7 @@ export default class PostScreen extends React.Component {
     this.setState({ loading: true });
     var this_ = this;
     var newvideo = this.state.video;
-
+    newvideo.createdAt = new Date().getTime();
     if(!newvideo && !newvideo.uri) return;
     // Why are we using XMLHttpRequest? See:
     // https://github.com/expo/expo/issues/2402#issuecomment-443726662
@@ -267,16 +272,7 @@ export default class PostScreen extends React.Component {
         .then(snap => { return snap.ref.getDownloadURL(); })
         .then(url => {
           newvideo.thumbnail = url;
-          newvideo.id = vid;
-          return firebase.firestore().collection("videos").doc(vid).set(newvideo);
-        })
-        .then(() => {
-          return firebase.firestore().collection("users").doc(id).get();
-        })
-        .then((user) => {
-          let uv = user.data()?.user_videos || [];
-          uv.push(newvideo);
-          return firebase.firestore().collection("users").doc(id).set({ user_videos: uv });
+          return firebase.firestore().collection("videos").add(newvideo);
         })
         .then(() => { this_.setState({ loading: false }); alert("Caricamento riuscito"); this_.props.navigation.goBack(); })
         .catch(err => { console.log(err) });
