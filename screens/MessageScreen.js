@@ -23,7 +23,8 @@ export default class ChatScreen extends React.Component {
         };
     }
 
-    
+
+
     updateSearch = search => {
         this.setState({ search });
       };
@@ -61,7 +62,7 @@ export default class ChatScreen extends React.Component {
         return(
             <SafeAreaView style={styles.container}>
                 <View style={{justifyContent:"center"}}>
-                    <Text style={styles.title}>Chat</Text>    
+                    <Text style={styles.title}></Text>    
                     <Entypo name="circle-with-plus" size={24} color="white" style={styles.circle}  onPress={() => {
                             this.props.navigation.navigate('NewChat')
                     }}></Entypo>

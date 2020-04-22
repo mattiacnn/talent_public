@@ -172,16 +172,20 @@ export default class SearchScreen extends React.Component {
            <HideContainer hide={this.state.hide} hideManually={this.hideManually()}>
                <SafeAreaView>
                <View style={styles.searchSection}>
-                    <Entypo name="magnifying-glass" size={24} color="black" style={styles.searchIcon} />
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Cerca Per Nickname"
-                        value={search}
-                        onEndEditing={this.searchFromDb}                           
-                        onChangeText={this.updateSearch}
-                        underlineColorAndroid="transparent"
-                        onFocus={() => this.setState({hide:true})}                    
-                    />
+               <Entypo name="magnifying-glass" size={24} color="white" style={styles.searchIcon} />
+                <TextInput
+                    style={styles.input}
+                    placeholder="Cerca Per Nickname"
+                    value={search}
+                    onEndEditing={this.searchFromDb}                           
+                    onChangeText={this.updateSearch}
+                    underlineColorAndroid="transparent"
+                    autoFocus={false} 
+                    placeholderTextColor="#8a8f9e"
+                    onFocus={() => this.setState({hide:true})}                    
+
+                />
+
 
                 </View>
                </SafeAreaView>
@@ -308,13 +312,16 @@ const styles = StyleSheet.create({
         searchSection: {
             height:60,
             flexDirection: 'row',
-            justifyContent: 'flex-start',
+            justifyContent: 'center',
             alignItems: 'center',
-            width:"90%"
+            width:"95%",
+            backgroundColor:"#1C1C1C",
+            margin:10
+  
         },
         searchIcon: {
             padding: 10,
-
+  
         },
         input: {
             flex: 1,
@@ -324,10 +331,14 @@ const styles = StyleSheet.create({
             paddingLeft: 0,
             height:48,
             marginRight:10,
-            
+            color:"#8a8f9e",
+            backgroundColor:"#1C1C1C",
+  
         },
     row:{
         flexDirection:"row",
         justifyContent:"space-around"
     }
 });
+
+
