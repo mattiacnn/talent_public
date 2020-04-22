@@ -221,7 +221,7 @@ export default class PostScreen extends React.Component {
     this.setState({ loading: true });
     var this_ = this;
     var newvideo = this.state.video;
-
+    newvideo.createdAt = new Date().getTime();
     if(!newvideo && !newvideo.uri) return;
     // Why are we using XMLHttpRequest? See:
     // https://github.com/expo/expo/issues/2402#issuecomment-443726662

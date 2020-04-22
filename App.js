@@ -344,7 +344,7 @@ const ChatStack = createStackNavigator();
 function ChatStackComponent() {
     return (
         <ChatStack.Navigator initialRouteName="Chat">
-            <ChatStack.Screen name="Chat" component={MessageScreen} />
+            <ChatStack.Screen name="Chat" component={MessageScreen} options={{headerShown:false}}/>
             <ChatStack.Screen name="Esplora" component={UVStackComponent} />
         </ChatStack.Navigator>
     )
@@ -354,7 +354,7 @@ const SearchStack = createStackNavigator();
 function SearchStackComponent() {
     return (
         <SearchStack.Navigator initialRouteName="Cerca">
-            <SearchStack.Screen name="Cerca" component={SearchScreen} />
+            <SearchStack.Screen name="Cerca" component={SearchScreen} options={{headerShown:false}}/>
             <SearchStack.Screen name="Esplora" component={UVStackComponent} />
             <SearchStack.Screen name="Categoria" component={SearchScreen} />
         </SearchStack.Navigator>
