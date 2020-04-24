@@ -4,7 +4,7 @@ import { Text } from 'galio-framework';
 import firebase from "firebase";
 import LoginScreen from "./LoginScreen";
 import { Video } from 'expo-av';
-import Profile from '../component/Profile';
+import Profile from '../components/Profile';
 import Fire from "../Fire";
 import * as ImagePicker from 'expo-image-picker';
 import uuid from 'react-uuid'

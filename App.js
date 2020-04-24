@@ -38,6 +38,8 @@ if (!global.atob) { global.atob = decode; }
 
 // Before rendering any navigation stack
 import { enableScreens } from 'react-native-screens';
+import ChatFlavio from "./screens/ChatFlavio";
+import NewMessageScreen from "./screens/NewMessageScreen";
 enableScreens();
 
 const MyTheme = {
@@ -345,6 +347,8 @@ function ChatStackComponent() {
     return (
         <ChatStack.Navigator initialRouteName="Chat">
             <ChatStack.Screen name="Chat" component={MessageScreen} options={{headerShown:false}}/>
+            <ChatStack.Screen name="ChatWith" component={ChatFlavio} options={{}}/>
+            <ChatStack.Screen name="NewChat" component={NewMessageScreen} options={{headerShown:true}}/>
             <ChatStack.Screen name="Esplora" component={UVStackComponent} />
         </ChatStack.Navigator>
     )
