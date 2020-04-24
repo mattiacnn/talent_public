@@ -6,7 +6,7 @@ import 'firebase/firestore';
 import { Entypo } from "@expo/vector-icons";
 import SectionedMultiSelect from 'react-native-sectioned-multi-select';
 import HideContainer from "./HideContainer";
-import BarraRicerca from "../component/BarraRicerca";
+import BarraRicerca from "../components/BarraRicerca";
 const items = [
     // this is the parent or 'item'
     {
