@@ -99,7 +99,7 @@ class Profile extends React.Component {
                 <View style={{ flexDirection: "row", justifyContent: "center", padding: 5 }}>
                     {this.props.guest ? (
                         <>
-                            <View style={{ margin: 10, flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
+                            <View style={{ margin: 10, flexDirection: "row", justifyContent: "center", alignItems: "center",}}>
                                 <TouchableOpacity style={{ margin: 5, flexDirection: "row", justifyContent: "center", alignItems: "center" }}
                                     onPress={this.followHandler} >
                                     <ActivityIndicator size="small" animating={this.state.loadingIndicator} />
@@ -157,7 +157,7 @@ class Profile extends React.Component {
                 </View>
 
 
-                <View style={{ flexDirection: "row", }}>
+                <View style={{ flexDirection: "row",marginBottom:10 }}>
                     <Text h4 color="white">{showUser?.name} </Text>
                     <Text h4 color="white">{showUser?.surname} </Text>
                 </View>

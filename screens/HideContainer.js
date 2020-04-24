@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 import { Entypo } from "@expo/vector-icons";
 import SectionedMultiSelect from 'react-native-sectioned-multi-select';
 
+
 const HideContainer = (props) => {
 
     state = {
@@ -26,11 +27,11 @@ const HideContainer = (props) => {
   const { search } = this.state;
  
   if (hide == true)  {
-  
+
     return(
     <SafeAreaView>
       <View style={styles.searchSection}>
-          <Entypo name="magnifying-glass" size={24} color="black" style={styles.searchIcon} />
+          <Entypo name="magnifying-glass" size={24} color="white" style={styles.searchIcon} />
           <TextInput
               style={styles.input}
               placeholder="Cerca Per Nickname"
@@ -41,12 +42,35 @@ const HideContainer = (props) => {
               autoFocus={true} 
           />
             <TouchableOpacity onPress={ () => {this.props}}>
-                  <Text>Anulla</Text>
+                  <Text style={{color:"white",padding:15}}>Anulla</Text>
             </TouchableOpacity>
       </View>
+      <FlatList
+          data={this.state.usersFound}
+          renderItem={({ item }) => (
+            <TouchableOpacity style={styles.searchSection} onPress={() => {
+                            //console.log(item);
+                 this.props.navigation.push('Esplora', {
+                      screen: 'Utente',
+                       params: {
+                           user:item
+                            },
+                          });
+                        }}>
+                        <Image style={styles.roundedAvatar} source={item.avatar?  { uri: item.avatar }
+                             : require("../assets/tempAvatar.jpg")
+                           } ></Image>
+                            <Text style={{fontWeight:"bold",paddingLeft:20}}>{item.username}</Text>   
+                        </TouchableOpacity>
+
+                     )}
+                            numColumns={1}
+                            keyExtractor={(item) => item.email}
+                      />
     </SafeAreaView>
     )
 }
+
   return (
     <View {...this.props} style={style}>
       { children }
@@ -93,9 +117,12 @@ const styles = StyleSheet.create({
       searchSection: {
           height:60,
           flexDirection: 'row',
-          justifyContent: 'flex-start',
+          justifyContent: 'center',
           alignItems: 'center',
-          width:"90%"
+          width:"95%",
+          backgroundColor:"#1C1C1C",
+          margin:10
+
       },
       searchIcon: {
           padding: 10,
@@ -109,6 +136,9 @@ const styles = StyleSheet.create({
           paddingLeft: 0,
           height:48,
           marginRight:10,
+          color:"#8a8f9e",
+          backgroundColor:"#1C1C1C",
+
       },
   row:{
       flexDirection:"row",
