@@ -1,85 +1,58 @@
 import React from "react";
 import { View, Image, Text, StyleSheet, FlatList, Dimensions, TouchableOpacity, SafeAreaView, StatusBar } from "react-native";
-import { ScrollView, TextInput } from "react-native-gesture-handler";
+import { ScrollView, TextInput, TouchableHighlight } from "react-native-gesture-handler";
 import *as firebase from "firebase";
 import 'firebase/firestore';
 import { Entypo } from "@expo/vector-icons";
 import SectionedMultiSelect from 'react-native-sectioned-multi-select';
 import HideContainer from "./HideContainer";
 import BarraRicerca from "../component/BarraRicerca";
-const items = [
-    // this is the parent or 'item'
-    {
-        name: 'Categorie',
-        id: 0,
-        // these are the children or 'sub items'
-        children: [
-            {
-                name: 'Apple',
-                id: 10,
-            },
-            {
-                name: 'Strawberry',
-                id: 17,
-            },
-            {
-                name: 'Pineapple',
-                id: 13,
-            },
-            {
-                name: 'Banana',
-                id: 14,
-            },
-            {
-                name: 'Watermelon',
-                id: 15,
-            },
-            {
-                name: 'Kiwi fruit',
-                id: 16,
-            },
-        ],
-    }
 
-];
 
-const posts = [
+
+const categorie = [
     {
         id: '1',
-        name: 'John McKay',
-        text:
-            'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
-        timestamp: 1569109273726,
-        avatar: require('../assets/sample.jpg'),
-        image: require('../assets/sample.jpg')
+        name: 'New Entry',
     },
     {
         id: '2',
-        name: 'Karyn Kim',
-        text:
-            'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
-        timestamp: 1569109273726,
-        avatar: require('../assets/tempAvatar.jpg'),
-        image: require('../assets/sample.jpg')
+        name: 'Canto',
     },
     {
         id: '3',
-        name: 'Emerson Parsons',
-        text:
-            'Amet mattis vulputate enim nulla aliquet porttitor lacus luctus. Vel elit scelerisque mauris pellentesque pulvinar pellentesque habitant.',
-        timestamp: 1569109273726,
-        avatar: require('../assets/tempAvatar.jpg'),
-        image: require('../assets/sample.jpg')
+        name: 'Musica',
     },
     {
         id: '4',
-        name: 'Kathie Malone',
-        text:
-            'At varius vel pharetra vel turpis nunc eget lorem. Lorem mollis aliquam ut porttitor leo a diam sollicitudin tempor. Adipiscing tristique risus nec feugiat in fermentum.',
-        timestamp: 1569109273726,
-        avatar: require('../assets/tempAvatar.jpg'),
-        image: require('../assets/sample.jpg')
-    }
+        name: 'Comicità',
+    },
+    {
+        id: '5',
+        name: 'Magia',
+    },
+    {
+        id: '6',
+        name: 'Moda',
+    },
+    {
+        id: '7',
+        name: 'Tik Tok',
+    },
+    {
+        id: '8',
+        name: 'Recitazione',
+    },
+    {
+        id: '9',
+        name: 'Sport',
+    },
+    {
+        id: '10',
+        name: 'Best of the week',
+    },
+
+
 ];
 
 export default class SearchScreen extends React.Component {
@@ -98,8 +71,53 @@ export default class SearchScreen extends React.Component {
             query: "",
             search: "",
             selectedItems: [],
-            hide: false
+            hide: false,
+            videoToShow:[],
+            categoria: "",
+            active:"New Entry"
         };
+    }
+
+    searchFromDb = async (categoria) => {
+        if (categoria == "New Entry")
+        {
+            this.setState({active: categoria})
+
+            var that = this;
+            firebase.firestore().collection("videos").orderBy("createdAt", "desc").limit(50)
+            .get()
+            .then(function (querySnapshot) {
+                var globalVideos = [];
+                querySnapshot.forEach(function (doc) {
+                    // doc.data() is never undefined for query doc snapshots
+                    globalVideos.push(doc.data());
+                });
+                that.setState({dataSource:globalVideos});
+                //console.log(that.state.dataSource);
+                // console.log(globalVideos);
+            })
+            .catch(function (error) {
+                console.log("Error getting documents: ", error);
+            });
+        }
+        else{
+            this.setState({active: categoria})
+            var that = this;
+            firebase.firestore().collection("videos").where("categories", "array-contains", categoria)
+                .get()
+                .then(function (querySnapshot) {
+                    var videosFound = [];
+                    querySnapshot.forEach(function (doc) {
+                        videosFound.push(doc.data());
+                    });
+                    that.setState({ dataSource : videosFound});
+                    console.log(that.state.videoToShow)
+                })
+                .catch(function (error) {
+                    console.log("Error getting documents: ", error);
+                });
+    
+        }
     }
 
     componentDidMount() {
@@ -113,7 +131,7 @@ export default class SearchScreen extends React.Component {
                 globalVideos.push(doc.data());
             });
             that.setState({dataSource:globalVideos});
-            // console.log(that.state.dataSource);
+            //console.log(that.state.dataSource);
             // console.log(globalVideos);
         })
         .catch(function (error) {
@@ -132,24 +150,39 @@ export default class SearchScreen extends React.Component {
     render() {
         const { search } = this.state;
 
-        return (<View style={{ backgroundColor: "#1f1f1f", height: Dimensions.get('screen').height }}>
-            <SafeAreaView>
+        return (<View style={{ backgroundColor: "#1f1f1f",  }}>
+            <SafeAreaView >
                 <BarraRicerca navigation={this.props.navigation}/>
-                <View style={styles.MainContainer}>
-                    <FlatList
-                        data={this.state.dataSource}
+                <ScrollView horizontal = {true} showsHorizontalScrollIndicator = {false} contentContainerStyle={{marginTop:15,}} directionalLockEnabled={true}> 
+                <FlatList
+                        data={categorie}
                         renderItem={({ item }) => (
-                            <View style={{ flex: 1, flexDirection: 'column', margin: 2}}>
-                                <TouchableOpacity onPress={()=>console.log('touch')}>
-                                    <Image style={styles.imageThumbnail} source={{uri:item.thumbnail}} />
-                                </TouchableOpacity>
-                            </View>
+                        <TouchableHighlight style={ this.state.active == item.name? styles.btnActive : styles.chip} onPress={() => this.searchFromDb(item.name)}>
+                            <Text style={styles.chipText}>
+                                {item.name}
+                            </Text>
+                        </TouchableHighlight>
                         )}
-                        //Setting the number of column
-                        numColumns={3}
+                        numColumns={10}
                         keyExtractor={(item) => item.id}
                     />
-                </View>
+                    
+                   
+                </ScrollView>
+                    <ScrollView  contentContainerStyle={styles.MainContainer}>
+                        <FlatList
+                            data={this.state.dataSource}
+                            renderItem={({ item }) => (
+                                    <TouchableOpacity  style={styles.imageThumbnail} onPress={()=>console.log('touch')}>
+                                        <Image style={styles.imageThumbnail} source={{uri:item.thumbnail}} />
+                                    </TouchableOpacity>
+        
+                            )}
+                            //Setting the number of column
+                            numColumns={3}
+                            keyExtractor={(item) => item.id}
+                        />
+                    </ScrollView>        
             </SafeAreaView>
 
         </View >);
@@ -318,13 +351,15 @@ const styles = StyleSheet.create({
     MainContainer: {
         justifyContent: 'center',
         alignSelf:"center",
-        width:Dimensions.get('screen').width,
+        width:Dimensions.get('screen').width - 10,
         height:Dimensions.get('screen').height,
+
         top:50,
+
     },
     imageThumbnail: {
-        width:Dimensions.get('screen').width/3 -6 ,
-        height:200,
+        height: Dimensions.get('window').width / 2,
+        width: Dimensions.get('window').width/3
     },
     cover: {
         width: 300,
@@ -357,6 +392,33 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         justifyContent: "space-around"
     },
+    chip:{
+        margin:10,
+        borderColor:"#EE1D52",
+        borderWidth:1,
+        backgroundColor:"transparent",
+        paddingTop:8,
+        paddingBottom:8,
+        paddingRight:15,
+        paddingLeft:15,
+        borderRadius:20
+    },
+    chipText:{
+        color:"white",
+        fontSize:15,
+        fontWeight:"700"
+    },
+    btnActive:{
+        margin:10,
+        borderWidth:1,
+        borderColor:"#EE1D52",
+        backgroundColor:"#EE1D52",
+        paddingTop:8,
+        paddingBottom:8,
+        paddingRight:15,
+        paddingLeft:15,
+        borderRadius:20
+    }
 });
 
 

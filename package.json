@@ -27,7 +27,7 @@
     "expo": "~36.0.0",
     "expo-av": "~8.0.0",
     "expo-cli": "^3.17.11",
-    "expo-crypto": "~8.0.0",
+    "expo-crypto": "^8.0.0",
     "expo-facebook": "^8.0.0",
     "expo-image-manipulator": "^8.0.0",
     "expo-image-picker": "^8.0.1",
