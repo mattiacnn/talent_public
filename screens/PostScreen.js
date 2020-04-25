@@ -25,27 +25,27 @@ const items = [
     // these are the children or 'sub items'
     children: [
       {
-        name: 'Apple',
+        name: 'Comicità',
         id: 10,
       },
       {
-        name: 'Strawberry',
+        name: 'Canto',
         id: 17,
       },
       {
-        name: 'Pineapple',
+        name: 'Ballo',
         id: 13,
       },
       {
-        name: 'Banana',
+        name: 'Sport',
         id: 14,
       },
       {
-        name: 'Watermelon',
+        name: 'Recitazione',
         id: 15,
       },
       {
-        name: 'Kiwi fruit',
+        name: 'Tik Tok',
         id: 16,
       },
     ],

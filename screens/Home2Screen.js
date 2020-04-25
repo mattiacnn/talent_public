@@ -12,6 +12,10 @@ import Fire from "../Fire";
 import firebase from 'firebase';
 import 'firebase/firestore';
 
+import { Notifications } from 'expo';
+import * as Permissions from 'expo-permissions';
+import Constants from 'expo-constants';
+
 const dublicateItems = (arr, numberOfRepetitions) =>
     arr.flatMap(i => Array.from({ length: numberOfRepetitions }).fill(i));
 
@@ -31,19 +35,24 @@ class Home2Screen extends Component {
             currentIndex: 0,
             user: { user_videos: null },
             refreshing: false,
-            nome: this.props.route.params.nome
+            nome: this.props.route.params.nome,
+            expoPushToken: '',
+            notification: {},
         };
         this.handleClick = this.handleClick.bind(this);
         this._onRefresh = this._onRefresh.bind(this);
 
     }
 
+  
+
     componentDidMount() {
         //this._onRefresh();
+        //firebase.auth().signOut()
         this.animation.play();
+
     }
     handleClick() {
-        console.log(this.state.nome);
         this.setState({
             liked: !this.state.liked,
             likecount: this.state.likecount + 1,
@@ -131,7 +140,6 @@ class Home2Screen extends Component {
                     this.setState({ user: user });
                 });
 
-                console.log(this.state.user);
             })
             .catch(err => {
                 console.log('Error getting documents', err);

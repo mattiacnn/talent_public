@@ -27,7 +27,11 @@ import { AsyncStorage, Dimensions } from 'react-native';
 import { View, Text, StyleSheet, Button, StatusBar, Image, TouchableOpacity, TouchableHighlight } from "react-native";
 import Fire from './Fire';
 import firebase from 'firebase';
+import 'firebase/firestore';
 import {GlobalContextProvider} from './GlobalContext';
+import { Notifications } from 'expo';
+import * as Permissions from 'expo-permissions';
+import Constants from 'expo-constants';
 // Cose strane
 import { decode, encode } from 'base-64'
 import { Row } from "native-base";
@@ -299,6 +303,7 @@ function PostIcon() {
 
 const AuthStack = createStackNavigator();
 function AuthStackComponent() {
+
     return (
         <AuthStack.Navigator initialRouteName="Login" headerMode="none">
             <AuthStack.Screen name="Login" component={LoginScreen} />
