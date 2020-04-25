@@ -26,7 +26,7 @@ export class GlobalContextProvider extends React.Component {
                         let utenteRicevuto = snapshot.data() || {};
                         utenteRicevuto.id = user.uid;
                         utenteRicevuto._id = user.uid;
-                        that.setState({ user: {...that.state.user, ...utenteRicevuto} });
+                        that.setState({ user: { ...that.state.user, ...utenteRicevuto } });
                     }, err => { console.log(err); }
                     );
 
@@ -35,15 +35,16 @@ export class GlobalContextProvider extends React.Component {
                         doc.docChanges().forEach(video => {
                             if (video.type === 'added') {
                                 console.log('added');
-                            }
-                            var id = video.doc.id;
-                            console.log("new video:" + id);
-                            video = video.doc.data();
-                            video.id = id;
+                                var id = video.doc.id;
+                                console.log("new video:" + id);
+                                video = video.doc.data();
+                                video.id = id;
 
-                            let user_videos = that.state.user.user_videos;
-                            user_videos.push(video);
-                            that.setState({ user: { ...that.state.user, user_videos } });
+                                let user_videos = that.state.user.user_videos;
+                                user_videos.push(video);
+                                that.setState({ user: { ...that.state.user, user_videos } });
+                            }
+
                         });
                     }, err => { console.log(err); }
                     );
