@@ -41,7 +41,7 @@ class Profile extends React.Component {
 
     isFollowed = () => {
         const userShown = this.props?.user.id || null;
-        const followedList = this.props.global.user.followed.id_users || [];
+        const followedList = this.props.global.user?.followed?.id_users || [];
         if (userShown) {
             return (followedList.includes(userShown));
         } else { return false }
@@ -156,11 +156,15 @@ class Profile extends React.Component {
                         <Text style={styles.statTitle}>Video</Text>
                     </View>
                     <View style={styles.stat}>
-                        <Text style={styles.statAmount}>{showUser.followers?.id_users ? showUser.followers.id_users.length : "0"}</Text>
+                        <Text style={styles.statAmount}>{showUser?.like_count ?showUser.like_count : "0"}</Text>
+                        <Text style={styles.statTitle}>Star</Text>
+                    </View>
+                    <View style={styles.stat}>
+                        <Text style={styles.statAmount}>{showUser?.followers_count ?showUser.followers_count  : "0"}</Text>
                         <Text style={styles.statTitle}>Follower</Text>
                     </View>
                     <View style={styles.stat}>
-                        <Text style={styles.statAmount}>{showUser.followed?.id_users ?showUser.followed.id_users.length : "0"}</Text>
+                        <Text style={styles.statAmount}>{showUser?.followed_count ?showUser.followed_count  : "0"}</Text>
                         <Text style={styles.statTitle}>Seguiti</Text>
                     </View>
                 </View>
