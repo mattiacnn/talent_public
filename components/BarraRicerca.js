@@ -38,7 +38,7 @@ class BarraRicerca extends React.Component {
         super(props);
         this.state = {
             show: false,
-            anim: false
+            anim: false,
         };
         this.searchInput = React.createRef();
     }

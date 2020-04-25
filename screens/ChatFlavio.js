@@ -14,11 +14,11 @@ class ChatFlavio extends React.Component {
         this.state = {
             messages: [],
             chatId: this.props.route.params.chatId,
+            recipient: this.props.route.params.recipient,
         };
     }
 
     componentDidMount() {
-        //console.log(this.props.route.params.chatID);
 
         this.loadMessages(message => {
             this.setState(previousState => {
@@ -31,13 +31,16 @@ class ChatFlavio extends React.Component {
     }
 
     sendMessage=(msg)=> {
-        //console.log(msg);
+        //console.log('messaggio mandato roa',msg[0].text); return
+        //this.setState({lastMessage: msg[0]});
         var that = this;
         firebase
             .firestore()
             .collection("chats")
             .doc(that.state.chatId)
-            .collection("messages").add(msg[0])
+            .collection("messages").add(msg[0]);
+
+        this.sendPushNotification(msg[0].text)    
     }
 
     async loadMessages(callback) {
@@ -67,6 +70,33 @@ class ChatFlavio extends React.Component {
                 });
             });
     }
+
+    _handleNotification = notification => {
+        Vibration.vibrate();
+        console.log(notification);
+        this.setState({ notification: notification });
+      };
+    
+      // Can use this function below, OR use Expo's Push Notification Tool-> https://expo.io/dashboard/notifications
+      sendPushNotification = async (msg) => {
+        const message = {
+          to: this.state.recipient.token,
+          sound: 'default',
+          title:  `Nuovo messaggio da  ${this.props.global.user.name}`,
+          body: msg,
+          data: { data: 'goes here' },
+          _displayInForeground: true,
+        };
+        const response = await fetch('https://exp.host/--/api/v2/push/send', {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            'Accept-encoding': 'gzip, deflate',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(message),
+        });
+      };
 
     render() {
         const user = {

@@ -111,12 +111,41 @@ class VideoScreen extends React.Component {
                     firebase.firestore().collection("videos").doc(vId).update({likes:this.state.video.likes + 1});
                     this.setState({video:{...this.state.video, likes: this.state.video.likes +1}});
                 }
+                this._handleNotification
             })
             .catch(function (error) {
                 console.log("Error getting document:", error);
             });
 
     }
+
+
+    _handleNotification = notification => {
+        Vibration.vibrate();
+        console.log(notification);
+        this.setState({ notification: notification });
+      };
+    
+      // Can use this function below, OR use Expo's Push Notification Tool-> https://expo.io/dashboard/notifications
+      sendPushNotification = async (msg) => {
+        const message = {
+          to: "ExponentPushToken[VPAE7YNZACQrlBaKeJf8a7]",
+          sound: 'default',
+          title:  `Nuovo messaggio da`,
+          body: "msg",
+          data: { data: 'goes here' },
+          _displayInForeground: true,
+        };
+        const response = await fetch('https://exp.host/--/api/v2/push/send', {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            'Accept-encoding': 'gzip, deflate',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(message),
+        });
+      };
 
     render() {
 

@@ -11,6 +11,10 @@ import * as ImagePicker from 'expo-image-picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scrollview';
 
+import { Notifications } from 'expo';
+import * as Permissions from 'expo-permissions';
+import Constants from 'expo-constants';
+
 export default class RegisterScreen extends React.Component {
     static navigationOptions = {
         headerShown: false
@@ -40,15 +44,50 @@ export default class RegisterScreen extends React.Component {
             show: false,
             message: "Seleziona Data di nascita"
         };
-      }
+    }
+
+    registerForPushNotificationsAsync = async () => {
+        var token;
+        if (Constants.isDevice) {
+            const { status: existingStatus } = await Permissions.getAsync(Permissions.NOTIFICATIONS);
+            let finalStatus = existingStatus;
+            if (existingStatus !== 'granted') {
+                const { status } = await Permissions.askAsync(Permissions.NOTIFICATIONS);
+                finalStatus = status;
+            }
+            if (finalStatus !== 'granted') {
+                alert('Failed to get push token for push notification!');
+                return;
+            }
+            token = await Notifications.getExpoPushTokenAsync();
+            console.log(token);
+            if (Platform.OS === 'android') {
+                Notifications.createChannelAndroidAsync('default', {
+                    name: 'default',
+                    sound: true,
+                    priority: 'max',
+                    vibrate: [0, 250, 250, 250],
+                });
+            };
+        }
+        else {
+            alert('Must use physical device for Push Notifications');
+        }
+        return token;
+
+    };
 
     // CREATE NEW USER AND STORE IT ON FIRESTORE
     handleSignUp = async () => {
         console.log(this.state.user);
-        const newUser = this.state.user;
+        var newUser = this.state.user;
         var uid = '';
         // registra utente
-        Fire.createUser(newUser)
+        this.registerForPushNotificationsAsync()
+            .then((token) => {
+                newUser.token = token;
+                return Fire.createUser(newUser)
+            })
             .then((res) => {
                 uid = res.user.uid;
                 delete newUser.password;
@@ -187,7 +226,7 @@ export default class RegisterScreen extends React.Component {
                         onPress={this.handlePickAvatar}
                     >
                         <Image
-                            source={this.state.user?.avatar?{uri: this.state.user.avatar}: null}
+                            source={this.state.user?.avatar ? { uri: this.state.user.avatar } : null}
                             style={styles.avatar}
                         />
                         <Ionicons
@@ -328,7 +367,7 @@ export default class RegisterScreen extends React.Component {
                             <TouchableOpacity
                                 style={!this.state.user.username || !this.state.user.birthdate || !this.state.checked ? styles.disabled : styles.button}
                                 disabled={!this.state.user.username || !this.state.user.birthdate || !this.state.checked ? true : false}
-                                onPress={ this.handleSignUp} >
+                                onPress={this.handleSignUp} >
                                 <View style={{ display: "flex", flexDirection: "row", alignItems: "stretch", justifyContent: "space-around", }}>
                                     <Text style={{ color: "#FFF", fontWeight: "500", letterSpacing: 2, alignSelf: "center", fontSize: 15, marginTop: -3 }}>Registrati</Text>
                                 </View>

@@ -6,7 +6,7 @@ import 'firebase/firestore';
 import { Entypo } from "@expo/vector-icons";
 import SectionedMultiSelect from 'react-native-sectioned-multi-select';
 import HideContainer from "./HideContainer";
-import BarraRicerca from "../component/BarraRicerca";
+import BarraRicerca from "../components/BarraRicerca";
 
 
 
@@ -153,7 +153,7 @@ export default class SearchScreen extends React.Component {
         return (<View style={{ backgroundColor: "#1f1f1f",  }}>
             <SafeAreaView >
                 <BarraRicerca navigation={this.props.navigation}/>
-                <ScrollView horizontal = {true} showsHorizontalScrollIndicator = {false} contentContainerStyle={{marginTop:15,}} directionalLockEnabled={true}> 
+                <ScrollView horizontal = {true} showsHorizontalScrollIndicator = {false} contentContainerStyle={{marginTop:15,}} > 
                 <FlatList
                         data={categorie}
                         renderItem={({ item }) => (

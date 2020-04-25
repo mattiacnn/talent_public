@@ -31,6 +31,7 @@
     "expo-facebook": "^8.0.0",
     "expo-image-manipulator": "^8.0.0",
     "expo-image-picker": "^8.0.1",
+    "expo-notifications": "^0.1.2",
     "expo-permissions": "^8.0.0",
     "expo-video-player": "^1.5.7",
     "expo-video-thumbnails": "^4.1.0",
@@ -75,8 +76,9 @@
     "react-uuid": "^1.0.2"
   },
   "devDependencies": {
+    "@babel/core": "^7.0.0",
     "babel-preset-expo": "~8.0.0",
-    "@babel/core": "^7.0.0"
+    "exp": "^57.2.1"
   },
   "private": true
 }

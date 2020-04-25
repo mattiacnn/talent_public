@@ -140,7 +140,7 @@ class MessageScreen extends React.Component {
                                 //console.log(item);
                                 this.props.navigation.push('ChatWith', {
                                     chatId: item.id,
-                                    name: item.users[i].username
+                                    recipient: item.users[i]
                                 });
                             }}>
                                 <Image

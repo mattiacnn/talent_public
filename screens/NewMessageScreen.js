@@ -5,6 +5,7 @@ import 'firebase/firestore';
 import { Entypo } from "@expo/vector-icons";
 import { Right } from "native-base";
 import { withGlobalContext } from "../GlobalContext";
+import { reset } from "expo/build/AR";
 
 const chats = [
     {
@@ -73,7 +74,8 @@ class NewMessageScreen extends React.Component {
                     _id: result.id,
                     name: res.name,
                     surname: res.surname,
-                    username: res.username
+                    username: res.username,
+                    token: res.token
                 });
             })
             that.setState({ fullList });
@@ -141,9 +143,10 @@ class NewMessageScreen extends React.Component {
     }
 
     handleNavigation = (chatObject) => {
-        console.log(chatObject);
+        console.log('chAT OBJECT:',chatObject);
         this.props.navigation.push('ChatWith', {
             chatId: chatObject.id,
+            recipient: chatObject.recipient
         });
     }
 
@@ -157,7 +160,7 @@ class NewMessageScreen extends React.Component {
     }
 
     handleNewChat = (item) => {
-
+        console.log('newchat, pressed on', item);
         var that = this;
         const idUtente = item._id;
         const idMio = firebase.auth().currentUser.uid;
@@ -166,7 +169,7 @@ class NewMessageScreen extends React.Component {
         // const key = this.hash(idMio, idUtente);
         const chatId = this.estimateChatId(idMio, idUtente);
         const ref = firebase.firestore().collection('chats').doc(chatId);
-        var arg = { id:chatId }
+        var arg = { id:chatId, recipient: item };
 
         ref.get().then(function (doc) {
             
@@ -182,11 +185,13 @@ class NewMessageScreen extends React.Component {
                     users: [{
                         name: item.name,
                         surname: item.surname,
-                        username: item.username
+                        username: item.username,
+                        token: item.token
                     },{
                         name: gu.name,
                         surname: gu.surname,
-                        username: gu.username
+                        username: gu.username,
+                        token: gu.token
                     }
                     ]
                 })
