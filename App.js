@@ -40,6 +40,9 @@ global.crypto.getRandomValues = byteArray => { for (let i = 0; i < byteArray.len
 if (!global.btoa) { global.btoa = encode; }
 if (!global.atob) { global.atob = decode; }
 
+// disabilita a un certo punto
+console.disableYellowBox = true;
+
 // Before rendering any navigation stack
 import { enableScreens } from 'react-native-screens';
 import ChatFlavio from "./screens/ChatFlavio";

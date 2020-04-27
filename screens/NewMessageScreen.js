@@ -143,7 +143,7 @@ class NewMessageScreen extends React.Component {
     }
 
     handleNavigation = (chatObject) => {
-        console.log('chAT OBJECT:',chatObject);
+        console.log('chAT OBJECT:', chatObject);
         this.props.navigation.push('ChatWith', {
             chatId: chatObject.id,
             recipient: chatObject.recipient
@@ -169,35 +169,39 @@ class NewMessageScreen extends React.Component {
         // const key = this.hash(idMio, idUtente);
         const chatId = this.estimateChatId(idMio, idUtente);
         const ref = firebase.firestore().collection('chats').doc(chatId);
-        var arg = { id:chatId, recipient: item };
+        var arg = { id: chatId, recipient: item };
 
         ref.get().then(function (doc) {
-            
+
             if (doc.exists) {
                 console.log("Document id:", doc.id);
-                
+
             } else {
                 // doc.data() will be undefined in this case
                 console.log("No such document!");
-                return ref.set({
+                const chatItem = {
                     avatars: [item.avatar, gu.avatar],
                     between: [idUtente, idMio],
-                    users: [{
-                        name: item.name,
-                        surname: item.surname,
-                        username: item.username,
-                        token: item.token
-                    },{
-                        name: gu.name,
-                        surname: gu.surname,
-                        username: gu.username,
-                        token: gu.token
-                    }
+                    users: [
+                        {
+                            name: item.name,
+                            surname: item.surname,
+                            username: item.username,
+                            token: item.token
+                        }, 
+                        {
+                            name: gu.name,
+                            surname: gu.surname,
+                            username: gu.username,
+                            token: gu.token
+                        }
                     ]
-                })
+                };
+                console.log('creating...',chatItem);
+                return ref.set(chatItem)
             }
-        }).then(()=> {that.handleNavigation(arg);})
-        .catch(err=>{console.log(err)});        
+        }).then(() => { that.handleNavigation(arg); })
+            .catch(err => { console.log(err) });
     }
 
     render() {
