@@ -41,7 +41,22 @@ class UserScreen extends React.Component {
                     //console.log(doc.id, " => ", doc.data());
                 });
                 this.setState({ userVideos })
-            })
+            });
+
+            firebase.firestore().collection('counters').doc(this.state.user.id)
+                    .get().then(doc => {
+                        const counters = doc.data();
+                        this.setState({
+                            user: {
+                                ...this.state.user,
+                                like_count: counters.like_count,
+                                followed_count: counters.followed_count,
+                                followers_count: counters.followers_count
+                            }
+                        });
+
+                    }, err => { console.log(err); }
+                    );
         }
         
         //this.signOut();

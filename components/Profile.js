@@ -60,6 +60,7 @@ class Profile extends React.Component {
         var showUser;
         if (this.props.guest) {
             showUser = this.props.user;
+            showUser.user_videos = this.props.userVideos;
         } else {
             showUser = this.props.global.user;
         }

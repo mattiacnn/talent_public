@@ -71,21 +71,18 @@ export class GlobalContextProvider extends React.Component {
                     }, err => { console.log(err); }
                     );
 
-                    firebase.firestore().collection('counters').doc(user.uid)
+                firebase.firestore().collection('counters').doc(user.uid)
                     .onSnapshot(doc => {
-                        doc.docChanges().forEach(counters => {
-                            if (chat.type === 'added') {
-                                console.log('counter:added ');
+                        const counters = doc.data();
+                        that.setState({
+                            user: {
+                                ...that.state.user,
+                                like_count: counters.like_count,
+                                followed_count: counters.followed_count,
+                                followers_count: counters.followers_count
                             }
-                            that.setState({ 
-                                user: { ...that.state.user, 
-                                    like_count:  counters.like_count,
-                                    followed_count : counters.followed_count,
-                                    followers_count : counters.followers_count
-                                } 
-                                });
-
                         });
+
                     }, err => { console.log(err); }
                     );
             }
