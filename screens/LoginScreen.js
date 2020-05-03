@@ -6,12 +6,15 @@ import {
   TouchableOpacity,
   Image,
   StatusBar,
-  LayoutAnimation
+  LayoutAnimation,
+  KeyboardAvoidingView,
+  Dimensions
 } from 'react-native';
 import * as firebase from 'firebase';
 import * as Facebook from 'expo-facebook';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scrollview'
 import Fire from '../Fire';
+import { ScrollView } from 'react-native-gesture-handler';
 
 export default class LoginScreen extends React.Component {
   static navigationOptions = {
@@ -97,75 +100,76 @@ export default class LoginScreen extends React.Component {
     LayoutAnimation.easeInEaseOut();
 
     return (
-      <KeyboardAwareScrollView
-        resetScrollToCoords={{ x: 0, y: 0 }}
-        contentContainerStyle={s.container}
-        scrollEnabled={true}
-      >
-        <StatusBar barStyle='light-content'></StatusBar>
-        <Image
-          source={require('../assets/authHeader.png')}
-          style={{ marginTop: -196, marginLeft: -50, position: "absolute" }}
-        ></Image>
-        <Image
-          source={require('../assets/authFooter.png')}
-          style={{ position: 'absolute', bottom: -325, right: -225 }}
-        ></Image>
-        <Image
-          source={require('../assets/loginLogo.png')}
-          style={{ alignSelf: 'center', position: "absolute", top: 50 }}
-        ></Image>
-        <Text style={{ ...s.greeting, marginTop: 200 }}>{'Ciao!\nBen tornato.'}</Text>
+      <KeyboardAvoidingView>
+        <ScrollView style={{ height:"100%", backgroundColor: "white" }}>
+          <Image
+            source={require('../assets/authHeader.png')}
+            style={{ top: -200, left: -50, position: "absolute" }}
+          />
+          <Image
+            source={require('../assets/authFooter.png')}
+            style={{ position: 'absolute', bottom: -300, right: -225 }}
+          />
+          <Image
+            source={require('../assets/loginLogo.png')}
+            style={{ alignSelf: 'center', position: "absolute", top: 80 }}
+          />
+          <Text style={s.greeting}>{'Ciao!\nBen tornato.'}</Text>
 
-        <View style={s.errorMessage}>
-          {this.state.errorMessage && (
-            <Text style={s.error}> {this.state.errorMessage} </Text>
-          )}
-        </View>
+          <View style={s.form}>
 
-        <View style={s.form}>
-          <View>
-            <Text style={s.inputTitle}>Email</Text>
-            <TextInput
-              style={s.input}
-              autoCapitalize='none'
-              onChangeText={email => this.setState({ email })}
-              value={this.state.email}
-            ></TextInput>
+            <View style={s.formItem}>
+              <Text style={s.inputTitle}>Email</Text>
+              <TextInput
+                style={s.input}
+                autoCapitalize='none'
+                onChangeText={email => this.setState({ email })}
+                value={this.state.email}
+              ></TextInput>
+            </View>
+
+            <View style={s.formItem}>
+              <Text style={s.inputTitle}>Password</Text>
+              <TextInput
+                style={s.input}
+                secureTextEntry
+                autoCapitalize='none'
+                onChangeText={password => this.setState({ password })}
+                value={this.state.password}
+              ></TextInput>
+            </View>
+
+            <View style={s.formItem}>
+              <TouchableOpacity style={s.button} onPress={this.handleLogin}>
+                <Text style={{ color: '#fff', fontWeight: '500' }}>Accedi</Text>
+              </TouchableOpacity>
+            </View>
+
+            <View style={s.formItem}>
+              <TouchableOpacity style={{ ...s.button, backgroundColor: "#3b5998" }} onPress={() => this.loginWithFacebook()}>
+                <Text style={{ color: "#FFF", fontWeight: "500", letterSpacing: 2, textAlign: "center", fontSize: 15, }}>Accedi con Facebook</Text>
+              </TouchableOpacity>
+            </View>
+
+            <View style={s.formItem}>
+              <TouchableOpacity
+                style={{ alignSelf: 'center' }}
+                onPress={() => {
+                  this.props.navigation.navigate('Registrati');
+                }}
+              >
+                <Text style={{ fontSize: 13 }}>
+                  Sei nuovo su Talent?{' '}
+                  <Text style={{ fontWeight: '500' }}>Registrati</Text>
+                </Text>
+              </TouchableOpacity>
+            </View>
+
           </View>
+        </ScrollView>
 
-          <View style={{ marginTop: 32 }}>
-            <Text style={s.inputTitle}>Password</Text>
-            <TextInput
-              style={s.input}
-              secureTextEntry
-              autoCapitalize='none'
-              onChangeText={password => this.setState({ password })}
-              value={this.state.password}
-            ></TextInput>
-          </View>
-        </View>
-        <View style={{ flex: 1, justifyContent: "space-around", flexDirection: "column", alignItems: "stretch" }}>
-          <TouchableOpacity style={s.button} onPress={this.handleLogin}>
-            <Text style={{ color: '#fff', fontWeight: '500' }}>Accedi</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={{ ...s.button, backgroundColor: "#3b5998" }} onPress={() => this.loginWithFacebook()}>
-            <Text style={{ color: "#FFF", fontWeight: "500", letterSpacing: 2, textAlign: "center", fontSize: 15, }}>Accedi con Facebook</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={{ alignSelf: 'center' }}
-            onPress={() => {
-              this.props.navigation.navigate('Registrati');
-            }}
-          >
-            <Text style={{ fontSize: 13 }}>
-              Sei nuovo su Talent?{' '}
-              <Text style={{ fontWeight: '500' }}>Registrati</Text>
-            </Text>
-          </TouchableOpacity>
-        </View>
 
-      </KeyboardAwareScrollView>
+      </KeyboardAvoidingView >
     );
   }
 }

@@ -1,5 +1,5 @@
 'use strict';
-
+import {Dimensions} from 'react-native';
 var React = require('react-native');
 
 var {
@@ -18,14 +18,24 @@ module.exports = StyleSheet.create({
         backgroundColor:"white"
     },
     greeting: {
-        marginTop: -32,
-        fontSize: 18,
+        top: 40,
+        fontSize: 24,
         fontWeight: '400',
-        textAlign: 'center'
+        textAlign: 'center',
+        position:"absolute",
+        alignSelf:"center",
     },
     form: {
-        marginBottom: 48,
-        marginHorizontal: 40
+        paddingTop:220,
+        paddingHorizontal: 40,
+        height:Dimensions.get('window').height,
+        display:"flex",
+        flexDirection:"column",
+        justifyContent:"space-around"
+    },
+    formItem:{
+        flex:1,
+        width:"100%"
     },
     inputTitle: {
         fontSize: 10,
@@ -34,7 +44,6 @@ module.exports = StyleSheet.create({
     input: {
         borderBottomColor: '#8a8f9e',
         borderBottomWidth: StyleSheet.hairlineWidth,
-        height: 40,
         fontSize: 15,
     },
     button: {

@@ -11,6 +11,7 @@ import uuid from 'react-uuid'
 import { AsyncStorage } from 'react-native';
 import * as c from "../config";
 import { withGlobalContext } from '../GlobalContext';
+import {FontAwesome} from '@expo/vector-icons';
 
 class UserScreen extends React.Component {
 
@@ -162,12 +163,29 @@ class UserScreen extends React.Component {
         }
     }
 
+    handleSfida = () => {
+        if (this.state.isMine) {
+            // vai a visualizza sfide
+            this.props.navigation.navigate('Sfide')
+        } else {
+            // posta video sfida
+            this.props.navigation.push('Carica',
+            { sfida: true, utenteSfidato: this.state.user})
+        }
+    }
+
     //RENDER
     render() {
         return (
             <SafeAreaView>
                 {/* <Text h1 color="white">Is online: {this.props.global.user.name}</Text> */}
                 {this.props.global.user ? (
+                    <>
+                    <TouchableOpacity style={{height:42,width:42, backgroundColor:"grey", borderRadius:76, position:"absolute", top:0, right:20,
+                justifyContent:"center", alignItems:"center", zIndex:2}} onPress={this.handleSfida}>
+                        <FontAwesome name="flash" color="red" size={32}/>
+                    </TouchableOpacity>
+                    
                     <Profile
                         user={this.state.user}
                         userVideos={this.state.userVideos}
@@ -177,6 +195,7 @@ class UserScreen extends React.Component {
                         guest={!this.state.isMine}
                         follow={this.follow}
                     />
+                    </>
 
                 )
                     : <Text color="white"> No User</Text>

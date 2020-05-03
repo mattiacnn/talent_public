@@ -108,7 +108,11 @@ class VideoScreen extends React.Component {
                     this.setState({ showToast: true, message: 'Video già piaciuto' });
                 } else {
                     docRef.set({ user_id: uId, video_id: vId, videoOwner_id:this.state.user.id});
-                    firebase.firestore().collection("videos").doc(vId).update({likes:this.state.video.likes + 1});
+                    // update con transaction. Si dovrò fare con distributed counters
+                    firebase.firestore().collection("videos").doc(vId)
+                    .update({
+                        likes: firebase.firestore.FieldValue.increment(1)
+                    });
                     this.setState({video:{...this.state.video, likes: this.state.video.likes +1}});
                 }
                 this._handleNotification

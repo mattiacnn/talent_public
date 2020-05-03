@@ -98,6 +98,68 @@ class Profile extends React.Component {
             this.setState({followed: !this.state.followed, loadingIndicator: false});
         }, 500);
     }
+    handleNavigation = (chatObject) => {
+        console.log('chAT OBJECT:', chatObject);
+        this.props.navigation.push('ChatWith', {
+            chatId: chatObject.id,
+            recipient: chatObject.recipient
+        });
+    }
+
+    estimateChatId(uid1, uid2) {
+        if (uid1 < uid2) {
+            return uid1 + uid2;
+        }
+        else {
+            return uid2 + uid1;
+        }
+    }
+
+    handleNewChat = (item) => {
+        console.log('newchat, pressed on', item);
+        var that = this;
+        const idUtente = item.id;
+        var gu = that.props.global.user;
+        const idMio = gu._id;
+        
+        // se esiste ha questa chiave
+        // const key = this.hash(idMio, idUtente);
+        const chatId = this.estimateChatId(idMio, idUtente);
+        const ref = firebase.firestore().collection('chats').doc(chatId);
+        var arg = { id: chatId, recipient: item };
+
+        ref.get().then(function (doc) {
+
+            if (doc.exists) {
+                console.log("Document id:", doc.id);
+
+            } else {
+                // doc.data() will be undefined in this case
+                console.log("No such document!");
+                const chatItem = {
+                    avatars: [item.avatar, gu.avatar],
+                    between: [idUtente, idMio],
+                    users: [
+                        {
+                            name: item.name,
+                            surname: item.surname,
+                            username: item.username,
+                            token: item.token
+                        }, 
+                        {
+                            name: gu.name,
+                            surname: gu.surname,
+                            username: gu.username,
+                            token: gu.token
+                        }
+                    ]
+                };
+                console.log('creating...',chatItem);
+                return ref.set(chatItem)
+            }
+        }).then(() => { that.handleNavigation(arg); })
+            .catch(err => { console.log(err) });
+    }
 
     render() {
         const { height, width } = Dimensions.get('window');
@@ -183,11 +245,7 @@ class Profile extends React.Component {
 
                             <View style={{ margin: 5, flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
                                 <TouchableOpacity style={{ margin: 5, flexDirection: "row", justifyContent: "center", alignItems: "center" }}
-                                    onPress={() => {
-                                        this.props.navigation.navigate('Chat', {
-                                            user: showUser,
-                                        })
-                                    }} >
+                                    onPress={() => {this.handleNewChat(showUser)}} >
                                     <Icon name="message-text" size={24} color="#EA1043" />
                                     <Text style={{ color: "#C3C5CD", fontSize: 12, lineHeight: 24, margin: 5 }}>Messaggio</Text>
                                 </TouchableOpacity>

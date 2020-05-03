@@ -1,5 +1,6 @@
 import React from "react";
-import { View, Text, Modal, StyleSheet, StatusBar, TextInput, TouchableOpacity, Image, AsyncStorage, SafeAreaView, ImageBackground } from "react-native";
+import { KeyboardAvoidingView, View, Text, Modal, StatusBar, TouchableOpacity, Image, AsyncStorage, SafeAreaView, ImageBackground } from "react-native";
+import { Animated, Dimensions, Keyboard, StyleSheet, TextInput, UIManager,ScrollView } from 'react-native';
 
 import Fire from "../Fire";
 import { CheckBox } from 'react-native-elements'
@@ -14,11 +15,9 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scrollview'
 import { Notifications } from 'expo';
 import * as Permissions from 'expo-permissions';
 import Constants from 'expo-constants';
+import KeyboardShift from '../KeyboardShift';
 
 export default class RegisterScreen extends React.Component {
-    static navigationOptions = {
-        headerShown: false
-    };
 
     constructor(props) {
         super(props);
@@ -186,20 +185,7 @@ export default class RegisterScreen extends React.Component {
         };
 
         return (
-            <KeyboardAwareScrollView
-                resetScrollToCoords={{ x: 0, y: 0 }}
-                contentContainerStyle={s.container}
-                scrollEnabled={true}
-            >
-                <StatusBar barStyle='light-content'></StatusBar>
-                <Image
-                    source={require('../assets/authHeader.png')}
-                    style={{ marginTop: -116, marginLeft: -50 }}
-                ></Image>
-                <Image
-                    source={require('../assets/authFooter.png')}
-                    style={{ position: 'absolute', bottom: -325, right: -225 }}
-                ></Image>
+            <>
                 <TouchableOpacity
                     style={styles.back}
                     onPress={() => this.props.navigation.navigate('Login')}
@@ -210,177 +196,177 @@ export default class RegisterScreen extends React.Component {
                         color='#FFF'
                     ></Ionicons>
                 </TouchableOpacity>
-                <View
-                    style={{
-                        position: 'absolute',
-                        top: 64,
-                        alignItems: 'center',
-                        width: '100%'
-                    }}
-                >
-                    <Text style={styles.greeting}>
-                        {'Registrati ora.\n Mostra a tutti il tuo talento!'}
-                    </Text>
-                    <TouchableOpacity
-                        style={styles.avatarPlaceholder}
-                        onPress={this.handlePickAvatar}
-                    >
-                        <Image
-                            source={this.state.user?.avatar ? { uri: this.state.user.avatar } : null}
-                            style={styles.avatar}
-                        />
-                        <Ionicons
-                            name='ios-add'
-                            size={40}
-                            color='#fff'
-                            style={{ marginTop: 6, marginLeft: 2 }}
-                        ></Ionicons>
-                    </TouchableOpacity>
-                </View>
 
-                <View style={styles.errorMessage}>
-                    {this.state.errorMessage && (
-                        <Text style={styles.error}>{this.state.errorMessage}</Text>
-                    )}
-                </View>
+                <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : null}>
+                    <ScrollView style={{ backgroundColor: "white",}}>
+                            <Image
+                                source={require('../assets/authHeader.png')}
+                                style={{ top: -200, left: -50, position: "absolute" }}
+                            />
+                            <Image
+                                source={require('../assets/authFooter.png')}
+                                style={{ position: 'absolute', bottom: -300, right: -225 }}
+                            />
 
-                <View style={styles.form}>
-                    <View>
-                        <Text style={styles.inputTitle}>Nome</Text>
-                        <TextInput
-                            style={styles.input}
-                            onChangeText={name =>
-                                this.setState({ user: { ...this.state.user, name } })
-                            }
-                            value={this.state.user.name}
-                            placeholder={"Inserisci il tuo nome"}
-                        ></TextInput>
-                    </View>
+                        <View style={styles.form}>
 
-                    <View style={{ marginTop: 32 }}>
-                        <Text style={styles.inputTitle}>Email</Text>
-                        <TextInput
-                            style={styles.input}
-                            autoCapitalize='none'
-                            onChangeText={email =>
-                                this.setState({ user: { ...this.state.user, email } })
-                            }
-                            value={this.state.user.email}
-                            placeholder={"Inserisci il tuo indirizzo email"}
-                        ></TextInput>
-                    </View>
-
-                    <View style={{ marginTop: 32 }}>
-                        <Text style={styles.inputTitle}>Password</Text>
-                        <TextInput
-                            style={styles.input}
-                            secureTextEntry
-                            autoCapitalize='none'
-                            onChangeText={password =>
-                                this.setState({ user: { ...this.state.user, password } })
-                            }
-                            value={this.state.user.password}
-                            placeholder={"Password di almeno 6 caratteri"}
-                        ></TextInput>
-                    </View>
-
-                    <TouchableOpacity style={!this.state.user.email || !this.state.user.password ? styles.disabled : styles.button}
-                        disabled={!this.state.user.email || !this.state.user.password ? true : false}
-                        onPress={() => this.setState({ visible: true })}>
-                        <View style={{ display: "flex", flexDirection: "row", alignItems: "stretch", justifyContent: "space-around", }}>
-                            <Text style={{ color: "#FFF", fontWeight: "500", letterSpacing: 2, alignSelf: "center", fontSize: 15, marginTop: -3 }}>Avanti</Text>
-                        </View>
-                    </TouchableOpacity>
-                </View>
-
-
-                <Modal
-                    animationType="fade"
-                    visible={this.state.visible}
-                >
-                    <KeyboardAwareScrollView resetScrollToCoords={{ x: 0, y: 0 }}
-                        contentContainerStyle={styles.container}
-                        scrollEnabled={true}>
-                        <StatusBar barStyle='light-content'></StatusBar>
-                        <Image
-                            source={require('../assets/authHeader.png')}
-                            style={{ position: 'absolute', marginTop: -146, marginLeft: -50 }}
-                        ></Image>
-                        <Image
-                            source={require('../assets/authFooter.png')}
-                            style={{ position: 'absolute', bottom: -325, right: -225 }}
-                        ></Image>
-                        <TouchableOpacity
-                            style={styles.back}
-                            onPress={() => this.setState({ ...this.state, visible: false })}
-                        >
-                            <Ionicons
-                                name='ios-arrow-round-back'
-                                size={42}
-                                color='#FFF'
-                            ></Ionicons>
-                        </TouchableOpacity>
-
-
-                        <View style={styles.errorMessage}>
-                            {this.state.errorMessage && (
-                                <Text style={styles.error}>{this.state.errorMessage}</Text>
-                            )}
-                        </View>
-                        <Image
-                            source={require('../assets/logo.png')}
-                            style={{ height: 150, width: 150, alignSelf: "center", marginTop: 80, position: "absolute" }}
-                        />
-                        <View style={{ ...styles.form, marginTop: 160, alignItems: "stretch", alignContent: "center", flexDirection: "column", }}>
-
-                            <View >
-                                <Text style={styles.inputTitle}>Username</Text>
-                                <TextInput placeholder="username" style={styles.input} onChangeText={username => this.setState({ user: { ...this.state.user, username } })}></TextInput>
-                            </View>
-
-                            <View>
-                                <TouchableOpacity onPress={() => this.setState({ show: !this.state.show })} >
-                                    <Text style={styles.inputData}>{this.state.message}</Text>
+                            <View style={s.formItem}>
+                                <TouchableOpacity
+                                    style={styles.avatarPlaceholder}
+                                    onPress={this.handlePickAvatar}
+                                >
+                                    <Image
+                                        source={this.state.user?.avatar ? { uri: this.state.user.avatar } : null}
+                                        style={styles.avatar}
+                                    />
+                                    <Ionicons
+                                        name='ios-add'
+                                        size={40}
+                                        color='#fff'
+                                        style={{ marginTop: 6, marginLeft: 2 }}
+                                    ></Ionicons>
                                 </TouchableOpacity>
-                                {this.state.show && (<DateTimePicker
-                                    testID="dateTimePicker"
-                                    timeZoneOffsetInMinutes={0}
-                                    value={this.state.date}
-                                    mode={'date'}
-                                    is24Hour={true}
-                                    display="calendar"
-                                    onChange={onChange}
-                                    minimumDate={this.state.minDate}
-                                    maximumDate={this.state.maxDate}
-                                />)}
                             </View>
 
-                            <View >
-                                <CheckBox
-                                    title='Accetto i temini e le condizioni di talent'
-                                    checked={this.state.checked}
-                                    onPress={() => this.condition()}
-                                    checkedColor="red"
-                                />
+                            <View style={s.formItem}>
+                                <Text style={s.inputTitle}>Nome</Text>
+                                <TextInput
+                                    style={s.input}
+                                    onChangeText={name =>
+                                        this.setState({ user: { ...this.state.user, name } })
+                                    }
+                                    value={this.state.user.name}
+                                    placeholder={"Inserisci il tuo nome"}
+                                ></TextInput>
                             </View>
 
-                            <TouchableOpacity
-                                style={!this.state.user.username || !this.state.user.birthdate || !this.state.checked ? styles.disabled : styles.button}
-                                disabled={!this.state.user.username || !this.state.user.birthdate || !this.state.checked ? true : false}
-                                onPress={this.handleSignUp} >
-                                <View style={{ display: "flex", flexDirection: "row", alignItems: "stretch", justifyContent: "space-around", }}>
-                                    <Text style={{ color: "#FFF", fontWeight: "500", letterSpacing: 2, alignSelf: "center", fontSize: 15, marginTop: -3 }}>Registrati</Text>
-                                </View>
-                            </TouchableOpacity>
-                            <Text style={{ alignSelf: "center", marginTop: 30 }}>Condizioni e termini di servizio di talent</Text>
+                            <View style={s.formItem}>
+                                <Text style={s.inputTitle}>Email</Text>
+                                <TextInput
+                                    style={s.input}
+                                    autoCapitalize='none'
+                                    onChangeText={email =>
+                                        this.setState({ user: { ...this.state.user, email } })
+                                    }
+                                    value={this.state.user.email}
+                                    placeholder={"Inserisci il tuo indirizzo email"}
+                                ></TextInput>
+                            </View>
+
+                            <View style={s.formItem}>
+                                <Text style={s.inputTitle}>Password</Text>
+                                <TextInput
+                                    style={s.input}
+                                    secureTextEntry
+                                    autoCapitalize='none'
+                                    onChangeText={password =>
+                                        this.setState({ user: { ...this.state.user, password } })
+                                    }
+                                    value={this.state.user.password}
+                                    placeholder={"Password di almeno 6 caratteri"}
+                                ></TextInput>
+                            </View>
+
+                            <View style={s.formItem}>
+                                <TouchableOpacity style={!this.state.user.email || !this.state.user.password ? styles.disabled : styles.button}
+                                    disabled={!this.state.user.email || !this.state.user.password ? true : false}
+                                    onPress={() => this.setState({ visible: true })}>
+                                    <View style={{ display: "flex", flexDirection: "row", alignItems: "stretch", justifyContent: "space-around", }}>
+                                        <Text style={{ color: "#FFF", fontWeight: "500", letterSpacing: 2, alignSelf: "center", fontSize: 15, marginTop: -3 }}>Avanti</Text>
+                                    </View>
+                                </TouchableOpacity>
+                            </View>
                         </View>
+                        </ScrollView>
+                </KeyboardAvoidingView>
+            
+            <Modal
+        animationType="fade"
+        visible={this.state.visible}
+    >
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : null}>
+
+            <Image
+                source={require('../assets/authHeader.png')}
+                style={{ position: 'absolute', top: -146, left: -50 }}
+            ></Image>
+            <Image
+                source={require('../assets/authFooter.png')}
+                style={{ position: 'absolute', bottom: -325, right: -225 }}
+            ></Image>
+            <TouchableOpacity
+                style={styles.back}
+                onPress={() => this.setState({ ...this.state, visible: false })}
+            >
+                <Ionicons
+                    name='ios-arrow-round-back'
+                    size={42}
+                    color='#FFF'
+                ></Ionicons>
+            </TouchableOpacity>
 
 
-                    </KeyboardAwareScrollView>
-                </Modal>
-            </KeyboardAwareScrollView>
-        );
+            <View style={styles.errorMessage}>
+                {this.state.errorMessage && (
+                    <Text style={styles.error}>{this.state.errorMessage}</Text>
+                )}
+            </View>
+            <Image
+                source={require('../assets/logo.png')}
+                style={{ height: 150, width: 150, alignSelf: "center", top: 80, position: "absolute" }}
+            />
+            <View style={{ ...styles.form, paddingTop: 160, alignItems: "stretch", alignContent: "center", flexDirection: "column", }}>
+
+                <View >
+                    <Text style={styles.inputTitle}>Username</Text>
+                    <TextInput placeholder="username" style={styles.input} onChangeText={username => this.setState({ user: { ...this.state.user, username } })}></TextInput>
+                </View>
+
+                <View>
+                    <TouchableOpacity onPress={() => this.setState({ show: !this.state.show })} >
+                        <Text style={styles.inputData}>{this.state.message}</Text>
+                    </TouchableOpacity>
+                    {this.state.show && (<DateTimePicker
+                        testID="dateTimePicker"
+                        timeZoneOffsetInMinutes={0}
+                        value={this.state.date}
+                        mode={'date'}
+                        is24Hour={true}
+                        display="calendar"
+                        onChange={onChange}
+                        minimumDate={this.state.minDate}
+                        maximumDate={this.state.maxDate}
+                    />)}
+                </View>
+
+                <View >
+                    <CheckBox
+                        title='Accetto i temini e le condizioni di talent'
+                        checked={this.state.checked}
+                        onPress={() => this.condition()}
+                        checkedColor="red"
+                    />
+                </View>
+
+                <TouchableOpacity
+                    style={!this.state.user.username || !this.state.user.birthdate || !this.state.checked ? styles.disabled : styles.button}
+                    disabled={!this.state.user.username || !this.state.user.birthdate || !this.state.checked ? true : false}
+                    onPress={this.handleSignUp} >
+                    <View style={{ display: "flex", flexDirection: "row", alignItems: "stretch", justifyContent: "space-around", }}>
+                        <Text style={{ color: "#FFF", fontWeight: "500", letterSpacing: 2, alignSelf: "center", fontSize: 15, marginTop: -3 }}>Registrati</Text>
+                    </View>
+                </TouchableOpacity>
+                <Text style={{ alignSelf: "center", marginTop: 30 }}>Condizioni e termini di servizio di talent</Text>
+            </View>
+
+
+        </KeyboardAvoidingView>
+    </Modal>
+            </>
+        )
     }
+
+    
 }
 
 const styles = StyleSheet.create({
@@ -388,19 +374,19 @@ const styles = StyleSheet.create({
         flex: 1
     },
     greeting: {
-        marginTop: 32,
         fontSize: 18,
         fontWeight: '500',
         textAlign: 'center',
-        color: '#FFF'
     },
     form: {
-        marginTop: -10,
-        marginBottom: 10,
-        marginHorizontal: 40,
-        flex: 1,
-        flexDirection: "column",
-        justifyContent: "space-around",
+        
+            paddingTop:100,
+            paddingHorizontal: 40,
+            height:Dimensions.get('window').height,
+            display:"flex",
+            flexDirection:"column",
+            justifyContent:"space-around"
+        
     },
     inputTitle: {
         color: '#8a8f9e',
@@ -434,7 +420,6 @@ const styles = StyleSheet.create({
     button: {
         backgroundColor: '#E9446a',
         borderRadius: 4,
-        height: 52,
         alignItems: 'center',
         justifyContent: 'center',
     },
@@ -447,8 +432,8 @@ const styles = StyleSheet.create({
     back: {
         position: 'absolute',
         zIndex: 9999,
-        top: 48,
-        left: 32,
+        top: 30,
+        left: 22,
         width: 42,
         height: 42,
         borderRadius: 21,
@@ -461,9 +446,9 @@ const styles = StyleSheet.create({
         height: 100,
         backgroundColor: '#cccccc',
         borderRadius: 50,
-        marginTop: 48,
         justifyContent: 'center',
-        alignItems: 'center'
+        alignItems: 'center',
+        alignSelf: "center"
     },
     avatar: {
         position: 'absolute',
