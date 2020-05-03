@@ -19,6 +19,9 @@ import Icon2 from 'react-native-vector-icons/MaterialIcons';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { Text, Button, Block, Input, Card, Radio } from 'galio-framework'
 import { withGlobalContext } from '../GlobalContext';
+import ProgressBarAnimated from 'react-native-progress-bar-animated';
+import {Badge,withBadge } from 'react-native-elements'
+
 
 class Profile extends React.Component {
 
@@ -28,16 +31,57 @@ class Profile extends React.Component {
         this.state = {
             followed: false,
             loadingIndicator: false,
+            progress: 20,
+            progressWithOnComplete: 0,
+            progressCustomized: 0,
+            status:""
         }
     }
 
     componentDidMount () {
-        this.setState({followed: this.isFollowed()})
+        this.setState({followed: this.isFollowed()});
+        this.checkStatus();
+
     }
 
-    prova() {
-        console.log("prova");
+    checkStatus = () =>{
+        var showUser;
+        if (this.props.guest) {
+            showUser = this.props.user;
+            showUser.user_videos = this.props.userVideos;
+        } else {
+            showUser = this.props.global.user;
+        }
+
+        const like = showUser?.like_count ?showUser.like_count : "0";
+        var that = this;
+        //DEFINE CATEGORY STATUS
+        if (like <= 5000)
+        {
+            that.setState({status:"emergente"});
+        }
+        else 
+         if(like>5000 && like<=10000)
+            {
+             that.setState({status:"talento"})
+            }
+        else 
+         if(like>10000 && like<=15000)
+            {
+                that.setState({status:"star"})
+            }
+        else 
+         if(like>15000)
+            {
+                that.setState({status:"superstar"})
+            }
     }
+
+    increase = (key, value) => {
+        this.setState({
+          [key]: this.state[key] + value,
+        });
+      }
 
     isFollowed = () => {
         const userShown = this.props?.user.id || null;
@@ -57,6 +101,15 @@ class Profile extends React.Component {
 
     render() {
         const { height, width } = Dimensions.get('window');
+        const barWidth = Dimensions.get('screen').width - 150;
+
+        const progressCustomStyles = {
+          backgroundColor: '#FEBB29', 
+          borderRadius: 10,
+          borderColor: '#FEBB29',
+          height:20
+        };
+
         var showUser;
         if (this.props.guest) {
             showUser = this.props.user;
@@ -71,7 +124,11 @@ class Profile extends React.Component {
         }
 
         return (
-            <View style={{ marginTop: 10, alignItems: "center", justifyContent: "space-around", }}>
+            <ScrollView contentContainerStyle={{ marginTop: 10, alignItems: "center", justifyContent: "space-around" }}>
+                <View style={{borderWidth:1, borderColor:"#FFD21D",width:160,marginBottom:20}}>
+        <Text style={{fontSize:25,color:"#FFD21D", fontWeight:"bold",letterSpacing:2,marginBottom:15, borderWidth:1, borrderColor:"#FFD21D",marginTop:10,textAlign:"center",}}>{this.state.status}</Text>
+
+                </View>
                 <View style={styles.avatarContainer}>
                     <TouchableOpacity activeOpacity={this.props.guest ? 1 : 0.5} onPress={this.props.guest ? (() => { }) : this.props.update}>
                         <Image
@@ -82,6 +139,25 @@ class Profile extends React.Component {
                             }
                             style={styles.avatar}
                         />
+                        <View style={{flexDirection:"row",marginTop:20,justifyContent:"center"}}>
+
+                        <Image 
+                                source={
+                                    showUser.like_count>1000  ?
+                                    
+                                            require('../assets/bronze2.png') : 
+
+                                            require('../assets/logo.png') ,
+
+                                    showUser.like_count>2000  ?
+                                    
+                                            require('../assets/bronze2.png') : 
+
+                                            require('../assets/logo.png')         
+                                }
+                                style={{height:50,width:50,}}
+                                />
+                        </View>
                     </TouchableOpacity>
                 </View>
 
@@ -121,7 +197,7 @@ class Profile extends React.Component {
                     )
                         : (
                             <>
-                                <View style={{ margin: 5, flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
+                                {/* <View style={{ margin: 5, flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
                                     <TouchableOpacity style={{ margin: 5, flexDirection: "row", justifyContent: "center", alignItems: "center" }}
                                         onPress={() => this.props.navigation.navigate('Modifica', {
                                             editingUser: showUser,
@@ -139,7 +215,7 @@ class Profile extends React.Component {
                                         <Text style={{ color: "#C3C5CD", fontSize: 12, }}>Esci</Text>
                                     </TouchableOpacity>
 
-                                </View>
+                                </View> */}
                             </>
                         )}
 
@@ -157,10 +233,6 @@ class Profile extends React.Component {
                         <Text style={styles.statTitle}>Video</Text>
                     </View>
                     <View style={styles.stat}>
-                        <Text style={styles.statAmount}>{showUser?.like_count ?showUser.like_count : "0"}</Text>
-                        <Text style={styles.statTitle}>Star</Text>
-                    </View>
-                    <View style={styles.stat}>
                         <Text style={styles.statAmount}>{showUser?.followers_count ?showUser.followers_count  : "0"}</Text>
                         <Text style={styles.statTitle}>Follower</Text>
                     </View>
@@ -170,9 +242,7 @@ class Profile extends React.Component {
                     </View>
                 </View>
 
-
-                 <ScrollView  contentContainerStyle={styles.MainContainer}>
-                 <FlatList
+                 <FlatList contentContainerStyle={styles.MainContainer}
                     data={showUser?.user_videos}
                     renderItem={({ item }) => (
 
@@ -187,8 +257,7 @@ class Profile extends React.Component {
                             numColumns={3}
                             keyExtractor={(item) => item.id}
                         />
-                 </ScrollView>                           
-                 </View>           
+                 </ScrollView>           
         );
     }
 }
@@ -266,6 +335,7 @@ const styles = StyleSheet.create({
         width: 250,
         flexDirection: "row",
         justifyContent: "center",
+        marginBottom:20
     },
     stat: {
         alignItems: "center",

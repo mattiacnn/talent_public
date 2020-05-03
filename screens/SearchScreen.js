@@ -169,7 +169,6 @@ export default class SearchScreen extends React.Component {
                     
                    
                 </ScrollView>
-                    <ScrollView  contentContainerStyle={styles.MainContainer}>
                         <FlatList
                             data={this.state.dataSource}
                             renderItem={({ item }) => (
@@ -182,7 +181,6 @@ export default class SearchScreen extends React.Component {
                             numColumns={3}
                             keyExtractor={(item) => item.id}
                         />
-                    </ScrollView>        
             </SafeAreaView>
 
         </View >);

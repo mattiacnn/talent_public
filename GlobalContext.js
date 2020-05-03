@@ -77,9 +77,9 @@ export class GlobalContextProvider extends React.Component {
                         that.setState({
                             user: {
                                 ...that.state.user,
-                                like_count: counters.like_count,
-                                followed_count: counters.followed_count,
-                                followers_count: counters.followers_count
+                                like_count: counters?.like_count||0,
+                                followed_count: counters?.followed_count||0,
+                                followers_count: counters?.followers_count||0
                             }
                         });
 

@@ -355,7 +355,7 @@ function ChatStackComponent() {
     return (
         <ChatStack.Navigator initialRouteName="Chat">
             <ChatStack.Screen name="Chat" component={MessageScreen} options={{headerShown:false}}/>
-            <ChatStack.Screen name="ChatWith" component={ChatFlavio} options={{}}/>
+            <ChatStack.Screen name="ChatWith" component={ChatFlavio} options={{headerTitle:"Conversazione"}}/>
             <ChatStack.Screen name="NewChat" component={NewMessageScreen} options={{headerShown:true}}/>
             <ChatStack.Screen name="Esplora" component={UVStackComponent} />
         </ChatStack.Navigator>

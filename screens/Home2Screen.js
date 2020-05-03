@@ -15,6 +15,8 @@ import 'firebase/firestore';
 import { Notifications } from 'expo';
 import * as Permissions from 'expo-permissions';
 import Constants from 'expo-constants';
+import { FlatList } from 'react-native-gesture-handler';
+import { reset } from 'expo/build/AR';
 
 const dublicateItems = (arr, numberOfRepetitions) =>
     arr.flatMap(i => Array.from({ length: numberOfRepetitions }).fill(i));
@@ -22,6 +24,8 @@ const dublicateItems = (arr, numberOfRepetitions) =>
 function shuffle(array) {
     array.sort(() => Math.random() - 0.5);
 }
+
+const that = this;
 
 
 class Home2Screen extends Component {
@@ -38,20 +42,119 @@ class Home2Screen extends Component {
             nome: this.props.route.params.nome,
             expoPushToken: '',
             notification: {},
+            timeline: [],
+            videoInfo: [],
+            owner: [],
+            feed: [],
         };
         this.handleClick = this.handleClick.bind(this);
         this._onRefresh = this._onRefresh.bind(this);
 
     }
 
-  
 
-    componentDidMount() {
+
+    async componentDidMount() {
         //this._onRefresh();
         //firebase.auth().signOut()
-        this.animation.play();
+        //this.animation.play();
+        //this.getTimeline();
+        const id = firebase.auth().currentUser.uid;
+        var timelineFull = [];
+        const that = this;
+
+        firebase.firestore().collection('timelines').doc(id).collection("videos").get()
+            .then(function (querySnapshot) {
+                querySnapshot.forEach((doc, i) => {
+                    //console.log(" timeline", doc.data());
+                    timelineFull[i] = { ...doc.data() };
+                    firebase.firestore().collection('videos').doc(doc.data().idVideo).get()
+                        .then(video => {
+                            //console.log("video", video.data());
+                            timelineFull[i] = { ...timelineFull[i], ...video.data() };
+                            firebase.firestore().collection('users').doc(video.data().owner).get()
+                                .then(user => {
+                                    //console.log('utente', user.data());
+                                    timelineFull[i] = { ...timelineFull[i], ...user.data() };
+                                })
+                                .then(()=> console.log("oggetto", i, timelineFull[i]))
+                        })
+                });
+                that.setState({timeline: timelineFull}); 
+            })
+            .catch(function (error) {
+                console.log("Error getting documents: ", error);
+            });
+        var videos = [];
+        var user = [];
+
+        timeline.forEach((video) => {
+            videos.push(this.fetchVideo(video.idVideo));
+        });
+
+        videos.forEach((video) => {
+            Promise.resolve(video).then(result => {
+                user.push(this.fetchUser(result.data().owner));
+            })
+        });
 
     }
+
+    fetchTimeline() {
+        const id = firebase.auth().currentUser.uid;
+        firebase.firestore().collection('timelines').doc(id).get();
+    }
+
+    async fetchVideo(video) {
+        return firebase.firestore().collection('videos').doc(video).get();
+    }
+
+    async fetchUser(user) {
+        return firebase.firestore().collection('users').doc(user).get();
+    }
+
+    /*{ getTimeline = async () => {
+ 
+         const that = this;
+         const id = firebase.auth().currentUser.uid;
+ 
+         var timeline = [];
+         // GET TIMLINE WITH VIDEO ID
+         firebase.firestore().collection("timelines").doc(id).collection("videos").get()
+             .then(function (querySnapshot) {
+ 
+                 querySnapshot.forEach(function (doc) {
+                     var item = { tl: doc.data() };
+                     //console.log(doc.id, " TIMELINE ", doc.data());
+                     // GET ALL VIDEO INFORMATION   
+                     firebase.firestore().collection("videos").doc(doc.data().idVideo).get().then(function (doc) {
+                         if (doc.exists) {
+                             item.videoInfo = doc.data();
+                             //console.log("Document data:", doc.data());
+                             // GET USER VIDEO INFO
+                             firebase.firestore().collection("users").doc(doc.data().owner).get().then(function (doc) {
+                                 if (doc.exists) {
+                                     item.userInfo = doc.data();
+                                     //console.log("USERS data:", doc.data());
+                                 }
+                                 else {
+                                     console.log("NO USER FOUND")
+                                 }
+                             })
+                         }
+                         else {
+                             console.log("no data found")
+                         }
+                     });
+ 
+                     //JOIN VIDEO AND USER INFO
+                     timeline.push(item);
+                 })
+ 
+                 console.log('scaricati ', timeline)
+             })
+     }
+ }*/
     handleClick() {
         this.setState({
             liked: !this.state.liked,
@@ -167,8 +270,8 @@ class Home2Screen extends Component {
         return (
 
             <View style={styles.container}>
-
-                <GestureRecognizer
+                <TouchableOpacity onPress={() => console.log(this.state.timeline)}><Text style={{color:"white"}}>CIAOO</Text></TouchableOpacity>    
+                {/*<GestureRecognizer
                     onSwipe={(direction, state) => this.onSwipe(direction, state)}
                     onSwipeUp={(state) => this.onSwipeUp(state)}
                     onSwipeDown={(state) => this.onSwipeDown(state)}
@@ -177,8 +280,7 @@ class Home2Screen extends Component {
                     config={config}
                     style={{ flex: 1, }}
                 >
-                    {/* <Image source={require('../assets/tempImage1.jpg')}></Image> */}
-                    <Video source={{ uri: item?.uri }} resizeMode="cover" style={StyleSheet.absoluteFill}  isLooping />
+                    <Video source={{ uri: this.state.timeline.uriVideo }} resizeMode="cover" style={StyleSheet.absoluteFill} isLooping />
                     <View style={styles.full}>
                         <View style={{ flex: .5, justifyContent: 'flex-end' }}>
 
@@ -210,7 +312,7 @@ class Home2Screen extends Component {
                     <View style={{ flex: .5, flexDirection: 'row' }}>
                         <View style={{ flex: .5 }}>
                             <View style={styles.tag}>
-        <Text style={styles.tagtitle}>{this.state.nome}</Text>
+                                <Text style={styles.tagtitle}>{this.state.nome}</Text>
                             </View>
                             <ScrollView showsVerticalScrollIndicator={false}>
                                 <Text style={styles.username}>{item?.description}</Text>
@@ -232,8 +334,7 @@ class Home2Screen extends Component {
                             </View>
                         </View>
                     </View>
-                </GestureRecognizer>
-
+                                </GestureRecognizer>*/}
             </View>
         );
     }

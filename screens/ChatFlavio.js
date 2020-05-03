@@ -3,6 +3,8 @@ import { GiftedChat } from 'react-native-gifted-chat';
 import { withGlobalContext } from '../GlobalContext';
 import firebase from 'firebase';
 import 'firebase/firestore';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scrollview';
+import { StyleSheet,SafeAreaView} from "react-native";
 
 class ChatFlavio extends React.Component {
     static navigationOptions = ({ route }) => ({
@@ -19,7 +21,6 @@ class ChatFlavio extends React.Component {
     }
 
     componentDidMount() {
-
         this.loadMessages(message => {
             this.setState(previousState => {
                 return {
@@ -47,7 +48,6 @@ class ChatFlavio extends React.Component {
         var that = this;
         //var recipientId = this.props.navigation.getParam("recipientId");
         var chatId = this.state.chatId;
-        console.log(chatId)
         firebase.firestore().collection("chats")
         .doc(chatId).collection("messages")
         .orderBy("createdAt", "asc")
@@ -55,7 +55,6 @@ class ChatFlavio extends React.Component {
                 doc.docChanges().forEach(message => {
                     var id = message.doc.id;
                     message = message.doc.data();
-                    console.log("message:",message)
                     const newMessage = {
                         _id: id,
                         text: message.text,
@@ -73,7 +72,6 @@ class ChatFlavio extends React.Component {
 
     _handleNotification = notification => {
         Vibration.vibrate();
-        console.log(notification);
         this.setState({ notification: notification });
       };
     
@@ -104,14 +102,20 @@ class ChatFlavio extends React.Component {
             name: this.props.global.user.name,
             avatar: this.props.global.user.avatar
         };
-        return (
-            <GiftedChat
-                messages={this.state.messages}
-                onSend={(m)=>{this.sendMessage(m)}}
-                user={user}
-            />
-        );
+
+            const chat = <GiftedChat messages={this.state.messages} onSend={(m)=>{this.sendMessage(m)}} user={user} />;
+
+            if (Platform.OS === "android") {
+                return (
+                    <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding" keyboardVerticalOffset={30} enabled>
+                        {chat}
+                    </KeyboardAvoidingView>
+                );
+            }
+    
+            return <SafeAreaView style={{ flex: 1}}>{chat}</SafeAreaView>;
     }
 }
 
 export default withGlobalContext(ChatFlavio);
+

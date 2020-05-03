@@ -28,17 +28,17 @@ export default class LoginScreen extends React.Component {
   }
 
 
-  facebookFirestore = () =>{
+  facebookFirestore = (avatar, email, name, surname, username) =>{
     const uid = firebase.auth().currentUser.uid;
     firebase.firestore().collection("users").doc(uid).set({
-      avatar: userInfo.picture,
-      birthdate: userInfo.user_birthday,
-      email: userInfo.email,
+      avatar: avatar,
+      birthdate: null,
+      email: email,
       followed: { id_users: [] },
       follower: { id_users: [] },
-      name: userInfo.first_name,
-      surname: userInfo.last_name,
-      username: userInfo.first_name + userInfo.last_name
+      name: name,
+      surname: surname,
+      username: username
     })
   }
 
@@ -65,14 +65,20 @@ export default class LoginScreen extends React.Component {
       });
       if (type === 'success') {
       // Get the user's name using Facebook's Graph API
-        const response = await fetch(`https://graph.facebook.com/me/?fields=id,name&access_token=${token}`); //<- use the token you got in your request
+        const response = await fetch(`https://graph.facebook.com/me/?fields=email,id,last_name,short_name,picture,first_name&access_token=${token}`); //<- use the token you got in your request
         const userInfo = await response.json();
-       
+
+
         const credential = firebase.auth.FacebookAuthProvider.credential(token)
       
         firebase.auth().signInWithCredential(credential).
-        then( this.facebookFirestore())
-        .catch((error) => {
+        then(
+          UC => {
+            console.log("EMAIL = ", userInfo.picture.data.url);
+            this.facebookFirestore(userInfo.picture.data.url, userInfo.email, userInfo.first_name, userInfo.last_name, userInfo.first_name + userInfo.last_name);
+          } 
+          //this.facebookFirestore())
+        ).catch((error) => {
           console.log(error)
         });
 
