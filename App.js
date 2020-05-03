@@ -47,6 +47,7 @@ console.disableYellowBox = true;
 import { enableScreens } from 'react-native-screens';
 import ChatFlavio from "./screens/ChatFlavio";
 import NewMessageScreen from "./screens/NewMessageScreen";
+import SfideScreen from "./screens/SfideScreen";
 enableScreens();
 
 const MyTheme = {
@@ -369,6 +370,7 @@ function SearchStackComponent() {
             <SearchStack.Screen name="Cerca" component={SearchScreen} options={{headerShown:false}}/>
             <SearchStack.Screen name="Esplora" component={UVStackComponent} />
             <SearchStack.Screen name="Categoria" component={SearchScreen} />
+            <SearchStack.Screen name="ChatWith" component={ChatFlavio} options={{}}/>
         </SearchStack.Navigator>
     )
 }
@@ -380,6 +382,7 @@ function ProfileStackComponent({ route }) {
         <ProfileStack.Navigator initialRouteName="Il tuo Profilo">
             <ProfileStack.Screen name="Modifica" component={EditProfileScreen} options={EditProfileScreen.navigationOptions} />
             <ProfileStack.Screen name="Il tuo Profilo" component={MySelfStackComponent} initialParams={{ isMine }} options={{ headerShown: false }} />
+            <ProfileStack.Screen name="Sfide" component={SfideScreen}/>
         </ProfileStack.Navigator>
     )
 }
