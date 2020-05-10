@@ -3,8 +3,8 @@ import { GiftedChat } from 'react-native-gifted-chat';
 import { withGlobalContext } from '../GlobalContext';
 import firebase from 'firebase';
 import 'firebase/firestore';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scrollview';
-import { StyleSheet,SafeAreaView} from "react-native";
+import { StyleSheet,SafeAreaView,KeyboardAvoidingView} from "react-native";
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scrollview'
 
 class ChatFlavio extends React.Component {
     static navigationOptions = ({ route }) => ({
@@ -102,18 +102,13 @@ class ChatFlavio extends React.Component {
             name: this.props.global.user.name,
             avatar: this.props.global.user.avatar
         };
-
-            const chat = <GiftedChat messages={this.state.messages} onSend={(m)=>{this.sendMessage(m)}} user={user} />;
-
-            if (Platform.OS === "android") {
-                return (
-                    <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding" keyboardVerticalOffset={30} enabled>
-                        {chat}
-                    </KeyboardAvoidingView>
-                );
-            }
-    
-            return <SafeAreaView style={{ flex: 1}}>{chat}</SafeAreaView>;
+        return (
+            <GiftedChat
+                messages={this.state.messages}
+                onSend={(m)=>{this.sendMessage(m)}}
+                user={user}
+            />
+        );
     }
 }
 

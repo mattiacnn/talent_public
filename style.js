@@ -24,6 +24,7 @@ module.exports = StyleSheet.create({
         textAlign: 'center',
         position:"absolute",
         alignSelf:"center",
+        color:"white"
     },
     form: {
         paddingTop:220,

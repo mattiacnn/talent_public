@@ -186,11 +186,8 @@ class Profile extends React.Component {
         }
 
         return (
-            <ScrollView contentContainerStyle={{ marginTop: 10, alignItems: "center", justifyContent: "space-around" }}>
-                <View style={{borderWidth:1, borderColor:"#FFD21D",width:160,marginBottom:20}}>
-        <Text style={{fontSize:25,color:"#FFD21D", fontWeight:"bold",letterSpacing:2,marginBottom:15, borderWidth:1, borrderColor:"#FFD21D",marginTop:10,textAlign:"center",}}>{this.state.status}</Text>
-
-                </View>
+            <ScrollView contentContainerStyle={{ alignItems: "center", justifyContent: "space-around" }}>
+                
                 <View style={styles.avatarContainer}>
                     <TouchableOpacity activeOpacity={this.props.guest ? 1 : 0.5} onPress={this.props.guest ? (() => { }) : this.props.update}>
                         <Image
@@ -204,21 +201,16 @@ class Profile extends React.Component {
                         <View style={{flexDirection:"row",marginTop:20,justifyContent:"center"}}>
 
                         <Image 
-                                source={
-                                    showUser.like_count>1000  ?
-                                    
-                                            require('../assets/bronze2.png') : 
+                                source={ require('../assets/star.png') }
+                                style={{height:30,width:30}}
 
-                                            require('../assets/logo.png') ,
-
-                                    showUser.like_count>2000  ?
-                                    
-                                            require('../assets/bronze2.png') : 
-
-                                            require('../assets/logo.png')         
-                                }
-                                style={{height:50,width:50,}}
                                 />
+                                                        <Image 
+                                source={ require('../assets/star.png') }
+                                style={{height:30,width:30}}
+
+                                />
+      
                         </View>
                     </TouchableOpacity>
                 </View>
@@ -255,7 +247,7 @@ class Profile extends React.Component {
                     )
                         : (
                             <>
-                                {/* <View style={{ margin: 5, flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
+                                 <View style={{ margin: 5, flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
                                     <TouchableOpacity style={{ margin: 5, flexDirection: "row", justifyContent: "center", alignItems: "center" }}
                                         onPress={() => this.props.navigation.navigate('Modifica', {
                                             editingUser: showUser,
@@ -273,7 +265,7 @@ class Profile extends React.Component {
                                         <Text style={{ color: "#C3C5CD", fontSize: 12, }}>Esci</Text>
                                     </TouchableOpacity>
 
-                                </View> */}
+                                </View> 
                             </>
                         )}
 
@@ -299,6 +291,7 @@ class Profile extends React.Component {
                         <Text style={styles.statTitle}>Seguiti</Text>
                     </View>
                 </View>
+
 
                  <FlatList contentContainerStyle={styles.MainContainer}
                     data={showUser?.user_videos}

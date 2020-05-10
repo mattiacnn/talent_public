@@ -270,8 +270,7 @@ class Home2Screen extends Component {
         return (
 
             <View style={styles.container}>
-                <TouchableOpacity onPress={() => console.log(this.state.timeline)}><Text style={{color:"white"}}>CIAOO</Text></TouchableOpacity>    
-                {/*<GestureRecognizer
+                <GestureRecognizer
                     onSwipe={(direction, state) => this.onSwipe(direction, state)}
                     onSwipeUp={(state) => this.onSwipeUp(state)}
                     onSwipeDown={(state) => this.onSwipeDown(state)}
@@ -295,7 +294,7 @@ class Home2Screen extends Component {
                                     </ImageBackground>
                                 </TouchableOpacity>
                                 <TouchableOpacity onPress={this.handleClick}>
-                                    <Icon name="heart" size={40} color={like} />
+                                    <Icon name="star" size={40} color={like} />
                                 </TouchableOpacity>
                                 <Text style={styles.likecount}>{this.state.likecount}</Text>
                                 <TouchableOpacity onPress={() => Actions.Comments()} >
@@ -334,7 +333,7 @@ class Home2Screen extends Component {
                             </View>
                         </View>
                     </View>
-                                </GestureRecognizer>*/}
+                                </GestureRecognizer>
             </View>
         );
     }

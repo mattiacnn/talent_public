@@ -73,7 +73,6 @@ export default class RegisterScreen extends React.Component {
             alert('Must use physical device for Push Notifications');
         }
         return token;
-
     };
 
     // CREATE NEW USER AND STORE IT ON FIRESTORE
