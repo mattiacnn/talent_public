@@ -1,5 +1,5 @@
 import React from "react";
-import { View, StyleSheet, Image, TouchableOpacity, SafeAreaView, RefreshControl, ActivityIndicator, ImageBackground } from "react-native";
+import { View, StyleSheet, Image,Animated, TouchableOpacity, SafeAreaView, RefreshControl, ActivityIndicator,Modal  } from "react-native";
 import Fire from "../Fire";
 import firebase from 'firebase';
 import 'firebase/firestore';
@@ -34,7 +34,9 @@ class Profile extends React.Component {
             progress: 20,
             progressWithOnComplete: 0,
             progressCustomized: 0,
-            status:""
+            status:"",
+            hide:"true",
+            fadeValue:0
         }
     }
 
@@ -161,6 +163,20 @@ class Profile extends React.Component {
             .catch(err => { console.log(err) });
     }
 
+    cancelVideo = () =>{
+        this.setState({hide:true});
+    }
+    deleteVideo = (idVideo) =>
+    {
+        firebase.firestore().collection("videos").doc(idVideo).delete();
+
+    }
+    _rotateAnimation = () =>{
+        Animated.timing(this.state.fadeValue, {
+            toValue:1,
+            duration:1000
+        }).start()
+    }
     render() {
         const { height, width } = Dimensions.get('window');
         const barWidth = Dimensions.get('screen').width - 150;
@@ -186,11 +202,8 @@ class Profile extends React.Component {
         }
 
         return (
-            <ScrollView contentContainerStyle={{ marginTop: 10, alignItems: "center", justifyContent: "space-around" }}>
-                <View style={{borderWidth:1, borderColor:"#FFD21D",width:160,marginBottom:20}}>
-        <Text style={{fontSize:25,color:"#FFD21D", fontWeight:"bold",letterSpacing:2,marginBottom:15, borderWidth:1, borrderColor:"#FFD21D",marginTop:10,textAlign:"center",}}>{this.state.status}</Text>
-
-                </View>
+            <ScrollView contentContainerStyle={{ alignItems: "center", justifyContent: "space-around" }}>
+                
                 <View style={styles.avatarContainer}>
                     <TouchableOpacity activeOpacity={this.props.guest ? 1 : 0.5} onPress={this.props.guest ? (() => { }) : this.props.update}>
                         <Image
@@ -201,24 +214,7 @@ class Profile extends React.Component {
                             }
                             style={styles.avatar}
                         />
-                        <View style={{flexDirection:"row",marginTop:20,justifyContent:"center"}}>
-
-                        <Image 
-                                source={
-                                    showUser.like_count>1000  ?
-                                    
-                                            require('../assets/bronze2.png') : 
-
-                                            require('../assets/logo.png') ,
-
-                                    showUser.like_count>2000  ?
-                                    
-                                            require('../assets/bronze2.png') : 
-
-                                            require('../assets/logo.png')         
-                                }
-                                style={{height:50,width:50,}}
-                                />
+                        <View style={{flexDirection:"row",marginTop:20,justifyContent:"center"}}> 
                         </View>
                     </TouchableOpacity>
                 </View>
@@ -255,7 +251,7 @@ class Profile extends React.Component {
                     )
                         : (
                             <>
-                                {/* <View style={{ margin: 5, flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
+                                 <View style={{ margin: 5, flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
                                     <TouchableOpacity style={{ margin: 5, flexDirection: "row", justifyContent: "center", alignItems: "center" }}
                                         onPress={() => this.props.navigation.navigate('Modifica', {
                                             editingUser: showUser,
@@ -273,7 +269,7 @@ class Profile extends React.Component {
                                         <Text style={{ color: "#C3C5CD", fontSize: 12, }}>Esci</Text>
                                     </TouchableOpacity>
 
-                                </View> */}
+                                </View> 
                             </>
                         )}
 
@@ -300,10 +296,13 @@ class Profile extends React.Component {
                     </View>
                 </View>
 
+                        {this.props.guest ? (
+                        <>
+                           
                  <FlatList contentContainerStyle={styles.MainContainer}
                     data={showUser?.user_videos}
                     renderItem={({ item }) => (
-
+                        
                             <TouchableOpacity style={styles.imageThumbnail} onPress={() => this.props.navigation.navigate('Video', {
                                 video: item,
                                 owner: showUser
@@ -315,6 +314,51 @@ class Profile extends React.Component {
                             numColumns={3}
                             keyExtractor={(item) => item.id}
                         />
+                        </>
+                    )
+                        : (
+                            <>
+                                 
+                
+                 <FlatList contentContainerStyle={styles.MainContainer}
+                    data={showUser?.user_videos}
+                    renderItem={({ item }) => (            
+                        <TouchableOpacity style={styles.imageThumbnail} onPress={() => this.props.navigation.navigate('Video', {
+                                video: item,
+                                owner: showUser
+                            })} onLongPress={() => this.cancelVideo()}>
+                            <Modal
+                                    animationType="fade"
+                                    visible={this.state.hide}  
+                                    transparent={true}                                                    
+                                >
+                                <View  style={{flex: 1,backgroundColor:"black",opacity:0.9, flexDirection: 'column',justifyContent: 'center', alignItems: 'center'}}>
+
+                                    <View>
+                                        <TouchableOpacity style={{margin:10}} onPress={() => this.setState({hide:false})}>
+                                            <Text style={{textAlign:"center",  fontWeight:'500',fontSize:20,color:"white"}}>Disattiva Commenti</Text>
+                                        </TouchableOpacity>
+                                        <TouchableOpacity style={{margin:10}} onPress={() => this.deleteVideo(item.idVideo)}>
+                                            <Text style={{textAlign:"center",  fontWeight:'500',fontSize:20,color:"white"}}>Cancella il video</Text>
+                                        </TouchableOpacity>  
+                                    </View>
+
+                                        <TouchableOpacity style={{position:"absolute", bottom:"20%"}} onPress={() => this.setState({hide:false})}>
+                                            <Entypo style={{height:50,width:50,color:"white"}} name="cross" size={44} />
+                                        </TouchableOpacity>  
+                                </View>
+                            </Modal>    
+                                <Image source={{ uri: item.thumbnail }} style={styles.imageThumbnail}></Image>
+                            </TouchableOpacity>
+                         )}
+                            //Setting the number of column
+                            numColumns={3}
+                            keyExtractor={(item) => item.id}
+                        />
+   
+
+                            </>
+                        )}
                  </ScrollView>           
         );
     }

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Text, View, StyleSheet, ScrollView, TouchableOpacity, ImageBackground, Image } from 'react-native';
+import { Text, View, StyleSheet, ScrollView, TouchableOpacity, ImageBackground, Image,Dimensions,Share } from 'react-native';
 import { Video } from 'expo-av';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Icon2 from 'react-native-vector-icons/MaterialIcons';
@@ -17,6 +17,7 @@ import * as Permissions from 'expo-permissions';
 import Constants from 'expo-constants';
 import { FlatList } from 'react-native-gesture-handler';
 import { reset } from 'expo/build/AR';
+import Modal, { SlideAnimation, ModalContent, ModalTitle } from 'react-native-modals';
 
 const dublicateItems = (arr, numberOfRepetitions) =>
     arr.flatMap(i => Array.from({ length: numberOfRepetitions }).fill(i));
@@ -24,8 +25,6 @@ const dublicateItems = (arr, numberOfRepetitions) =>
 function shuffle(array) {
     array.sort(() => Math.random() - 0.5);
 }
-
-const that = this;
 
 
 class Home2Screen extends Component {
@@ -45,7 +44,7 @@ class Home2Screen extends Component {
             timeline: [],
             videoInfo: [],
             owner: [],
-            feed: [],
+            feed:[],
         };
         this.handleClick = this.handleClick.bind(this);
         this._onRefresh = this._onRefresh.bind(this);
@@ -53,7 +52,7 @@ class Home2Screen extends Component {
     }
 
 
-
+    
     async componentDidMount() {
         //this._onRefresh();
         //firebase.auth().signOut()
@@ -62,29 +61,49 @@ class Home2Screen extends Component {
         const id = firebase.auth().currentUser.uid;
         var timelineFull = [];
         const that = this;
+        //PRENDI LA COLLECTION TIMELINES CON ID ID DELL'UTENTE E PRENDI  COLLECTION VIDEOS
+        firebase.firestore().collection("timelines").doc(id).collection("videos").get().
+        then(function(querySnapshot) {
+            querySnapshot.forEach(function(doc) {
+                // doc.data() is never undefined for query doc snapshots
+                var timeline = doc.data();
 
-        firebase.firestore().collection('timelines').doc(id).collection("videos").get()
+                that.setState({
+                    feed: [ ...that.state.feed, timeline ]
+                  })
+
+                console.log(doc.id, " => ", doc.data());
+            });
+            console.log(that.state.feed)
+
+        });
+        //PER OGNI VIDEO OTTENUTO VAI NELLA COLLECTION VIDEOS E TRAMITE L'ID OTTENUTO PRENDI I VIDEO
+
+        //FAI LO STESSO CON L'UTENTE
+
+        /*{firebase.firestore().collection('timelines').doc(id).collection("videos").get()
             .then(function (querySnapshot) {
-                querySnapshot.forEach((doc, i) => {
+                querySnapshot.forEach((doc) => {
                     //console.log(" timeline", doc.data());
-                    timelineFull[i] = { ...doc.data() };
+                    timelineFull = { ...doc.data() };
                     firebase.firestore().collection('videos').doc(doc.data().idVideo).get()
                         .then(video => {
                             //console.log("video", video.data());
-                            timelineFull[i] = { ...timelineFull[i], ...video.data() };
+                            timelineFull = { ...timelineFull, ...video.data() };
                             firebase.firestore().collection('users').doc(video.data().owner).get()
                                 .then(user => {
                                     //console.log('utente', user.data());
-                                    timelineFull[i] = { ...timelineFull[i], ...user.data() };
+                                    timelineFull = { ...timelineFull, ...user.data() };
                                 })
-                                .then(()=> console.log("oggetto", i, timelineFull[i]))
+                                .then(()=>that.setState({feed:timelineFull}), console.log(timelineFull))
                         })
                 });
-                that.setState({timeline: timelineFull}); 
-            })
+                
+             })
             .catch(function (error) {
                 console.log("Error getting documents: ", error);
-            });
+            });}
+
         var videos = [];
         var user = [];
 
@@ -96,7 +115,7 @@ class Home2Screen extends Component {
             Promise.resolve(video).then(result => {
                 user.push(this.fetchUser(result.data().owner));
             })
-        });
+        });*/
 
     }
 
@@ -248,16 +267,72 @@ class Home2Screen extends Component {
                 console.log('Error getting documents', err);
             });
     }
+    handleModalComment = () => {
+        console.log(this.state.video);
+        this.setState({ showComments: !this.state.showComments });
+        if (!this.state.commentsSubscribed) {
+            firebase.firestore().collection("comments").where("video_id", "==", this.state.feed.idVideo)
+                .onSnapshot((querySnapshot) => {
+                    //console.log(querySnapshot);
+                    var comments = [];
+                    querySnapshot.forEach(function (doc) {
+                        // doc.data() is never undefined for query doc snapshots
+                        comments.push(doc.data());
+                        //console.log(doc.id, " => ", doc.data());
+                    });
+                    this.setState({ video: { ...this.state.video, comments }, commentsSubscribed:true });
+                });
+        }
+    }
+
+    handleComment = () => {
+        console.log(this.state.comment);
+        const newComment = {
+            video_id:this.state.feed.idVideo,
+            user_id: firebase.auth().currentUser.uid,
+            user_avatar: this.props.global.user.avatar || null,
+            author: `${this.props.global.user.name || null} ${this.props.global.user.surname || null}`,
+            body: this.state.comment,
+            timestamp: new Date().toLocaleDateString()
+        }
+        let comments = this.state.video.comments;
+        comments.push(newComment);
+        Keyboard.dismiss();
+        this.setState({ video: { ...this.state.video, comments }, comment:'' });
+        firebase.firestore().collection("comments").add(newComment);
+    }
+
+    onShare = async (video) => {
+        try {
+          const result = await Share.share({
+            message: 'Ciao! guarda questo video su talent'  ,
+            url: video,
+
+          });
+    
+          if (result.action === Share.sharedAction) {
+            if (result.activityType) {
+              // shared with activity type of result.activityType
+            } else {
+              // shared
+            }
+          } else if (result.action === Share.dismissedAction) {
+            // dismissed
+          }
+        } catch (error) {
+          alert(error.message);
+        }
+      };
 
     render() {
 
         const like = this.state.liked ? 'red' : 'white';
 
         let currentIndex = this.state.currentIndex;
-        let videos = this.state.user.user_videos;
+        let videos = this.state.feed;
 
-        var item = {};
-
+        var item = this.state.feed;
+     
         if (videos && !this.state.refreshing) {
             item = videos[currentIndex];
         }
@@ -266,12 +341,16 @@ class Home2Screen extends Component {
             velocityThreshold: 0.3,
             directionalOffsetThreshold: 80
         };
-
+        const categorie = [
+            {
+                id: '1',
+                name: 'New Entry',
+            },
+        ]
         return (
 
-            <View style={styles.container}>
-                <TouchableOpacity onPress={() => console.log(this.state.timeline)}><Text style={{color:"white"}}>CIAOO</Text></TouchableOpacity>    
-                {/*<GestureRecognizer
+            <View style={styles.container}>       
+               <GestureRecognizer
                     onSwipe={(direction, state) => this.onSwipe(direction, state)}
                     onSwipeUp={(state) => this.onSwipeUp(state)}
                     onSwipeDown={(state) => this.onSwipeDown(state)}
@@ -280,7 +359,7 @@ class Home2Screen extends Component {
                     config={config}
                     style={{ flex: 1, }}
                 >
-                    <Video source={{ uri: this.state.timeline.uriVideo }} resizeMode="cover" style={StyleSheet.absoluteFill} isLooping />
+                    <Video source={{ uri: item?.uriVideo }} resizeMode="cover" style={StyleSheet.absoluteFill} isLooping  />
                     <View style={styles.full}>
                         <View style={{ flex: .5, justifyContent: 'flex-end' }}>
 
@@ -295,20 +374,36 @@ class Home2Screen extends Component {
                                     </ImageBackground>
                                 </TouchableOpacity>
                                 <TouchableOpacity onPress={this.handleClick}>
-                                    <Icon name="heart" size={40} color={like} />
+                                    <Icon name="star" size={40} color={like} />
                                 </TouchableOpacity>
-                                <Text style={styles.likecount}>{this.state.likecount}</Text>
-                                <TouchableOpacity onPress={() => Actions.Comments()} >
+                                <Text style={styles.likecount}>4</Text>
+                                <TouchableOpacity onPress={this.handleModalComment} >
                                     <Icon2 name="chat-bubble" size={40} color="white" />
                                 </TouchableOpacity>
-                                <Text style={styles.commentcount}>{this.state.commentcount}</Text>
-                                <TouchableOpacity>
+                                <Text style={styles.commentcount}>7</Text>
+                                <TouchableOpacity onPress={() => this.onShare(item?.uriVideo)}> 
                                     <Icon name="share" size={40} color="white" />
                                 </TouchableOpacity>
                                 <Text style={styles.share}>share</Text>
                             </View>
                         </View>
                     </View>
+                    
+                <Modal.BottomModal
+                    visible={this.state.showComments}
+                    onTouchOutside={() => this.setState({ showComments: false })}
+                    height={0.8}
+                    width={1}
+                    onSwipeOut={() => this.setState({ showComments: false })}
+                    modalTitle={
+                        <ModalTitle
+                            title="Commenti"
+                            hasTitleBar
+                        />
+                    }
+                >
+                </Modal.BottomModal>
+
                     <View style={{ flex: .5, flexDirection: 'row' }}>
                         <View style={{ flex: .5 }}>
                             <View style={styles.tag}>
@@ -334,7 +429,7 @@ class Home2Screen extends Component {
                             </View>
                         </View>
                     </View>
-                                </GestureRecognizer>*/}
+                                </GestureRecognizer>
             </View>
         );
     }

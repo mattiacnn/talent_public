@@ -128,7 +128,9 @@ export default class SearchScreen extends React.Component {
             var globalVideos = [];
             querySnapshot.forEach(function (doc) {
                 // doc.data() is never undefined for query doc snapshots
-                globalVideos.push(doc.data());
+                let video = doc.data();
+                video.id = doc.id;
+                globalVideos.push(video);
             });
             that.setState({dataSource:globalVideos});
             //console.log(that.state.dataSource);
@@ -150,12 +152,16 @@ export default class SearchScreen extends React.Component {
     render() {
         const { search } = this.state;
 
-        return (<View style={{ backgroundColor: "#1f1f1f",  }}>
-            <SafeAreaView >
+        return (
+            <SafeAreaView  style={{ backgroundColor: "#1f1f1f",  }} >
+                <StatusBar>
+
+                </StatusBar>
                 <BarraRicerca navigation={this.props.navigation}/>
-                <ScrollView horizontal = {true} showsHorizontalScrollIndicator = {false} contentContainerStyle={{marginTop:15,}} > 
+                <ScrollView horizontal = {true} showsHorizontalScrollIndicator = {false} contentContainerStyle={{marginTop:5,marginBottom:20}} > 
                 <FlatList
                         data={categorie}
+                        style={{height:70}}
                         renderItem={({ item }) => (
                         <TouchableHighlight style={ this.state.active == item.name? styles.btnActive : styles.chip} onPress={() => this.searchFromDb(item.name)}>
                             <Text style={styles.chipText}>
@@ -172,7 +178,10 @@ export default class SearchScreen extends React.Component {
                         <FlatList
                             data={this.state.dataSource}
                             renderItem={({ item }) => (
-                                    <TouchableOpacity  style={styles.imageThumbnail} onPress={()=>console.log('touch')}>
+                                    <TouchableOpacity  style={styles.imageThumbnail}onPress={() => this.props.navigation.navigate('Video', {
+                                        video: item,
+                                        owner: item.owner
+                                    })}>
                                         <Image style={styles.imageThumbnail} source={{uri:item.thumbnail}} />
                                     </TouchableOpacity>
         
@@ -183,7 +192,7 @@ export default class SearchScreen extends React.Component {
                         />
             </SafeAreaView>
 
-        </View >);
+  );
 
 
     }

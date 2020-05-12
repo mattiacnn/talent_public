@@ -24,6 +24,7 @@ module.exports = StyleSheet.create({
         textAlign: 'center',
         position:"absolute",
         alignSelf:"center",
+        color:"white"
     },
     form: {
         paddingTop:220,
@@ -45,6 +46,7 @@ module.exports = StyleSheet.create({
         borderBottomColor: '#8a8f9e',
         borderBottomWidth: StyleSheet.hairlineWidth,
         fontSize: 15,
+        height:30
     },
     button: {
         marginHorizontal: 40,

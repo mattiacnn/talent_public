@@ -181,8 +181,8 @@ class UserScreen extends React.Component {
                 {/* <Text h1 color="white">Is online: {this.props.global.user.name}</Text> */}
                 {this.props.global.user ? (
                     <>
-                    <TouchableOpacity style={{height:42,width:42, backgroundColor:"grey", borderRadius:76, position:"absolute", top:0, right:20,
-                justifyContent:"center", alignItems:"center", zIndex:2}} onPress={this.handleSfida}>
+                    <TouchableOpacity style={{height:52,width:52, backgroundColor:"white", borderRadius:76, position:"absolute", top:0, right:20,
+                justifyContent:"center", alignItems:"center", zIndex:1}} onPress={this.handleSfida}>
                         <FontAwesome name="flash" color="red" size={32}/>
                     </TouchableOpacity>
                     

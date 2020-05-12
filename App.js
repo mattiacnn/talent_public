@@ -370,6 +370,8 @@ function SearchStackComponent() {
             <SearchStack.Screen name="Cerca" component={SearchScreen} options={{headerShown:false}}/>
             <SearchStack.Screen name="Esplora" component={UVStackComponent} />
             <SearchStack.Screen name="Categoria" component={SearchScreen} />
+            <SearchStack.Screen name="Video" component={VideoScreen} />
+
             <SearchStack.Screen name="ChatWith" component={ChatFlavio} options={{}}/>
         </SearchStack.Navigator>
     )
@@ -391,7 +393,6 @@ function ProfileStackComponent({ route }) {
 const HomeTabs = createBottomTabNavigator();
 function HomeTabsComponent({ route, nav }) {
     const { myname } = route.params;
-    console.log(`nome is ${Object.keys(route.params)}`);
 
     return (
         <HomeTabs.Navigator

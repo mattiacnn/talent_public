@@ -29,6 +29,7 @@ export default class RegisterScreen extends React.Component {
                 email: "",
                 password: "",
                 birthdate: "",
+                user_videos:[],
                 avatar: null,
                 followed: { id_users: [] },
                 followers: { id_users: [] },
@@ -73,7 +74,6 @@ export default class RegisterScreen extends React.Component {
             alert('Must use physical device for Push Notifications');
         }
         return token;
-
     };
 
     // CREATE NEW USER AND STORE IT ON FIRESTORE
@@ -229,7 +229,7 @@ export default class RegisterScreen extends React.Component {
                             </View>
 
                             <View style={s.formItem}>
-                                <Text style={s.inputTitle}>Nome</Text>
+                                <Text style={s.inputTitle}>Nome e Cognome</Text>
                                 <TextInput
                                     style={s.input}
                                     onChangeText={name =>
@@ -422,6 +422,7 @@ const styles = StyleSheet.create({
         borderRadius: 4,
         alignItems: 'center',
         justifyContent: 'center',
+        padding:20
     },
     error: {
         color: '#e9446a',
