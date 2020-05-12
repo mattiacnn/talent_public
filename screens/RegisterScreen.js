@@ -272,7 +272,7 @@ export default class RegisterScreen extends React.Component {
                                     disabled={!this.state.user.email || !this.state.user.password ? true : false}
                                     onPress={() => this.setState({ visible: true })}>
                                     <View style={{ display: "flex", flexDirection: "row", alignItems: "stretch", justifyContent: "space-around", }}>
-                                        <Text style={{ color: "#FFF", fontWeight: "500", letterSpacing: 2, alignSelf: "center", fontSize: 15, marginTop: -3 }}>Avanti</Text>
+                                        <Text style={{ color: "#FFF", fontWeight: "500", letterSpacing: 2, alignSelf: "center", fontSize: 15}}>Avanti</Text>
                                     </View>
                                 </TouchableOpacity>
                             </View>

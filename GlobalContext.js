@@ -40,7 +40,7 @@ export class GlobalContextProvider extends React.Component {
                                 video = video.doc.data();
                                 video.id = id;
 
-                                let user_videos = that.state.user.user_videos;
+                                let user_videos = that.state.user.user_videos || [];
                                 user_videos.push(video);
                                 that.setState({ user: { ...that.state.user, user_videos } });
                             }
