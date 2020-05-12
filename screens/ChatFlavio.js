@@ -3,6 +3,8 @@ import { GiftedChat } from 'react-native-gifted-chat';
 import { withGlobalContext } from '../GlobalContext';
 import firebase from 'firebase';
 import 'firebase/firestore';
+import { StyleSheet,SafeAreaView,KeyboardAvoidingView} from "react-native";
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scrollview'
 
 class ChatFlavio extends React.Component {
     static navigationOptions = ({ route }) => ({
@@ -19,7 +21,6 @@ class ChatFlavio extends React.Component {
     }
 
     componentDidMount() {
-
         this.loadMessages(message => {
             this.setState(previousState => {
                 return {
@@ -47,7 +48,6 @@ class ChatFlavio extends React.Component {
         var that = this;
         //var recipientId = this.props.navigation.getParam("recipientId");
         var chatId = this.state.chatId;
-        console.log(chatId)
         firebase.firestore().collection("chats")
         .doc(chatId).collection("messages")
         .orderBy("createdAt", "asc")
@@ -55,7 +55,6 @@ class ChatFlavio extends React.Component {
                 doc.docChanges().forEach(message => {
                     var id = message.doc.id;
                     message = message.doc.data();
-                    console.log("message:",message)
                     const newMessage = {
                         _id: id,
                         text: message.text,
@@ -73,7 +72,6 @@ class ChatFlavio extends React.Component {
 
     _handleNotification = notification => {
         Vibration.vibrate();
-        console.log(notification);
         this.setState({ notification: notification });
       };
     
@@ -115,3 +113,4 @@ class ChatFlavio extends React.Component {
 }
 
 export default withGlobalContext(ChatFlavio);
+

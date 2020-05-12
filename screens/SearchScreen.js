@@ -150,12 +150,16 @@ export default class SearchScreen extends React.Component {
     render() {
         const { search } = this.state;
 
-        return (<View style={{ backgroundColor: "#1f1f1f",  }}>
-            <SafeAreaView >
+        return (
+            <SafeAreaView  style={{ backgroundColor: "#1f1f1f",  }} >
+                <StatusBar>
+
+                </StatusBar>
                 <BarraRicerca navigation={this.props.navigation}/>
-                <ScrollView horizontal = {true} showsHorizontalScrollIndicator = {false} contentContainerStyle={{marginTop:15,}} > 
+                <ScrollView horizontal = {true} showsHorizontalScrollIndicator = {false} contentContainerStyle={{marginTop:5,marginBottom:20}} > 
                 <FlatList
                         data={categorie}
+                        style={{height:70}}
                         renderItem={({ item }) => (
                         <TouchableHighlight style={ this.state.active == item.name? styles.btnActive : styles.chip} onPress={() => this.searchFromDb(item.name)}>
                             <Text style={styles.chipText}>
@@ -169,7 +173,6 @@ export default class SearchScreen extends React.Component {
                     
                    
                 </ScrollView>
-                    <ScrollView  contentContainerStyle={styles.MainContainer}>
                         <FlatList
                             data={this.state.dataSource}
                             renderItem={({ item }) => (
@@ -182,10 +185,9 @@ export default class SearchScreen extends React.Component {
                             numColumns={3}
                             keyExtractor={(item) => item.id}
                         />
-                    </ScrollView>        
             </SafeAreaView>
 
-        </View >);
+  );
 
 
     }

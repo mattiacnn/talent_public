@@ -15,6 +15,8 @@ import 'firebase/firestore';
 import { Notifications } from 'expo';
 import * as Permissions from 'expo-permissions';
 import Constants from 'expo-constants';
+import { FlatList } from 'react-native-gesture-handler';
+import { reset } from 'expo/build/AR';
 
 const dublicateItems = (arr, numberOfRepetitions) =>
     arr.flatMap(i => Array.from({ length: numberOfRepetitions }).fill(i));
@@ -22,6 +24,8 @@ const dublicateItems = (arr, numberOfRepetitions) =>
 function shuffle(array) {
     array.sort(() => Math.random() - 0.5);
 }
+
+const that = this;
 
 
 class Home2Screen extends Component {
@@ -38,6 +42,10 @@ class Home2Screen extends Component {
             nome: this.props.route.params.nome,
             expoPushToken: '',
             notification: {},
+            timeline: [],
+            videoInfo: [],
+            owner: [],
+            feed: [],
         };
         this.handleClick = this.handleClick.bind(this);
         this._onRefresh = this._onRefresh.bind(this);
@@ -49,7 +57,46 @@ class Home2Screen extends Component {
     async componentDidMount() {
         //this._onRefresh();
         //firebase.auth().signOut()
-        this.animation.play();
+        //this.animation.play();
+        //this.getTimeline();
+        const id = firebase.auth().currentUser.uid;
+        var timelineFull = [];
+        const that = this;
+
+        firebase.firestore().collection('timelines').doc(id).collection("videos").get()
+            .then(function (querySnapshot) {
+                querySnapshot.forEach((doc, i) => {
+                    //console.log(" timeline", doc.data());
+                    timelineFull[i] = { ...doc.data() };
+                    firebase.firestore().collection('videos').doc(doc.data().idVideo).get()
+                        .then(video => {
+                            //console.log("video", video.data());
+                            timelineFull[i] = { ...timelineFull[i], ...video.data() };
+                            firebase.firestore().collection('users').doc(video.data().owner).get()
+                                .then(user => {
+                                    //console.log('utente', user.data());
+                                    timelineFull[i] = { ...timelineFull[i], ...user.data() };
+                                })
+                                .then(()=> console.log("oggetto", i, timelineFull[i]))
+                        })
+                });
+                that.setState({timeline: timelineFull}); 
+            })
+            .catch(function (error) {
+                console.log("Error getting documents: ", error);
+            });
+        var videos = [];
+        var user = [];
+
+        timeline.forEach((video) => {
+            videos.push(this.fetchVideo(video.idVideo));
+        });
+
+        videos.forEach((video) => {
+            Promise.resolve(video).then(result => {
+                user.push(this.fetchUser(result.data().owner));
+            })
+        });
 
         // var timeline = await Promise.resolve(this.fetchTimeline(Fire.uid));
         // //console.log('timeline:',timeline)
@@ -234,7 +281,6 @@ class Home2Screen extends Component {
         return (
 
             <View style={styles.container}>
-
                 <GestureRecognizer
                     onSwipe={(direction, state) => this.onSwipe(direction, state)}
                     onSwipeUp={(state) => this.onSwipeUp(state)}
@@ -262,7 +308,7 @@ class Home2Screen extends Component {
                                     </ImageBackground>
                                 </TouchableOpacity>
                                 <TouchableOpacity onPress={this.handleClick}>
-                                    <Icon name="heart" size={40} color={like} />
+                                    <Icon name="star" size={40} color={like} />
                                 </TouchableOpacity>
                                 <Text style={styles.likecount}>{this.state.likecount}</Text>
                                 <TouchableOpacity onPress={() => Actions.Comments()} >
@@ -301,8 +347,7 @@ class Home2Screen extends Component {
                             </View>
                         </View>
                     </View>
-                </GestureRecognizer>
-
+                                </GestureRecognizer>
             </View>
         );
     }

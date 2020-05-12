@@ -66,6 +66,8 @@ class NewMessageScreen extends React.Component {
             promises.push(this.fetchUser(followed.data().followed));
         });
 
+        // Promise.resolve(item).then((item2) =>)
+
         Promise.all(promises).then(results => {
             results.forEach((result) => {
                 const res = result.data();
