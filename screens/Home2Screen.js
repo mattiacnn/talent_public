@@ -33,7 +33,7 @@ class Home2Screen extends Component {
             commentcount: 9,
             videoNum: 0,
             currentIndex: 0,
-            user: { user_videos: null },
+            user: { user_videos: [] },
             refreshing: false,
             nome: this.props.route.params.nome,
             expoPushToken: '',
@@ -44,14 +44,81 @@ class Home2Screen extends Component {
 
     }
 
-  
 
-    componentDidMount() {
+
+    async componentDidMount() {
         //this._onRefresh();
         //firebase.auth().signOut()
         this.animation.play();
 
+        // var timeline = await Promise.resolve(this.fetchTimeline(Fire.uid));
+        // //console.log('timeline:',timeline)
+        // timeline.forEach((video,i) => {
+        //     console.log('video',i,':',video.data())
+        // })
+        var aux = [];
+        var fullItem = [];
+        var arrVideos = [];
+
+        this.fetchTimeline(Fire.uid).then(videos => {
+
+            videos.forEach(video => {
+                const v = video.data();
+                console.log(video.data());
+                const userPromise = this.fetchUser(v.owner);
+                const videoPromise = this.fetchVideo(v.idVideo);
+
+                var user_video = { user:null, video:null};
+                Promise.all([userPromise, videoPromise]).then(results => {
+                    //console.log(results);
+                    user_video.user = results[0].data();
+                    user_video.video = results[1].data();
+                    console.log('user video', user_video);
+                    let currState = this.state.user.user_videos;
+                    currState.push(user_video);
+                    this.setState({user: {...this.state.user, user_video: currState}})
+                    // results.forEach((result) => {
+                    //     console.log('result', result.data());
+                    // })
+                });
+            })
+        })
+        
+        // .then( () => {
+
+        //     arrVideos.forEach(video => {
+        //         const userPromise = this.fetchUser(video.owner);
+        //         const videoPromise = this.fetchVideo(video.idVideo);
+        //         Promise.all(userPromise, videoPromise).then(results => {
+
+        //             results.forEach((result) => {
+        //                 console.log('result', result.data())
+        //                 aux.push(result.data())
+        //             })
+        //             //console.log(aux)
+        //             fullItem.push(aux)
+        //         })
+        //     })
+        //     //console.log('full', fullItem)
+        // })
+
     }
+
+    async fetchTimeline(user) {
+        return firebase.firestore().collection('timelines').doc(user)
+            .collection('videos').get();
+    }
+
+    async fetchUser(user) {
+        console.log('Fetching ', user);
+        return firebase.firestore().collection('users').doc(user).get();
+    }
+
+    async fetchVideo(video) {
+        console.log('Fetching ', video);
+        return firebase.firestore().collection('videos').doc(video).get();
+    }
+
     handleClick() {
         this.setState({
             liked: !this.state.liked,
@@ -177,8 +244,10 @@ class Home2Screen extends Component {
                     config={config}
                     style={{ flex: 1, }}
                 >
+                    <Text style={styles.tagtitle}>{item?.user.name}</Text>
+                    <Text style={styles.tagtitle}>{item?.video.nome}</Text>
                     {/* <Image source={require('../assets/tempImage1.jpg')}></Image> */}
-                    <Video source={{ uri: item?.uri }} resizeMode="cover" style={StyleSheet.absoluteFill}  isLooping />
+                    <Video source={{ uri: item?.uri }} resizeMode="cover" style={StyleSheet.absoluteFill} isLooping />
                     <View style={styles.full}>
                         <View style={{ flex: .5, justifyContent: 'flex-end' }}>
 
@@ -210,7 +279,7 @@ class Home2Screen extends Component {
                     <View style={{ flex: .5, flexDirection: 'row' }}>
                         <View style={{ flex: .5 }}>
                             <View style={styles.tag}>
-        <Text style={styles.tagtitle}>{this.state.nome}</Text>
+                                <Text style={styles.tagtitle}>{this.state.nome}</Text>
                             </View>
                             <ScrollView showsVerticalScrollIndicator={false}>
                                 <Text style={styles.username}>{item?.description}</Text>
