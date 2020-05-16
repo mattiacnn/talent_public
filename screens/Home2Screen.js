@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Text, View, StyleSheet, ScrollView, TouchableOpacity, ImageBackground, Image } from 'react-native';
+import { Text, View, StyleSheet, ScrollView, TouchableOpacity, ImageBackground, Share, } from 'react-native';
 import { Video } from 'expo-av';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Icon2 from 'react-native-vector-icons/MaterialIcons';
@@ -11,6 +11,7 @@ import GestureRecognizer, { swipeDirections } from 'react-native-swipe-gestures'
 import Fire from "../Fire";
 import firebase from 'firebase';
 import 'firebase/firestore';
+import * as Crypto from 'expo-crypto';
 
 import { Notifications } from 'expo';
 import * as Permissions from 'expo-permissions';
@@ -18,6 +19,10 @@ import Constants from 'expo-constants';
 import { FlatList } from 'react-native-gesture-handler';
 import { reset } from 'expo/build/AR';
 import { withNavigation } from "react-navigation";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scrollview";
+import Modal, { SlideAnimation, ModalContent, ModalTitle } from 'react-native-modals';
+import {Item,Input } from 'native-base';
+import { Snackbar } from 'react-native-paper';
 
 const dublicateItems = (arr, numberOfRepetitions) =>
     arr.flatMap(i => Array.from({ length: numberOfRepetitions }).fill(i));
@@ -43,18 +48,43 @@ class Home2Screen extends Component {
             nome: this.props.route.params.nome,
             expoPushToken: '',
             notification: {},
-            timeline: [],
-            videoInfo: [],
+            comments:[],
             owner: [],
             feed: [],
+            showComments: false,
             isPaused: true,
-            play:true
+            play:true,
+            commentsSubscribed: false,
+            showToast:false
+            
         };
         this.handleClick = this.handleClick.bind(this);
         this._onRefresh = this._onRefresh.bind(this);
 
     }
+    _onDismissSnackBar = () => this.setState({ showToast: false });
 
+    onShare = async (uri) => {
+        try {
+          const result = await Share.share({
+            message: 'Ciao! guarda il video che ho messo su talent'  ,
+            url: uri,
+
+          });
+    
+          if (result.action === Share.sharedAction) {
+            if (result.activityType) {
+              // shared with activity type of result.activityType
+            } else {
+              // shared
+            }
+          } else if (result.action === Share.dismissedAction) {
+            // dismissed
+          }
+        } catch (error) {
+          alert(error.message);
+        }
+      };
 
     async componentDidMount() {
 
@@ -89,7 +119,7 @@ class Home2Screen extends Component {
 
                 var user_video = { user: null, video: null };
                 Promise.all([userPromise, videoPromise]).then(results => {
-                    //console.log(results);
+                    //console.log(results
                     user_video.user = results[0].data();
                     user_video.video = results[1].data();
                     user_video.video.id = v.idVideo;
@@ -233,6 +263,54 @@ class Home2Screen extends Component {
             });
     }
 
+    handleModalComment = (id) => {
+        console.log("pattiu", id)
+        this.setState({ showComments: !this.state.showComments });
+        if (!this.state.commentsSubscribed) {
+            firebase.firestore().collection("comments").where("video_id", "==", id)
+                .onSnapshot((querySnapshot) => {
+                    //console.log(querySnapshot);
+                    var commenti = [];
+                    querySnapshot.forEach(function (doc) {
+                        // doc.data() is never undefined for query doc snapshots
+                        let commentsC = doc.data();
+                        commentsC.id = doc.id;
+                        commenti.push(commentsC);
+                        console.log("COMMENTI",commenti)
+                        //console.log(doc.id, " => ", doc.data());
+                    });
+                    this.setState({ comments: { ...this.state.comments, commenti }, commentsSubscribed:true });
+                });
+        }
+    }
+    handleLike = (video,owner) => {
+
+        const uId = firebase.auth().currentUser.uid;
+        const vId = video;
+        var docRef;
+        Crypto.digestStringAsync(Crypto.CryptoDigestAlgorithm.SHA1, `${uId}${vId}` )
+            .then(hash => {
+                docRef = firebase.firestore().collection("likes").doc(hash);
+                return docRef.get();
+            })
+            .then((doc) => {
+                if (doc.exists) {
+                    console.log("Document data:", doc.data());
+                    this.setState({ showToast: true, message: 'Video già piaciuto' });
+                } else {
+                    docRef.set({ user_id: uId, video_id: vId, videoOwner_id:owner});
+                    // update con transaction. Si dovrò fare con distributed counters
+                    firebase.firestore().collection("videos").doc(vId)
+                    .update({
+                        likes: firebase.firestore.FieldValue.increment(1)
+                    });
+                }
+            })
+            .catch(function (error) {
+                console.log("Error getting document:", error);
+            });
+
+    }
     render() {
 
         const like = this.state.liked ? 'red' : 'white';
@@ -265,15 +343,20 @@ class Home2Screen extends Component {
                 >
                     {/* <Image source={require('../assets/tempImage1.jpg')}></Image> */}
                     
-                        <Video
-                        source={{ uri: item?.video.uri }}
+                    <Video
+                        source={{ uri:item?.video.uri }}
                         resizeMode="cover"
                         style={StyleSheet.absoluteFill}
                         isLooping
                         shouldPlay = {this.state.isPaused}
-                        />
-                    
-                    
+                    />
+                    <Snackbar
+                        visible={this.state.showToast}
+                        onDismiss={this._onDismissSnackBar}
+                        duration={Snackbar.DURATION_SHORT}
+                    >
+                    {this.state.message}
+                    </Snackbar>     
                     <View style={styles.full}>
                         <View style={{ flex: .5, justifyContent: 'flex-end' }}>
 
@@ -281,21 +364,20 @@ class Home2Screen extends Component {
                         <View style={{ flex: .5, justifyContent: 'flex-end', alignItems: 'flex-end' }}>
                             <View>
                                 <TouchableOpacity>
-                                    <ImageBackground source={{ uri: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSKoh_wxk-fkGGHm4pP_Mwe6v-P6weOYRpuchqAu0K0VYoDj4AVQg' }} style={{ width: 50, height: 50, borderRadius: 25, marginBottom: 8 }} imageStyle={{ borderRadius: 25 }}>
+                                    <ImageBackground source={ item?.user.avatar? { uri: item.user.avatar }: require("../assets/tempAvatar.jpg")} style={{ width: 50, height: 50, borderRadius: 25, marginBottom: 8 }} imageStyle={{ borderRadius: 25 }}>
                                         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'flex-end' }}>
                                             <Icon2 name="add-circle" size={20} color="#fb2956" />
                                         </View>
                                     </ImageBackground>
                                 </TouchableOpacity>
-                                <TouchableOpacity onPress={this.handleClick}>
+                                <TouchableOpacity onPress={ () => this.handleLike(item?.video.id, item?.video.owner)}>
                                     <Icon name="star" size={40} color={like} />
                                 </TouchableOpacity>
-                                <Text style={styles.likecount}>{this.state.likecount}</Text>
-                                <TouchableOpacity onPress={() => Actions.Comments()} >
+                                <Text style={styles.likecount}>{item?.video.likes}</Text>
+                                <TouchableOpacity onPress={() => this.handleModalComment(item?.video.id)}>
                                     <Icon2 name="chat-bubble" size={40} color="white" />
                                 </TouchableOpacity>
-                                <Text style={styles.commentcount}>{this.state.commentcount}</Text>
-                                <TouchableOpacity>
+                                <TouchableOpacity onPress={() => this.onShare(item?.video.uri)}>
                                     <Icon name="share" size={40} color="white" />
                                 </TouchableOpacity>
                                 <Text style={styles.share}>share</Text>
@@ -305,11 +387,61 @@ class Home2Screen extends Component {
                     <View style={{ flex: .5, flexDirection: 'row' }}>
                         <View style={{ flex: .5 }}>
                             <View style={styles.tag}>
-                                <Text style={styles.tagtitle}>{this.state.nome}</Text>
+                                <Text style={styles.tagtitle}>@{item?.user.username}</Text>
                             </View>
                             <ScrollView showsVerticalScrollIndicator={false}>
                                 <Text style={styles.username}>{item?.description}</Text>
                             </ScrollView>
+                            <Modal.BottomModal
+                                visible={this.state.showComments}
+                                onTouchOutside={() => this.setState({ showComments: false })}
+                                height={0.8}
+                                width={1}
+                                onSwipeOut={() => this.setState({ showComments: false })}
+                                modalTitle={<ModalTitle title="Commenti"hasTitleBar />}
+                            >
+                        <KeyboardAwareScrollView resetScrollToCoords={{ x: 0, y: 0 }} contentContainerStyle={styles.container} scrollEnabled={true}>
+                        <ModalContent style={{flex: 1,backgroundColor: 'fff',}}>
+                        <FlatList
+                                numColumns={1}
+                                data={this.state.comments ? this.state.comments : []}
+                                keyExtractor={(item) => item.id}
+                                renderItem={({ item }) => (
+                                    <TouchableOpacity style={{flexDirection:"row", marginTop:10}} onLongPress={() =>   this.setState({modalCancel: true}) }>
+                                        <Modal
+                                            animationType="fade"
+                                            visible={this.state.modalCancel}                                           
+                                        >
+                                            <View  style={{height:100,width:250,backgroundColor:"white",justifyContent:"center"}}>
+                                                <TouchableOpacity style={{margin:5}} onPress={() => this.setState({modalCancel:false})}>
+                                                    <Text style={{textAlign:"center",  fontWeight:'500',fontSize:16,color:"black"}}>Annulla</Text>
+                                                </TouchableOpacity>
+                                                <TouchableOpacity style={{margin:5}} onPress={() => this.deleteComment(item.id)}>
+                                                    <Text style={{textAlign:"center",  fontWeight:'500',fontSize:16,color:"black"}}>Cancella Commento</Text>
+                                                </TouchableOpacity>
+                                                <TouchableOpacity style={{margin:5}}>
+                                                    <Text style={{textAlign:"center",  fontWeight:'500',fontSize:16,color:"black"}}>Segnala</Text>
+                                                </TouchableOpacity>                                                    
+
+                                            </View>
+                                        </Modal>
+                                        
+                                        <Image style={{height:40,width:40,borderRadius:30}} source = {{uri:item.user_avatar}}/>
+                                        <View style={{flexDirection:"column",marginLeft:30}}>
+                                            <View style={{flexDirection:"row"}}>
+                                                <Text style={{fontWeight:"bold"}}>{item.author}</Text>
+                                                <Text style={{marginLeft:10}}>{item.body}</Text>
+                                            </View>
+                                            <Text style={{fontSize:12, color:"gray"}}>{item.timestamp}</Text>
+                                        </View>
+                                    </TouchableOpacity>
+                                )}
+                            >
+                            </FlatList>
+                        </ModalContent>
+                    </KeyboardAwareScrollView>
+
+                </Modal.BottomModal>
                         </View>
                         <View style={{ flex: .5, justifyContent: 'flex-end' }}>
                             <View style={{ margin: 12, alignItems: 'flex-end', }}>

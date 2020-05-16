@@ -69,6 +69,7 @@ class VideoScreen extends React.Component {
                         //console.log(doc.id, " => ", doc.data());
                     });
                     this.setState({ video: { ...this.state.video, comments }, commentsSubscribed:true });
+                    console.log(this.state.video.comments)
                 });
         }
     }

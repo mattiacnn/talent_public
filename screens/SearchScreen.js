@@ -153,7 +153,7 @@ export default class SearchScreen extends React.Component {
         const { search } = this.state;
 
         return (
-            <SafeAreaView  style={{ backgroundColor: "#1f1f1f",  }} >
+            <SafeAreaView >
                 <StatusBar>
 
                 </StatusBar>

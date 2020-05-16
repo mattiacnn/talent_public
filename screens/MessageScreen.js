@@ -6,27 +6,7 @@ import { Entypo } from "@expo/vector-icons";
 import { Right } from "native-base";
 import { withGlobalContext } from "../GlobalContext";
 
-const chats = [
-    {
-        id: 1, username: "Mattiacnn", text: "ciao come stai?", chatId: "1"
-    },
-    {
-        id: 2, username: "Flaviocnn", text: "ciao come stai?"
-    },
-    {
-        id: 3, username: "Carlo23", text: "ciao come stai?"
-    },
-    {
-        id: 4, username: "Melo86", text: "ciao come stai?"
-    },
-    {
-        id: 5, username: "GiuliaSpa", text: "ciao come stai?"
-    },
-    {
-        id: 6, username: "GabryTeletabies", text: "ciao come stai?"
-    },
 
-]
 
 class MessageScreen extends React.Component {
 
@@ -228,7 +208,7 @@ const styles = StyleSheet.create({
         paddingRight: 10,
         paddingBottom: 10,
         paddingLeft: 0,
-        height: 48,
+        height: 47.5,
         backgroundColor: '#1C1C1C',
         color: 'white',
         marginRight: 10
