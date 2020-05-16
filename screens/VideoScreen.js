@@ -208,7 +208,7 @@ class VideoScreen extends React.Component {
                 >
                     {this.state.message}
                 </Snackbar>
-                <View style={{ position: "absolute", right: 10, top: Dimensions.get('screen').height/2, display: "flex", flexDirection: "column", justifyContent: "flex-start", alignItems: "center" }}>
+                <View style={{ position: "absolute", right: 10, top: Dimensions.get('screen').height/2.5, display: "flex", flexDirection: "column", justifyContent: "flex-start", alignItems: "center" }}>
 
                     <View>
                         <TouchableOpacity>
@@ -225,13 +225,10 @@ class VideoScreen extends React.Component {
                     </View>
 
                     <View>
-                        <TouchableOpacity onPress={this.handleLike} style={styles.icon}>
+                    <TouchableOpacity onPress={this.handleLike} style={styles.icon}>
                             <Icon name="star" size={40} color={COLOR} />
                         </TouchableOpacity>
                         <Text style={styles.counter}>{this.state.video?.likes}</Text>
-                    </View>
-
-                    <View>
                         <TouchableOpacity onPress={this.handleModalComment} style={styles.icon}>
                             <Icon2 name="chat-bubble" size={40} color={COLOR} />
                         </TouchableOpacity>

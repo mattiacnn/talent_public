@@ -345,7 +345,7 @@ function HomeStackComponent({ route }) {
     console.log(`this is ${nome}`);
     return (
         <HomeStack.Navigator initialRouteName="Timeline">
-            <HomeStack.Screen name="Timeline" component={Home2Screen} initialParams={{ nome: nome }} />
+            <HomeStack.Screen name="Timeline" component={Home2Screen} initialParams={{ nome: nome }}  options={{ headerShown: false }}/>
             <HomeStack.Screen name="Esplora" component={UVStackComponent} />
         </HomeStack.Navigator>
     )
