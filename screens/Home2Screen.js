@@ -47,7 +47,8 @@ class Home2Screen extends Component {
             videoInfo: [],
             owner: [],
             feed: [],
-            isPaused: false
+            isPaused: true,
+            play:true
         };
         this.handleClick = this.handleClick.bind(this);
         this._onRefresh = this._onRefresh.bind(this);
@@ -56,48 +57,6 @@ class Home2Screen extends Component {
 
 
     async componentDidMount() {
-        //this._onRefresh();
-        //firebase.auth().signOut()
-        //this.animation.play();
-        //this.getTimeline();
-        // const id = firebase.auth().currentUser.uid;
-        // var timelineFull = [];
-        // const that = this;
-
-        // firebase.firestore().collection('timelines').doc(id).collection("videos").get()
-        //     .then(function (querySnapshot) {
-        //         querySnapshot.forEach((doc, i) => {
-        //             //console.log(" timeline", doc.data());
-        //             timelineFull[i] = { ...doc.data() };
-        //             firebase.firestore().collection('videos').doc(doc.data().idVideo).get()
-        //                 .then(video => {
-        //                     //console.log("video", video.data());
-        //                     timelineFull[i] = { ...timelineFull[i], ...video.data() };
-        //                     firebase.firestore().collection('users').doc(video.data().owner).get()
-        //                         .then(user => {
-        //                             //console.log('utente', user.data());
-        //                             timelineFull[i] = { ...timelineFull[i], ...user.data() };
-        //                         })
-        //                         .then(()=> console.log("oggetto", i, timelineFull[i]))
-        //                 })
-        //         });
-        //         that.setState({timeline: timelineFull}); 
-        //     })
-        //     .catch(function (error) {
-        //         console.log("Error getting documents: ", error);
-        //     });
-        // var videos = [];
-        // var user = [];
-
-        // timeline.forEach((video) => {
-        //     videos.push(this.fetchVideo(video.idVideo));
-        // });
-
-        // videos.forEach((video) => {
-        //     Promise.resolve(video).then(result => {
-        //         user.push(this.fetchUser(result.data().owner));
-        //     })
-        // });
 
         // var timeline = await Promise.resolve(this.fetchTimeline(Fire.uid));
         // //console.log('timeline:',timeline)
@@ -108,12 +67,17 @@ class Home2Screen extends Component {
         var fullItem = [];
         var arrVideos = [];
 
-        this.props.navigation.addListener(
-            'didBlur', payload => {
-                this.setState({
-                    isPaused: true
-                });
-            });
+        this._unsubscribe = this.props.navigation.addListener('blur', () => {
+            // do something
+            console.log("adios")
+            this.setState({isPaused:false})
+          });
+
+          this.props.navigation.addListener('focus', () => {
+            // do something
+            console.log("haloa")
+            this.setState({isPaused:true})
+          });
 
         this.fetchTimeline(Fire.uid).then(videos => {
 
@@ -290,7 +254,7 @@ class Home2Screen extends Component {
         return (
 
             <View style={styles.container}>
-                <GestureRecognizer
+                   <GestureRecognizer
                     onSwipe={(direction, state) => this.onSwipe(direction, state)}
                     onSwipeUp={(state) => this.onSwipeUp(state)}
                     onSwipeDown={(state) => this.onSwipeDown(state)}
@@ -300,12 +264,16 @@ class Home2Screen extends Component {
                     style={{ flex: 1, }}
                 >
                     {/* <Image source={require('../assets/tempImage1.jpg')}></Image> */}
-                    <Video
-                        source={{ uri: item?.uri }}
+                    
+                        <Video
+                        source={{ uri: item?.video.uri }}
                         resizeMode="cover"
                         style={StyleSheet.absoluteFill}
                         isLooping
-                        paused={this.state.isPaused} />
+                        shouldPlay = {this.state.isPaused}
+                        />
+                    
+                    
                     <View style={styles.full}>
                         <View style={{ flex: .5, justifyContent: 'flex-end' }}>
 
@@ -359,6 +327,7 @@ class Home2Screen extends Component {
                             </View>
                         </View>
                     </View>
+                
                 </GestureRecognizer>
             </View>
         );
