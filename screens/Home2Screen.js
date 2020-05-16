@@ -17,6 +17,7 @@ import * as Permissions from 'expo-permissions';
 import Constants from 'expo-constants';
 import { FlatList } from 'react-native-gesture-handler';
 import { reset } from 'expo/build/AR';
+import { withNavigation } from "react-navigation";
 
 const dublicateItems = (arr, numberOfRepetitions) =>
     arr.flatMap(i => Array.from({ length: numberOfRepetitions }).fill(i));
@@ -52,7 +53,6 @@ class Home2Screen extends Component {
         this._onRefresh = this._onRefresh.bind(this);
 
     }
-
 
 
     async componentDidMount() {
@@ -103,7 +103,7 @@ class Home2Screen extends Component {
         // //console.log('timeline:',timeline)
         // timeline.forEach((video,i) => {
         //     console.log('video',i,':',video.data())
-        // })
+        // })        
         var aux = [];
         var fullItem = [];
         var arrVideos = [];
@@ -166,12 +166,12 @@ class Home2Screen extends Component {
     }
 
     async fetchUser(user) {
-        console.log('Fetching ', user);
+        console.log('Fetching user id:', user);
         return firebase.firestore().collection('users').doc(user).get();
     }
 
     async fetchVideo(video) {
-        console.log('Fetching ', video);
+        console.log('Fetching video id:', video);
         return firebase.firestore().collection('videos').doc(video).get();
     }
 
@@ -299,8 +299,6 @@ class Home2Screen extends Component {
                     config={config}
                     style={{ flex: 1, }}
                 >
-                    <Text style={styles.tagtitle}>{item?.user.name}</Text>
-                    <Text style={styles.tagtitle}>{item?.video.nome}</Text>
                     {/* <Image source={require('../assets/tempImage1.jpg')}></Image> */}
                     <Video
                         source={{ uri: item?.uri }}
