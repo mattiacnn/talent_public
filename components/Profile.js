@@ -36,7 +36,8 @@ class Profile extends React.Component {
             progressCustomized: 0,
             status:"",
             hide:"true",
-            fadeValue:0
+            fadeValue:0,
+            toCancel: null
         }
     }
 
@@ -163,12 +164,13 @@ class Profile extends React.Component {
             .catch(err => { console.log(err) });
     }
 
-    cancelVideo = () =>{
+    cancelVideo = (id) =>{
         this.setState({hide:true});
+        this.setState({toCancel: id});
     }
     deleteVideo = (idVideo) =>
     {
-        firebase.firestore().collection("videos").doc(idVideo).delete();
+        firebase.firestore().collection("videos").doc(this.state.toCancel).delete();
 
     }
     _rotateAnimation = () =>{
@@ -176,6 +178,11 @@ class Profile extends React.Component {
             toValue:1,
             duration:1000
         }).start()
+    }
+    disattivaCommenti = () => {
+        firebase.firestore().collection("videos").doc(this.state.toCancel).update({
+            commentVisible: false
+        })
     }
     render() {
         const { height, width } = Dimensions.get('window');
@@ -326,7 +333,7 @@ class Profile extends React.Component {
                         <TouchableOpacity style={styles.imageThumbnail} onPress={() => this.props.navigation.navigate('Video', {
                                 video: item,
                                 owner: showUser
-                            })} onLongPress={() => this.cancelVideo()}>
+                            })} onLongPress={() => this.cancelVideo(item.id)}>
                             <Modal
                                     animationType="fade"
                                     visible={this.state.hide}  
@@ -335,10 +342,10 @@ class Profile extends React.Component {
                                 <View  style={{flex: 1,backgroundColor:"black",opacity:0.9, flexDirection: 'column',justifyContent: 'center', alignItems: 'center'}}>
 
                                     <View>
-                                        <TouchableOpacity style={{margin:10}} onPress={() => this.setState({hide:false})}>
+                                        <TouchableOpacity style={{margin:10}} onPress={() => this.disattivaCommenti()}>
                                             <Text style={{textAlign:"center",  fontWeight:'500',fontSize:20,color:"white"}}>Disattiva Commenti</Text>
                                         </TouchableOpacity>
-                                        <TouchableOpacity style={{margin:10}} onPress={() => this.deleteVideo(item.idVideo)}>
+                                        <TouchableOpacity style={{margin:10}} onPress={() => this.deleteVideo(item.id)}>
                                             <Text style={{textAlign:"center",  fontWeight:'500',fontSize:20,color:"white"}}>Cancella il video</Text>
                                         </TouchableOpacity>  
                                     </View>

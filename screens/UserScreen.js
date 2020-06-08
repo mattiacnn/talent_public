@@ -28,7 +28,7 @@ class UserScreen extends React.Component {
         //console.log(this.props.route.params);
         console.log("started user screen");
         console.log(this.state.isMine);
-
+        
         if(!this.state.isMine) {
             firebase.firestore().collection('videos')
             .where('owner', '==', this.state.user.id)
@@ -181,10 +181,7 @@ class UserScreen extends React.Component {
                 {/* <Text h1 color="white">Is online: {this.props.global.user.name}</Text> */}
                 {this.props.global.user ? (
                     <>
-                    <TouchableOpacity style={{height:52,width:52, backgroundColor:"white", borderRadius:76, position:"absolute", top:0, right:20,
-                justifyContent:"center", alignItems:"center", zIndex:1}} onPress={this.handleSfida}>
-                        <FontAwesome name="flash" color="red" size={32}/>
-                    </TouchableOpacity>
+
                     
                     <Profile
                         user={this.state.user}

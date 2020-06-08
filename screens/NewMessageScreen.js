@@ -7,27 +7,7 @@ import { Right } from "native-base";
 import { withGlobalContext } from "../GlobalContext";
 import { reset } from "expo/build/AR";
 
-const chats = [
-    {
-        id: 1, username: "Mattiacnn", text: "ciao come stai?", chatId: "1"
-    },
-    {
-        id: 2, username: "Flaviocnn", text: "ciao come stai?"
-    },
-    {
-        id: 3, username: "Carlo23", text: "ciao come stai?"
-    },
-    {
-        id: 4, username: "Melo86", text: "ciao come stai?"
-    },
-    {
-        id: 5, username: "GiuliaSpa", text: "ciao come stai?"
-    },
-    {
-        id: 6, username: "GabryTeletabies", text: "ciao come stai?"
-    },
 
-]
 
 class NewMessageScreen extends React.Component {
 

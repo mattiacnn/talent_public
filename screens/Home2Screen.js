@@ -1,11 +1,10 @@
 import React, { Component } from 'react';
-import { Text, View, StyleSheet, ScrollView, TouchableOpacity, ImageBackground, Share, Image} from 'react-native';
+import { Text, View, StyleSheet, ScrollView, TouchableOpacity, ImageBackground, Share, Image,Alert} from 'react-native';
 import { Video } from 'expo-av';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Icon2 from 'react-native-vector-icons/MaterialIcons';
 import anim from '../assets/lottie/play.json';
 import Animation from 'lottie-react-native';
-import { Actions } from 'react-native-router-flux';
 // import Swipeable from 'react-native-gesture-handler/Swipeable';
 import GestureRecognizer, { swipeDirections } from 'react-native-swipe-gestures';
 import Fire from "../Fire";
@@ -13,18 +12,15 @@ import firebase from 'firebase';
 import 'firebase/firestore';
 import * as Crypto from 'expo-crypto';
 
-import { Notifications } from 'expo';
-import * as Permissions from 'expo-permissions';
-import Constants from 'expo-constants';
 import { FlatList } from 'react-native-gesture-handler';
-import { reset } from 'expo/build/AR';
-import { withNavigation } from "react-navigation";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scrollview";
-import Modal, { SlideAnimation, ModalContent, ModalTitle } from 'react-native-modals';
+import Modal, { ModalContent, ModalTitle } from 'react-native-modals';
 import { Item, Input } from 'native-base';
 import { Snackbar } from 'react-native-paper';
 import { withGlobalContext } from "../GlobalContext";
 import { Keyboard } from 'react-native'
+import {FontAwesome} from '@expo/vector-icons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 const dublicateItems = (arr, numberOfRepetitions) =>
     arr.flatMap(i => Array.from({ length: numberOfRepetitions }).fill(i));
@@ -66,7 +62,11 @@ class Home2Screen extends Component {
 
     }
     _onDismissSnackBar = () => this.setState({ showToast: false });
-
+    deleteComment = (id) => {
+        
+        firebase.firestore().collection("comments").doc(id).delete();
+        this.setState({modalCancel:false})
+    }
     onShare = async (uri) => {
         try {
             const result = await Share.share({
@@ -131,30 +131,9 @@ class Home2Screen extends Component {
                     let currState = this.state.user.user_videos;
                     currState.push(user_video);
                     this.setState({ user: { ...this.state.user, user_video: currState } })
-                    // results.forEach((result) => {
-                    //     console.log('result', result.data());
-                    // })
                 });
             })
         })
-
-        // .then( () => {
-
-        //     arrVideos.forEach(video => {
-        //         const userPromise = this.fetchUser(video.owner);
-        //         const videoPromise = this.fetchVideo(video.idVideo);
-        //         Promise.all(userPromise, videoPromise).then(results => {
-
-        //             results.forEach((result) => {
-        //                 console.log('result', result.data())
-        //                 aux.push(result.data())
-        //             })
-        //             //console.log(aux)
-        //             fullItem.push(aux)
-        //         })
-        //     })
-        //     //console.log('full', fullItem)
-        // })
 
     }
 
@@ -200,7 +179,7 @@ class Home2Screen extends Component {
     }
 
     onSwipeLeft(gestureState) {
-        this.setState({ myText: 'You swiped left!', currentIndex: this.state.currentIndex + 1 });
+        this.setState({ myText: 'You swiped down!', currentIndex: this.state.currentIndex + 1 });
     }
 
     onSwipeRight(gestureState) {
@@ -214,22 +193,6 @@ class Home2Screen extends Component {
         if (this.state.currentIndex >= this.state.user.user_videos.length) {
             this.setState({ currentIndex: 0 });
         }
-        // const { SWIPE_UP, SWIPE_DOWN, SWIPE_LEFT, SWIPE_RIGHT } = swipeDirections;
-        // this.setState({ gestureName: gestureName });
-        // switch (gestureName) {
-        //     case SWIPE_UP:
-        //         this.setState({ backgroundColor: 'red' });
-        //         break;
-        //     case SWIPE_DOWN:
-        //         this.setState({ backgroundColor: 'green' });
-        //         break;
-        //     case SWIPE_LEFT:
-        //         this.setState({ backgroundColor: 'blue' });
-        //         break;
-        //     case SWIPE_RIGHT:
-        //         this.setState({ backgroundColor: 'yellow' });
-        //         break;
-        // }
     }
 
     promisedSetState = (newState) => {
@@ -290,21 +253,40 @@ class Home2Screen extends Component {
 
     handleComment = (video) => {
         console.log(this.state.comment);
-        const newComment = {
-            video_id: video.id,
-            user_id: firebase.auth().currentUser.uid,
-            user_avatar: this.props.global.user.avatar || null,
-            author: `${this.props.global.user.name || null} ${this.props.global.user.surname || null}`,
-            body: this.state.comment,
-            timestamp: new Date().toLocaleDateString()
+        if (firebase.firestore().collection("videos").doc(video.id) == false)
+        {
+            const newComment = {
+                video_id: video.id,
+                user_id: firebase.auth().currentUser.uid,
+                user_avatar: this.props.global.user.avatar || null,
+                author: `${this.props.global.user.name || null} ${this.props.global.user.surname || null}`,
+                body: this.state.comment,
+                timestamp: new Date().toLocaleDateString()
+            }
+            let comments = video.comments || [];
+            comments.push(newComment);
+            Keyboard.dismiss();
+            this.setState({ video: { ...video, comments }, comment: '' });
+            firebase.firestore().collection("comments").add(newComment);
         }
-        let comments = video.comments || [];
-        comments.push(newComment);
-        Keyboard.dismiss();
-        this.setState({ video: { ...video, comments }, comment: '' });
-        firebase.firestore().collection("comments").add(newComment);
+        else
+        {
+            Alert.alert(
+                "Commenti disattivati",
+                "l'autore del video ha disattivato i commenti",
+                [
+                  { text: "OK", onPress: () => console.log("OK Pressed") }
+                ],
+                { cancelable: false }
+              );
+        }
     }
+    handleSfida = (user) => {
 
+        // posta video sfida
+        this.props.navigation.push('StartSfida',
+        { sfida: true, utenteSfidato: user})
+    }
     handleLike = (video, owner) => {
 
         const uId = firebase.auth().currentUser.uid;
@@ -372,7 +354,7 @@ class Home2Screen extends Component {
                     onSwipeLeft={(state) => this.onSwipeLeft(state)}
                     onSwipeRight={(state) => this.onSwipeRight(state)}
                     config={config}
-                    style={{ flex: 1, }}
+                    style={{ flex: 1}}
                 >
                     {/* <Image source={require('../assets/tempImage1.jpg')}></Image> */}
 
@@ -397,7 +379,7 @@ class Home2Screen extends Component {
                         <View style={{ flex: .5, justifyContent: 'flex-end', alignItems: 'flex-end' }}>
                             <View>
                                 <TouchableOpacity onPress={() => this.goToUser(item.user)}>
-                                    <ImageBackground source={item?.user.avatar ? { uri: item.user.avatar } : require("../assets/tempAvatar.jpg")} style={{ width: 50, height: 50, borderRadius: 25, marginBottom: 8 }} imageStyle={{ borderRadius: 25 }}>
+                                    <ImageBackground source={item?.user.avatar ? { uri: item.user.avatar } : require("../assets/tempAvatar.jpg")} style={{ width: 50, height: 50, borderRadius: 25, marginBottom: 8,marginLeft:-5 }} imageStyle={{ borderRadius: 25 }}>
                                         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'flex-end' }}>
                                             <Icon2 name="add-circle" size={20} color="#fb2956" />
                                         </View>
@@ -408,41 +390,25 @@ class Home2Screen extends Component {
                                 </TouchableOpacity>
                                 <Text style={styles.likecount}>{item?.video.likes}</Text>
                                 <TouchableOpacity onPress={() => this.handleModalComment(item?.video)}>
-                                    <Icon2 name="chat-bubble" size={40} color="white" />
+                                    <MaterialCommunityIcons name="chat" color="white" size={40} />
                                 </TouchableOpacity>
                                 <TouchableOpacity onPress={() => this.onShare(item?.video.uri)}>
                                     <Icon name="share" size={40} color="white" />
                                 </TouchableOpacity>
-                                <Text style={styles.share}>share</Text>
+                                <TouchableOpacity onPress={() => this.handleSfida(item?.user)} style={{marginTop:10,marginLeft:10}}>
+                                    <FontAwesome name="flash" color="red" size={40}/>
+                                </TouchableOpacity>
                             </View>
                         </View>
                     </View>
-                    <View style={{ flex: .5, flexDirection: 'row' }}>
-                        <View style={{ flex: .5 }}>
+                    <View style={{ flex: .5, flexDirection: 'row', }}>
+                        <View >
                             <View style={styles.tag}>
                                 <Text style={styles.tagtitle}>@{item?.user.username}</Text>
                             </View>
                             <ScrollView showsVerticalScrollIndicator={false}>
                                 <Text style={styles.username}>{item?.description}</Text>
                             </ScrollView>
-
-
-
-                        </View>
-                        <View style={{ flex: .5, justifyContent: 'flex-end' }}>
-                            <View style={{ margin: 12, alignItems: 'flex-end', }}>
-                                <Animation
-                                    ref={animation => {
-                                        this.animation = animation;
-                                    }}
-                                    style={{
-                                        width: 50,
-                                        height: 50
-                                    }}
-                                    loop={true}
-                                    source={anim}
-                                />
-                            </View>
                         </View>
                     </View>
                 </GestureRecognizer>
@@ -571,11 +537,12 @@ const styles = StyleSheet.create({
 
     },
     tag: {
-        backgroundColor: '#f20b3a',
+        backgroundColor: 'transparent',
         margin: 10,
         justifyContent: 'center',
         alignItems: 'center',
-        borderRadius: 8
+        borderRadius: 8,
+        marginTop:100        
     },
     username: {
         fontWeight: 'bold',

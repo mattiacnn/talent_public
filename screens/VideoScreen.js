@@ -1,20 +1,12 @@
 import React, { Component } from "react";
-import { StyleSheet, Button, Share,StatusBar, Dimensions, SafeAreaView, TouchableOpacity, ImageBackground, View, Text,  } from "react-native";
+import { StyleSheet, Share, Dimensions, SafeAreaView, TouchableOpacity, ImageBackground, View, Text, Alert  } from "react-native";
 import *as firebase from "firebase";
-import { Video } from 'expo-av';
-import * as ImagePicker from 'expo-image-picker';
-import Constants from 'expo-constants';
-import * as Permissions from 'expo-permissions';
-import Fire from "../Fire";
 import { Image } from 'react-native';
-import { Container, Header, DeckSwiper, Card, CardItem, Thumbnail, Left, Body, Item, Input } from 'native-base';
+import { Item, Input } from 'native-base';
 import { ScrollView, FlatList } from "react-native-gesture-handler";
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Icon2 from 'react-native-vector-icons/MaterialIcons';
-import anim from '../assets/lottie/play.json';
-import Animation from 'lottie-react-native';
-import { Actions } from 'react-native-router-flux';
-import Modal, { SlideAnimation, ModalContent, ModalTitle } from 'react-native-modals';
+import Modal, {ModalContent, ModalTitle } from 'react-native-modals';
 import { Ionicons } from '@expo/vector-icons';
 import VideoPlayer from 'expo-video-player';
 import * as Crypto from 'expo-crypto';
@@ -46,7 +38,8 @@ class VideoScreen extends React.Component {
             showToast: false,
             commentsSubscribed: false,
             modalCancel: false,
-            cancelComment: "Elimina Commento"
+            cancelComment: "Elimina Commento",
+            owner:null,
         };
     }
 
@@ -74,27 +67,40 @@ class VideoScreen extends React.Component {
         }
     }
 
-
     handleComment = () => {
         console.log(this.state.comment);
-        const newComment = {
-            video_id:this.state.video.id,
-            user_id: firebase.auth().currentUser.uid,
-            user_avatar: this.props.global.user.avatar || null,
-            author: `${this.props.global.user.name || null} ${this.props.global.user.surname || null}`,
-            body: this.state.comment,
-            timestamp: new Date().toLocaleDateString()
+        if (this.state.video.commentVisible == false)
+        {
+            Alert.alert(
+                "Commenti disattivati",
+                "l'autore del video ha disattivato i commenti",
+                [
+                  { text: "OK", onPress: () => console.log("OK Pressed") }
+                ],
+                { cancelable: false }
+              );
         }
-        let comments = this.state.video.comments;
-        comments.push(newComment);
-        Keyboard.dismiss();
-        this.setState({ video: { ...this.state.video, comments }, comment:'' });
-        firebase.firestore().collection("comments").add(newComment);
+        else
+        {
+            const newComment = {
+                video_id:this.state.video.id,
+                user_id: firebase.auth().currentUser.uid,
+                user_avatar: this.props.global.user.avatar || null,
+                author: `${this.props.global.user.name || null} ${this.props.global.user.surname || null}`,
+                body: this.state.comment,
+                timestamp: new Date().toLocaleDateString()
+            }
+            let comments = this.state.video.comments;
+            comments.push(newComment);
+            Keyboard.dismiss();
+            this.setState({ video: { ...this.state.video, comments }, comment:'' });
+            firebase.firestore().collection("comments").add(newComment);
+        }
     }
 
     handleLike = () => {
         //console.log(this.state.user)
-        console.log(this.state.user.id);
+        console.log(this.state.video.owner);
         console.log(this.state.video?.id || 'iddidefault');
         console.log(firebase.auth().currentUser.uid);
 
@@ -111,7 +117,7 @@ class VideoScreen extends React.Component {
                     console.log("Document data:", doc.data());
                     this.setState({ showToast: true, message: 'Video già piaciuto' });
                 } else {
-                    docRef.set({ user_id: uId, video_id: vId, videoOwner_id:this.state.user.id});
+                    docRef.set({ user_id: uId, video_id: vId, videoOwner_id:this.state.video.owner});
                     // update con transaction. Si dovrò fare con distributed counters
                     firebase.firestore().collection("videos").doc(vId)
                     .update({
@@ -162,7 +168,7 @@ class VideoScreen extends React.Component {
       onShare = async () => {
         try {
           const result = await Share.share({
-            message: 'Ciao! guarda il video che ho messo su talent'  ,
+            message: 'Ciao! guarda il video che ho messo su talent, ',
             url: this.state.video.uri,
 
           });
@@ -180,6 +186,28 @@ class VideoScreen extends React.Component {
           alert(error.message);
         }
       };
+      goToUser = (user) => {
+        console.log(user, 'UTENTE')
+
+        this.props.navigation.push('Esplora', {
+            screen: 'Utente',
+            params: {
+                user: firebase.firestore().collection("users").doc(this.state.video.owner)
+            },
+        });
+    }
+
+    async fetchUser() {
+        console.log('Fetching user id:', this.state.video.owner);
+        return firebase.firestore().collection('users').doc(this.state.video.owner).get();
+    }
+
+    componentDidMount = () => {
+        const userPromise = this.fetchUser();
+        console.log("USER",userPromise);
+        this.setState({owner: userPromise})
+
+    }
     render() {
 
         return (
@@ -212,9 +240,9 @@ class VideoScreen extends React.Component {
                 <View style={{ position: "absolute", right: 10, top: Dimensions.get('screen').height/2.5, display: "flex", flexDirection: "column", justifyContent: "flex-start", alignItems: "center" }}>
 
                     <View>
-                        <TouchableOpacity>
+                        <TouchableOpacity onPress={ () => this.goToUser ()}>
                             <ImageBackground source={
-                                this.state.user?.avatar
+                                this.state.owner?.avatar
                                     ? { uri: this.state.user.avatar }
                                     : require("../assets/tempAvatar.jpg")
                             }style={{ width: 50, height: 50, borderRadius: 25, marginBottom: 8 }} imageStyle={{ borderRadius: 25 }}>
