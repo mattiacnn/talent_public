@@ -54,7 +54,8 @@ class Home2Screen extends Component {
             isPaused: true,
             play: true,
             commentsSubscribed: false,
-            showToast: false
+            showToast: false,
+            name: ""
 
         };
         this.handleClick = this.handleClick.bind(this);
@@ -88,6 +89,50 @@ class Home2Screen extends Component {
             alert(error.message);
         }
     };
+      // Can use this function below, OR use Expo's Push Notification Tool-> https://expo.io/dashboard/notifications
+      sendPushNotification = async (token) => {
+        console.log("SENDING...")
+        const message = {
+          to: token,
+          sound: 'default',
+          title: `Nuovo like da: ${this.state.name}`,
+          body: 'fantastico, un nuovo like al tuo video',
+          data: { data: 'goes here' },
+          _displayInForeground: true,
+        };
+        const response = await fetch('https://exp.host/--/api/v2/push/send', {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            'Accept-encoding': 'gzip, deflate',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(message),
+        });
+        Console.log("SENDED")
+      };
+
+       // Can use this function below, OR use Expo's Push Notification Tool-> https://expo.io/dashboard/notifications
+       sendPushNotificationComment = async (token) => {
+        console.log("SENDING...")
+        const message = {
+          to: token,
+          sound: 'default',
+          title: `Nuovo commento da: ${this.state.name}`,
+          body: 'fantastico, un nuovo commento al tuo video',
+          data: { data: 'goes here' },
+          _displayInForeground: false,
+        };
+        const response = await fetch('https://exp.host/--/api/v2/push/send', {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            'Accept-encoding': 'gzip, deflate',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(message),
+        });
+      };
 
     async componentDidMount() {
 
@@ -135,6 +180,27 @@ class Home2Screen extends Component {
             })
         })
 
+       this.getName();
+           
+        
+    }
+
+    async getName() {
+        const id = firebase.auth().currentUser.uid;
+        const that = this;
+        firebase.firestore().collection("users").doc(id).get().then(function(doc) {
+            if (doc.exists) {
+                console.log("Document data:", doc.data());
+                that.setState({
+                    name: doc.data().name
+                });
+            } else {
+                // doc.data() will be undefined in this case
+                console.log("No such document!");
+            }
+        }).catch(function(error) {
+            console.log("Error getting document:", error);
+        });
     }
 
     async fetchTimeline(user) {
@@ -251,9 +317,21 @@ class Home2Screen extends Component {
             });
     }
 
-    handleComment = (video) => {
+    handleComment = (video, token) => {
         console.log(this.state.comment);
-        if (firebase.firestore().collection("videos").doc(video.id) == false)
+
+        if (video.commentVisible == false)
+        {
+            Alert.alert(
+                "Commenti disattivati",
+                "l'autore del video ha disattivato i commenti",
+                [
+                  { text: "OK", onPress: () => console.log("OK Pressed") }
+                ],
+                { cancelable: false }
+              );
+        }
+        else
         {
             const newComment = {
                 video_id: video.id,
@@ -268,26 +346,17 @@ class Home2Screen extends Component {
             Keyboard.dismiss();
             this.setState({ video: { ...video, comments }, comment: '' });
             firebase.firestore().collection("comments").add(newComment);
-        }
-        else
-        {
-            Alert.alert(
-                "Commenti disattivati",
-                "l'autore del video ha disattivato i commenti",
-                [
-                  { text: "OK", onPress: () => console.log("OK Pressed") }
-                ],
-                { cancelable: false }
-              );
+            this.sendPushNotificationComment(token)
         }
     }
+
     handleSfida = (user) => {
 
         // posta video sfida
         this.props.navigation.push('StartSfida',
         { sfida: true, utenteSfidato: user})
     }
-    handleLike = (video, owner) => {
+    handleLike = (video, owner, token) => {
 
         const uId = firebase.auth().currentUser.uid;
         const vId = video;
@@ -308,6 +377,8 @@ class Home2Screen extends Component {
                         .update({
                             likes: firebase.firestore.FieldValue.increment(1)
                         });
+                        console.log("THE TOKEN", token)
+                        this.sendPushNotification(token)
                 }
             })
             .catch(function (error) {
@@ -385,11 +456,11 @@ class Home2Screen extends Component {
                                         </View>
                                     </ImageBackground>
                                 </TouchableOpacity>
-                                <TouchableOpacity onPress={() => this.handleLike(item?.video.id, item?.video.owner)}>
+                                <TouchableOpacity onPress={() => this.handleLike(item?.video.id, item?.video.owner, item?.user.token)}>
                                     <Icon name="star" size={40} color={like} />
                                 </TouchableOpacity>
                                 <Text style={styles.likecount}>{item?.video.likes}</Text>
-                                <TouchableOpacity onPress={() => this.handleModalComment(item?.video)}>
+                                <TouchableOpacity onPress={() => this.handleModalComment(item?.video, item?.user.token)}>
                                     <MaterialCommunityIcons name="chat" color="white" size={40} />
                                 </TouchableOpacity>
                                 <TouchableOpacity onPress={() => this.onShare(item?.video.uri)}>
@@ -404,7 +475,7 @@ class Home2Screen extends Component {
                     <View style={{ flex: .5, flexDirection: 'row', }}>
                         <View >
                             <View style={styles.tag}>
-                                <Text style={styles.tagtitle}>@{item?.user.username}</Text>
+                                <Text style={styles.tagtitle}>@{item?.user.name}</Text>
                             </View>
                             <ScrollView showsVerticalScrollIndicator={false}>
                                 <Text style={styles.username}>{item?.description}</Text>
