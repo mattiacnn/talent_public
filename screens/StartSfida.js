@@ -3,12 +3,24 @@ import { Text, Image, View, StyleSheet, ImageBackground, Animated } from "react-
 import *as firebase from "firebase";
 import 'firebase/firestore';
 
-class ImageLoader extends Component {
-    state = {
+
+class ImageLoader  extends Component  {
+  constructor(props) {
+    super(props);
+    this.state = {
       opacity: new Animated.Value(0),
+      user: []
+    };
+    this.onLoad= this.onLoad.bind(this);
+  }
+
+    handleSfida = () => {
+      this.props.navigation.push('Carica',
+      { sfida: true})
     }
-  
-    onLoad = () => {
+
+    onLoad(){
+      const that = this;
       Animated.timing(this.state.opacity, {
         toValue: 1,
         duration: 500,
@@ -53,27 +65,27 @@ export default class StarSfida extends React.Component {
           toValue: 1,
           duration: 800,
           useNativeDriver: true,
-        }).start();
+        }).start( ()  => this.handleSfida());
+        
       }
 
    async componentDidMount()
     {
         var docRef = db.collection("users").doc(firebase.auth().currentUser.uid);
-        const that = this;
 
         docRef.get().then(function(doc) {
             if (doc.exists) {
-                const user = doc.data()
-                let currState = that.state.user;
-                currState.push(user);               
-                console.log(that.state.user)
+                const user = doc.data().avatar     
+                that.setState({user: user})        
+                console.log(user)
             } else {
                 // doc.data() will be undefined in this case
                 console.log("No such document!");
             }
         }).catch(function(error) {
             console.log("Error getting document:", error);
-        });    }
+        });    
+      }
     
     render() {
         return(

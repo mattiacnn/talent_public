@@ -53,7 +53,7 @@ enableScreens();
 const MyTheme = {
     dark: true,
     colors: {
-        primary: '#EA1043',
+        primary: '#979797',
         background: '#0f0104',
         card: '#0a0003',
         text: 'white',
@@ -116,26 +116,20 @@ function LogoTitle() {
 function PostIcon() {
     return (
         <View style={{
-            backgroundColor: "#EA1043",
+            backgroundColor: "transparent",
             height: 58,
             width: 58,
             borderRadius: 32,
-            shadowColor: "#bf0e37",
+            shadowColor: "transparent",
             shadowOffset: { width: 0, height: 5 },
             shadowRadius: 5,
             shadowOpacity: 0.5,
         }}>
-            <Entypo
-                name="clapperboard"
-                size={26}
-                color='#fff'
-                style={{
-                    lineHeight: 58,
-                    textAlign: "center",
-
-                }}
-            />
-        </View>
+        <Image
+                style={{height:70, width:70}}
+                source={require('./assets/FaviconLogo.png')}
+            />        
+      </View>
     )
 }
 
@@ -181,7 +175,7 @@ function HomeStackComponent({ route }) {
     const { nome } = route.params;
     console.log(`this is ${nome}`);
     return (
-        <HomeStack.Navigator initialRouteName="Timeline">
+        <HomeStack.Navigator initialRouteName="Timeline" >
             <HomeStack.Screen name="Timeline" component={Home2Screen} initialParams={{ nome: nome }}  options={{ headerShown: false }}/>
             <HomeStack.Screen name="Esplora" component={UVStackComponent} />
             <HomeStack.Screen name="StartSfida" component={StartSfida}  options={{ headerShown: false }} />
@@ -234,7 +228,9 @@ function HomeTabsComponent({ route, nav }) {
 
     return (
         <HomeTabs.Navigator
-            initialRouteName="Home">
+            initialRouteName="Home" tabBarOptions={{
+                inactiveTintColor: '#ffff',
+              }}>
             <HomeTabs.Screen name="Home" component={HomeStackComponent} initialParams={{ nome: myname }} options={{
                 tabBarLabel: 'Home',
                 tabBarIcon: ({ color, size }) => (
