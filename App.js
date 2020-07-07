@@ -48,6 +48,7 @@ import { enableScreens } from 'react-native-screens';
 import ChatFlavio from "./screens/ChatFlavio";
 import NewMessageScreen from "./screens/NewMessageScreen";
 import SfideScreen from "./screens/SfideScreen";
+import ListUsers from "./screens/ListUsers";
 enableScreens();
 
 const MyTheme = {
@@ -88,6 +89,7 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 1 },
         shadowRadius: 2,
         shadowOpacity: 0.1,
+        paddingRight:10
     },
     tabBar: {
         backgroundColor: "#0a0003",
@@ -153,8 +155,9 @@ function MySelfStackComponent({ route }) {
     const { isMine } = route.params;
     return (
         <MySelfStack.Navigator>
-            <MySelfStack.Screen name="Utente" component={UserScreen} options={{ title: isMine ? '' : 'Utente' }} initialParams={{ isMine }} />
+            <MySelfStack.Screen name="Utente" component={UserScreen} initialParams={{ isMine }} />
             <MySelfStack.Screen name="Video" component={VideoScreen} />
+            <MySelfStack.Screen name="ListaSocial" component={ListUsers} />
         </MySelfStack.Navigator>
     )
 }
@@ -166,6 +169,7 @@ function UVStackComponent({ route }) {
         <UserVideoStack.Navigator mode="modal" headerMode="none">
             <UserVideoStack.Screen name="Utente" component={UserScreen} options={{ headerShown: false }} initialParams={{ isMine }} />
             <UserVideoStack.Screen name="Video" component={VideoScreen} />
+            <UserVideoStack.Screen name="ListaSocial" component={ListUsers} />
         </UserVideoStack.Navigator>
     )
 }
@@ -215,7 +219,7 @@ function ProfileStackComponent({ route }) {
     return (
         <ProfileStack.Navigator initialRouteName="Il tuo Profilo">
             <ProfileStack.Screen name="Modifica" component={EditProfileScreen} options={EditProfileScreen.navigationOptions} />
-            <ProfileStack.Screen name="Il tuo Profilo" component={MySelfStackComponent} initialParams={{ isMine }} options={{ headerShown: false }} />
+            <ProfileStack.Screen name="Il tuo Profilo" component={MySelfStackComponent} initialParams={{ isMine }} options={{headerShown:false}}/>
             <ProfileStack.Screen name="Sfide" component={SfideScreen}/>
         </ProfileStack.Navigator>
     )
@@ -281,7 +285,7 @@ export default function App() {
     //checkIfLoggedIn();
 
     var [isLogged, setIsLogged] = useState(0);
-    var [nome, setNome] = useState('flavio');
+    var [nome, setNome] = useState('');
 
     firebase.auth().onAuthStateChanged(user => {
         console.log("changed");

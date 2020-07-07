@@ -60,8 +60,10 @@ class Home2Screen extends Component {
         };
         this.handleClick = this.handleClick.bind(this);
         this._onRefresh = this._onRefresh.bind(this);
-
+        this.onSwipeUp = this.onSwipeUp.bind(this);
+        this.onSwipeDown = this.onSwipeDown.bind(this);
     }
+
     _onDismissSnackBar = () => this.setState({ showToast: false });
     deleteComment = (id) => {
         
@@ -237,11 +239,19 @@ class Home2Screen extends Component {
     }
 
     onSwipeUp(gestureState) {
-        this.setState({ myText: 'You swiped up!', currentIndex: this.state.currentIndex - 1 });
+        console.log("Swipe up"); console.log(this.state.currentIndex); console.log(this.state.user?.user_videos?.length);
+
+        if(this.state.currentIndex > 0) {
+            this.setState({ currentIndex: this.state.currentIndex - 1 });
+        }
+        
     }
 
     onSwipeDown(gestureState) {
-        this.setState({ myText: 'You swiped down!', currentIndex: this.state.currentIndex + 1 });
+        console.log("Swipe down"); console.log(this.state.currentIndex); console.log(this.state.user?.user_videos?.length);
+        if(this.state.currentIndex + 1 < this.state.user.user_videos.length) {
+            this.setState({ currentIndex: this.state.currentIndex + 1 });
+        }
     }
 
     onSwipeLeft(gestureState) {
@@ -419,11 +429,11 @@ class Home2Screen extends Component {
 
             <View style={styles.container}>
                 <GestureRecognizer
-                    onSwipe={(direction, state) => this.onSwipe(direction, state)}
+                    // onSwipe={(direction, state) => this.onSwipe(direction, state)}
                     onSwipeUp={(state) => this.onSwipeUp(state)}
                     onSwipeDown={(state) => this.onSwipeDown(state)}
-                    onSwipeLeft={(state) => this.onSwipeLeft(state)}
-                    onSwipeRight={(state) => this.onSwipeRight(state)}
+                    // onSwipeLeft={(state) => this.onSwipeLeft(state)}
+                    // onSwipeRight={(state) => this.onSwipeRight(state)}
                     config={config}
                     style={{ flex: 1}}
                 >

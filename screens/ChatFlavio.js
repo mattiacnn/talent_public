@@ -3,7 +3,7 @@ import { GiftedChat } from 'react-native-gifted-chat';
 import { withGlobalContext } from '../GlobalContext';
 import firebase from 'firebase';
 import 'firebase/firestore';
-import { StyleSheet,SafeAreaView,KeyboardAvoidingView} from "react-native";
+import { StyleSheet, SafeAreaView, KeyboardAvoidingView, View, Text } from "react-native";
 
 class ChatFlavio extends React.Component {
     static navigationOptions = ({ route }) => ({
@@ -30,7 +30,8 @@ class ChatFlavio extends React.Component {
 
     }
 
-    sendMessage=(msg)=> {
+    sendMessage = (msg) => {
+        console.log(msg);
         //console.log('messaggio mandato roa',msg[0].text); return
         //this.setState({lastMessage: msg[0]});
         var that = this;
@@ -38,9 +39,9 @@ class ChatFlavio extends React.Component {
             .firestore()
             .collection("chats")
             .doc(that.state.chatId)
-            .collection("messages").add(msg[0]);
+            .collection("messages").add({...msg[0], sent: true});
 
-        this.sendPushNotification(msg[0].text)    
+        this.sendPushNotification(msg[0].text)
     }
 
     async loadMessages(callback) {
@@ -48,8 +49,8 @@ class ChatFlavio extends React.Component {
         //var recipientId = this.props.navigation.getParam("recipientId");
         var chatId = this.state.chatId;
         firebase.firestore().collection("chats")
-        .doc(chatId).collection("messages")
-        .orderBy("createdAt", "asc")
+            .doc(chatId).collection("messages")
+            .orderBy("createdAt", "asc")
             .onSnapshot(function (doc) {
                 doc.docChanges().forEach(message => {
                     var id = message.doc.id;
@@ -62,7 +63,9 @@ class ChatFlavio extends React.Component {
                             _id: message.user._id,
                             name: message.user.name,
                             avatar: message.avatar
-                        }
+                        },
+                        received:!!message.received,
+                        sent:true
                     };
                     callback(newMessage);
                 });
@@ -72,28 +75,45 @@ class ChatFlavio extends React.Component {
     _handleNotification = notification => {
         Vibration.vibrate();
         this.setState({ notification: notification });
-      };
-    
-      // Can use this function below, OR use Expo's Push Notification Tool-> https://expo.io/dashboard/notifications
-      sendPushNotification = async (msg) => {
+    };
+
+    // Can use this function below, OR use Expo's Push Notification Tool-> https://expo.io/dashboard/notifications
+    sendPushNotification = async (msg) => {
         const message = {
-          to: this.state.recipient.token,
-          sound: 'default',
-          title:  `Nuovo messaggio da  ${this.props.global.user.name}`,
-          body: msg,
-          data: { data: 'goes here' },
-          _displayInForeground: true,
+            to: this.state.recipient.token,
+            sound: 'default',
+            title: `Nuovo messaggio da  ${ this.props.global.user.name }`,
+            body: msg,
+            data: { data: 'goes here' },
+            _displayInForeground: true,
         };
         const response = await fetch('https://exp.host/--/api/v2/push/send', {
-          method: 'POST',
-          headers: {
-            Accept: 'application/json',
-            'Accept-encoding': 'gzip, deflate',
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(message),
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'Accept-encoding': 'gzip, deflate',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(message),
         });
-      };
+    };
+
+    renderTicks = currentMessage => {
+        const tickedUser = currentMessage.user._id;
+        const mine = !!(tickedUser == this.props.global.user._id);
+        const sent = !!mine && currentMessage.sent;
+
+        if (sent)
+        {
+            return (
+
+                <View>
+                    <Text style={{ color: 'gold', paddingRight: 10 }}>✓✓</Text>
+                </View>
+            )
+        }
+
+    }
 
     render() {
         const user = {
@@ -102,17 +122,26 @@ class ChatFlavio extends React.Component {
             avatar: this.props.global.user.avatar
         };
 
-            const chat = <GiftedChat messages={this.state.messages} onSend={(m)=>{this.sendMessage(m)}} user={user} />;
+        const chat = <GiftedChat
+            messages={this.state.messages}
+            onSend={(m) => { this.sendMessage(m) }}
+            user={user}
+            scrollToBottom
+            infiniteScroll
 
-            if (Platform.OS === "android") {
-                return (
-                    <KeyboardAvoidingView style={{ flex: 1 }}>
-                        {chat}
-                    </KeyboardAvoidingView>
-                );
-            }
-    
-            return <SafeAreaView style={{ flex: 1 }}>{chat}</SafeAreaView>;
+            // renderTicks={this.renderTicks}
+        />;
+
+        if (Platform.OS === "android")
+        {
+            return (
+                <KeyboardAvoidingView style={{ flex: 1 }}>
+                    {chat}
+                </KeyboardAvoidingView>
+            );
+        }
+
+        return <SafeAreaView style={{ flex: 1 }}>{chat}</SafeAreaView>;
     }
 }
 

@@ -10,6 +10,7 @@ import Accordion from 'react-native-collapsible/Accordion';
 import * as Animatable from 'react-native-animatable';
 import Collapsible from 'react-native-collapsible';
 import { ActivityIndicator } from "react-native-paper";
+import Icon2 from 'react-native-vector-icons/MaterialIcons';
 
 const chats = [
     {
@@ -101,7 +102,7 @@ class SfideScreen extends React.Component {
                 querySnapshot.forEach(function (doc) {
                     // doc.data() is never undefined for query doc snapshots
                     //console.log(doc.id, " => ", doc.data());
-                    sfideRicevute.push({ ...doc.data(), id: doc.id, content: 'inviata' });
+                    sfideRicevute.push({ ...doc.data(), id: doc.id, content: 'Hai sfidato' });
                 });
             })
             .then(() => (firebase.firestore().collection('sfide').where('sfidato_id', '==', id).get()))
@@ -109,7 +110,7 @@ class SfideScreen extends React.Component {
                 querySnapshot.forEach(function (doc) {
                     // doc.data() is never undefined for query doc snapshots
                     //console.log(doc.id, " => ", doc.data());
-                    sfideRicevute.push({ ...doc.data(), id: doc.id, content: 'ricevuta' });
+                    sfideRicevute.push({ ...doc.data(), id: doc.id, content: 'Ti ha sfidato' });
                 });
             })
             .then(() => (this.setState({ sfideRicevute })))
@@ -142,43 +143,42 @@ class SfideScreen extends React.Component {
     }
 
     statusLabel(status) {
-        var inner;
+        var statusMessage;
         switch (status) {
             case 'onCreating':
-                inner = <Text style={{ color: "#EA1043" }}>In attesa</Text>;
+                statusMessage = "In attesa";
                 break;
 
             case 'refused':
-                inner = <Text style={{ color: "red" }}>Rifiutata</Text>;
+                statusMessage = "Rifiutata";
                 break;
 
             case 'pending':
-                inner = <Text style={{ color: "#00cc5c" }}>In corso</Text>;
+                statusMessage = "In corso";
                 break;
 
             case 'completed':
-                inner = <Text style={{ color: "#00cc5c" }}>Completata</Text>;
+                statusMessage = "Completata";
                 break;
 
             default:
-                inner = <Text style={{ color: "#960000" }}>Scaduta</Text>;
+                statusMessage = "Scaduta";
                 break;
         }
         return (
             <View style={{
                 height: 28,
                 width: 80,
-                fontSize: 16,
-                lineHeight: 20,
-                borderWidth: 2,
-                borderColor: "white",
-                borderRadius: 10,
+                fontSize: 20,
+                lineHeight: 28,
+                backgroundColor: "white",
+                borderRadius: 14,
                 justifyContent: "center",
                 alignItems: "center",
                 position: "absolute",
-                right: 20
+                right: 10
             }}>
-                {inner}
+                <Text style={{ color: "#EA1043" }}>{statusMessage}</Text>
             </View>
         )
     }
@@ -266,16 +266,19 @@ class SfideScreen extends React.Component {
 
     renderHeader = (item, _, isActive) => {
         return (
-            <View>
-                <View style={styles.column}>
-                    <Text style={styles.name}>
-                        {item?.sfidato?.name}
-                    </Text>
-                    <Text style={styles.message}>
-                        Star richieste: {item?.threshold}
-                    </Text>
+            <View style={styles.cardSfida}>
+                <Text color="white">{item.content}</Text>
+                <View style={styles.nome_status}>
+                    <Text style={styles.name}>{item?.sfidato?.name} </Text>
+                    {this.statusLabel(item.status)}
                 </View>
-                {this.statusLabel(item.status)}
+                
+                <View style={styles.star}>
+                    <Text style={styles.message}>{item?.threshold} </Text> 
+                    <Icon2 name="star" size={20} color="white" />
+                </View>
+                
+                
             </View>
 
         );
@@ -286,15 +289,15 @@ class SfideScreen extends React.Component {
         // se è una sfida inviata è il video1, altrimenti è il video 2
         const video_id = (section.content == 'inviate') ? section.video1_id : section?.video2_id;
         return (
-            <View style={{ padding: 10, margin: 20, backgroundColor: "#2b2b2b", justifyContent: "space-evenly" }}>
+            <View style={{ padding: 10, margin: 10, backgroundColor: "#2b2b2b", justifyContent: "space-evenly" }}>
                 <TouchableOpacity onPress={() => {
                                 //console.log(item);
                                 this.statusAlert(section);
                             }}>
-                    <Text p color="yellow">Opzioni</Text>
+                    <Text p color="#FF1E56">Opzioni</Text>
                 </TouchableOpacity>
                 <Text color="white" p>
-                    creata il: {section.createdAt.toDate().toDateString()}
+                    creata il: {section.createdAt.toDate().toLocaleDateString()}
                 </Text>
                 {video_id && (<TouchableOpacity onPress={() => { this.setState({ show: true }); this.handleNaviagtion(video_id) }}>
                     {this.state?.show ? (<ActivityIndicator size="small" color="#00ff00" />) : (<Text color="red" p>Vai al tuo video</Text>)}
@@ -309,11 +312,6 @@ class SfideScreen extends React.Component {
 
         return (
             <SafeAreaView style={styles.container}>
-                <View style={{ justifyContent: "center" }}>
-                    <Entypo name="circle-with-plus" size={24} color="white" style={styles.circle} onPress={() => {
-                        this.props.navigation.navigate('NewChat')
-                    }}></Entypo>
-                </View>
                 {/* <FlatList
                     data={this.state.sfideLanciate}
                     renderItem={({ item }) => {
@@ -367,7 +365,7 @@ class SfideScreen extends React.Component {
                     touchableComponent={TouchableOpacity}
                     renderHeader={this.renderHeader}
                     renderContent={this.renderContent}
-                    renderSectionTitle={this._renderSectionTitle}
+                    // renderSectionTitle={this._renderSectionTitle}
                     onChange={this.setSections}
                 />
             </SafeAreaView>
@@ -389,8 +387,21 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
     },
-    column: {
-        flexDirection: "column"
+    cardSfida:  {
+        paddingHorizontal:15,
+        margin:10,
+        padding:10,
+        flexDirection: "column",
+        backgroundColor:"#FF1E56",
+        borderRadius: 12
+    },
+    nome_status: {
+        flexDirection:"row",
+        alignItems:"center"
+    },
+    star: {
+        flexDirection:"row",
+        alignItems:"center"
     },
     avatar: {
         width: 50,
@@ -399,16 +410,13 @@ const styles = StyleSheet.create({
         marginLeft: 10
     },
     name: {
-        fontSize: 18,
+        fontSize: 28,
         fontWeight: "bold",
-        marginLeft: 20,
-        color: "#EE1D52"
+        color: "#fff"
     },
     message: {
-        fontSize: 15,
-        color: "gray",
-        marginLeft: 20,
-        marginTop: 5
+        fontSize: 20,
+        color: "#fff",
     },
     searchSection: {
         height: 60,

@@ -86,7 +86,7 @@ class VideoScreen extends React.Component {
                 video_id:this.state.video.id,
                 user_id: firebase.auth().currentUser.uid,
                 user_avatar: this.props.global.user.avatar || null,
-                author: `${this.props.global.user.name || null} ${this.props.global.user.surname || null}`,
+                author: `${this.props.global.user.name || 'Senza nome'} ${this.props.global.user.surname || ''}`,
                 body: this.state.comment,
                 timestamp: new Date().toLocaleDateString()
             }
@@ -95,6 +95,7 @@ class VideoScreen extends React.Component {
             Keyboard.dismiss();
             this.setState({ video: { ...this.state.video, comments }, comment:'' });
             firebase.firestore().collection("comments").add(newComment);
+            this.sendPushNotificationComment(this.state.user.token);
         }
     }
 
@@ -124,6 +125,7 @@ class VideoScreen extends React.Component {
                         likes: firebase.firestore.FieldValue.increment(1)
                     });
                     this.setState({video:{...this.state.video, likes: this.state.video.likes +1}});
+                    this.sendPushNotification(this.state.user.token);
                 }
                 this._handleNotification
             })
@@ -145,26 +147,7 @@ class VideoScreen extends React.Component {
           firebase.firestore().collection("comments").doc(id).delete();
           this.setState({modalCancel:false})
       }
-      // Can use this function below, OR use Expo's Push Notification Tool-> https://expo.io/dashboard/notifications
-      sendPushNotification = async (msg) => {
-        const message = {
-          to: "ExponentPushToken[VPAE7YNZACQrlBaKeJf8a7]",
-          sound: 'default',
-          title:  `Nuovo messaggio da`,
-          body: "msg",
-          data: { data: 'goes here' },
-          _displayInForeground: true,
-        };
-        const response = await fetch('https://exp.host/--/api/v2/push/send', {
-          method: 'POST',
-          headers: {
-            Accept: 'application/json',
-            'Accept-encoding': 'gzip, deflate',
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(message),
-        });
-      };
+      
       onShare = async () => {
         try {
           const result = await Share.share({
@@ -201,6 +184,51 @@ class VideoScreen extends React.Component {
         console.log('Fetching user id:', this.state.video.owner);
         return firebase.firestore().collection('users').doc(this.state.video.owner).get();
     }
+
+          // Can use this function below, OR use Expo's Push Notification Tool-> https://expo.io/dashboard/notifications
+          sendPushNotification = async (token) => {
+            console.log("SENDING...")
+            const message = {
+              to: token,
+              sound: 'default',
+              title: `Nuovo like da: ${this.props.global.user.name}`,
+              body: 'fantastico, un nuovo like al tuo video',
+              data: { data: 'goes here' },
+              _displayInForeground: true,
+            };
+            const response = await fetch('https://exp.host/--/api/v2/push/send', {
+              method: 'POST',
+              headers: {
+                Accept: 'application/json',
+                'Accept-encoding': 'gzip, deflate',
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(message),
+            });
+            Console.log("SENDED")
+          };
+    
+           // Can use this function below, OR use Expo's Push Notification Tool-> https://expo.io/dashboard/notifications
+           sendPushNotificationComment = async (token) => {
+            console.log("SENDING...")
+            const message = {
+              to: token,
+              sound: 'default',
+              title: `Nuovo commento da: ${this.props.global.user.name}`,
+              body: 'fantastico, un nuovo commento al tuo video',
+              data: { data: 'goes here' },
+              _displayInForeground: false,
+            };
+            const response = await fetch('https://exp.host/--/api/v2/push/send', {
+              method: 'POST',
+              headers: {
+                Accept: 'application/json',
+                'Accept-encoding': 'gzip, deflate',
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(message),
+            });
+          };
 
     componentDidMount = () => {
         const userPromise = this.fetchUser();

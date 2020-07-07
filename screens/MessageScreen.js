@@ -23,7 +23,7 @@ class MessageScreen extends React.Component {
             searchString: "",
             query: "",
             search: "",
-            fullChats : [],
+            fullChats: [],
         };
     }
 
@@ -37,7 +37,7 @@ class MessageScreen extends React.Component {
         //     fullChats[i].otherIndex = +!myIndex; // cast index to boolean and then to number
         // })
         //console.log('fullchat',fullChats);
-        this.setState({fullChats});
+        this.setState({ fullChats });
         // var promises = [];
 
         // fullChats.forEach((chat) => {
@@ -67,7 +67,7 @@ class MessageScreen extends React.Component {
         //     //console.log(fullChats)
         //   })
 
-        }
+    }
 
     async fetchUser(user) {
         return firebase.firestore().collection('users').doc(user).get();
@@ -91,7 +91,7 @@ class MessageScreen extends React.Component {
             <SafeAreaView style={styles.container}>
                 <View style={{ justifyContent: "center" }}>
                     <TouchableOpacity ><Text style={styles.title}>Chat</Text>
-                        </TouchableOpacity>
+                    </TouchableOpacity>
                     <Entypo name="circle-with-plus" size={24} color="white" style={styles.circle} onPress={() => {
                         this.props.navigation.navigate('NewChat')
                     }}></Entypo>
@@ -114,7 +114,7 @@ class MessageScreen extends React.Component {
                     <FlatList
                         data={this.state.fullChats}
                         renderItem={({ item }) => {
-  
+
                             var i = item.otherIndex;
                             return (<TouchableOpacity style={styles.row} onPress={() => {
                                 //console.log(item);
@@ -125,8 +125,8 @@ class MessageScreen extends React.Component {
                             }}>
                                 <Image
                                     source={
-                                        item.avatars[i]? {uri:item.avatars[i]} :
-                                        require("../assets/tempAvatar.jpg")
+                                        item.avatars[i] ? { uri: item.avatars[i] } :
+                                            require("../assets/tempAvatar.jpg")
                                     }
                                     style={styles.avatar}
                                 />

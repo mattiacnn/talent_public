@@ -4,29 +4,6 @@ import { Container, Header, Button, Thumbnail, Left, Body, Item, Input, Icon } f
 import { StyleSheet, Dimensions, TouchableOpacity, Modal, View, Text, Animated,FlatList,Image } from "react-native";
 import { withGlobalContext } from "../GlobalContext";
 
-
-const chats = [
-    {
-        id:1, username:"Mattiacnn",message:"ciao come stai?"
-    },
-    {
-        id:2, username:"Flaviocnn",message:"ciao come stai?"
-    },
-    {
-        id:3, username:"Carlo23",message:"ciao come stai?"
-    },
-    {
-        id:4, username:"Melo86",message:"ciao come stai?"
-    },
-    {
-        id:5, username:"GiuliaSpa",message:"ciao come stai?"
-    },
-    {
-        id:6, username:"GabryTeletabies",message:"ciao come stai?"
-    },
-
-]
-
 export default class RisultatiRicerca extends React.Component {
 
     constructor(props) {
@@ -45,11 +22,13 @@ export default class RisultatiRicerca extends React.Component {
                     data={this.props.usersFound}
                     renderItem={({ item }) => (
                         <TouchableOpacity style={styles.searchSection} onPress={() => {
-                            //console.log(item);
-                            this.props.navigation.push('Esplora', {
+                            console.log("pressed on");
+                            console.log(item);
+                            this.props.navigation.navigate('Esplora', {
                                 screen: 'Utente',
                                 params: {
-                                  user:item
+                                  user:item,
+                                  isMine:false
                                 },
                               });
                         }}>
