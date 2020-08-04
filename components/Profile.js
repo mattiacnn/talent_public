@@ -263,7 +263,7 @@ class Profile extends React.Component {
 							<View style={styles.banner}><Text style={styles.bannerText}>EMERGENTE</Text></View>
 						</View>
 						<View style={{}}><Text style={styles.nome}>{showUser?.name}{" "}{showUser?.surname}</Text></View>
-						<View style={{}}><Text style={styles.bio}>No payment history found at this moment</Text></View>
+						<View style={{}}><Text style={styles.bio}>{showUser?.bio || ""}</Text></View>
 					</View>
 				</View>
 

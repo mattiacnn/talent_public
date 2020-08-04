@@ -142,6 +142,18 @@ export default class EditProfileScreen extends React.Component {
                                     />
                                 </View>
 
+                                <View style={{ marginBottom: 10 }}>
+                                    <Text style={{ fontSize: 12, color: "#ea1043", }}>Biografia</Text>
+                                    <Input
+                                        rounded
+                                        color="white"
+                                        style={{ backgroundColor: "transparent", fontSize: 18, borderColor: "#ea1043" }}
+                                        placeholderTextColor="white"
+                                        placeholder={this.state.user?.bio || ""}
+                                        onChangeText={bio => this.setState({ user: { ...this.state.user, bio } })}
+                                    />
+                                </View>
+
                                 <View>
                                     <Text style={{ fontSize: 12, color: "#ea1043", marginTop: 10 }}>Sicurezza</Text>
                                     <Input placeholder="password attuale" password viewPass

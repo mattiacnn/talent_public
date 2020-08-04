@@ -453,6 +453,7 @@ class Home2Screen extends Component {
                     >
                         {this.state.message}
                     </Snackbar>
+
                     <View style={styles.full}>
                         <View style={{ flex: .5, justifyContent: 'flex-end' }}>
 
@@ -482,6 +483,7 @@ class Home2Screen extends Component {
                             </View>
                         </View>
                     </View>
+                    
                     <View style={{ flex: .5, flexDirection: 'row', }}>
                         <View >
                             <View style={styles.tag}>
@@ -492,6 +494,7 @@ class Home2Screen extends Component {
                             </ScrollView>
                         </View>
                     </View>
+
                 </GestureRecognizer>
 
                 <Modal.BottomModal

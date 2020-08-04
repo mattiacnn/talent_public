@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { View, Image, StyleSheet, SafeAreaView, TouchableOpacity, ScrollView } from "react-native";
+import { View, Image, StyleSheet, SafeAreaView, TouchableOpacity, ScrollView, KeyboardAvoidingView } from "react-native";
 import { Video } from 'expo-av';
 import * as ImagePicker from 'expo-image-picker';
 import Constants from 'expo-constants';
@@ -100,123 +100,129 @@ class PostScreen extends React.Component {
   render() {
     return (
       <SafeAreaView style={{ backgroundColor: "#fff", height: "100%", display: "flex", marginTop: 20, }}>
-        <View style={
-          {
-            position: "relative",
-            backgroundColor: "#EA1043",
-            borderBottomEndRadius: 48,
-            borderBottomLeftRadius: 48,
-            alignSelf: "center",
-            justifyContent: "center",
-            alignItems: "center",
-            width: 60,
-            marginBottom: 10
-          }}>
-          {/* <Text>chiudi</Text> */}
-          <MaterialCommunityIcons name="arrow-collapse-down" size={24}
-            color='#fafafa'
-            style={{ margin: 10 }} />
-        </View>
-
-        <View style={{
-          padding: 20, flex: 1, flexDirection: "column", justifyContent: "space-evenly", alignItems: "center"
-        }}>
-          {
-            this.props.route.params?.sfida && (<Text h4>Lancia una sfida a {this.props.route.params?.utenteSfidato?.name}</Text>)
-          }
-          {
-            this.props.route.params?.rispostaSfida && (<Text h4>Accetta la sfida di {this.props.route.params?.rispostaSfida?.sfidante?.name}</Text>)
-          }
-
-          <View style={{
-            shadowColor: "#471863",
-            shadowOffset: {
-              width: 0,
-              height: 1,
-            },
-            shadowOpacity: 0.72,
-            shadowRadius: 3.22,
-
-            elevation: 3,
-          }}>
-            <TouchableOpacity onPress={this._pickImage} style={
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : null}>
+          <ScrollView>
+            <View style={
               {
-                width: Dimensions.get('screen').width / 2,
-                height: Dimensions.get('screen').width / 2,
-                backgroundColor: "#0f0104",
-                borderRadius: Dimensions.get('screen').width,
-                overflow: "hidden",
-                alignContent: "center",
-                justifyContent: "center"
-              }
-            }>
-              <Video source={{ uri: this.state.video?.uri }} resizeMode="cover" style={{
-                height: Dimensions.get('screen').width / 2,
-                width: Dimensions.get('screen').width / 2,
-                zIndex: 3,
-                position: "absolute",
-                alignSelf: "center"
-              }} />
-              <Ionicons
-                name='ios-add'
-                size={64}
+                backgroundColor: "#EA1043",
+                borderBottomEndRadius: 48,
+                borderBottomLeftRadius: 48,
+                flex:1,
+                display:"flex",
+                flexDirection:"column",
+                alignSelf: "center",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}>
+              {/* <Text>chiudi</Text> */}
+              <MaterialCommunityIcons name="arrow-collapse-down" size={24}
                 color='#fafafa'
-                style={{ zIndex: 2, position: "absolute", alignSelf: "center", lineHeight: Dimensions.get('screen').width / 2 }}
-              ></Ionicons>
-            </TouchableOpacity>
-          </View>
+                style={{ margin: 10 }} />
+            </View>
 
-          <Input placeholder="Descrizione del video" right icon="text-fields" family="MaterialCommunityIcons" onChangeText={text => this.onChangeText(text)} />
-
-          <SectionedMultiSelect
-            items={items}
-            uniqueKey="name"
-            subKey="children"
-            selectText="Scegli una o più categorie"
-            showDropDowns={true}
-            modalWithSafeAreaView={true}
-            readOnlyHeadings={true}
-            onSelectedItemsChange={this.onSelectedItemsChange}
-            selectedItems={this.state.selectedItems}
-            confirmText="conferma"
-            selectedText="selezionate"
-            searchPlaceholderText="Cerca categoria"
-            colors={{ primary: "#EA1043" }}
-            styles={{
-              selectToggle: {
-                width: 320,
-              },
-
-              selectToggleText: {
-                color: '#471863',
-                zIndex: 10
+            <View style={{
+              padding: 20, 
+              height: Dimensions.get('screen').height -40,
+              flex: 1,
+              display:"flex", 
+              flexDirection: "column", 
+              justifyContent: "space-evenly", 
+              alignItems: "center",
+            }}>
+              {
+                this.props.route.params?.sfida && (<Text h4>Lancia una sfida a {this.props.route.params?.utenteSfidato?.name}</Text>)
               }
-            }}
+              {
+                this.props.route.params?.rispostaSfida && (<Text h4>Accetta la sfida di {this.props.route.params?.rispostaSfida?.sfidante?.name}</Text>)
+              }
 
-          />
-          {this.props.route.params?.sfida && (<View style={{ width: "100%" }}>
-            <Text> Difficoltà sfida: {this.state.starAmount} star</Text>
-            <Slider
-              maximumValue={500}
-              minimumValue={10}
-              value={this.state.starAmount}
-              step={10}
-              onValueChange={(val) => this.setState({ starAmount: val })}
-            //onSlidingComplete={(val) =>this.setState({starAmount:val})}
-            />
-          </View>)}
+              <View style={{
+                shadowColor: "#471863",
+                shadowOffset: {
+                  width: 0,
+                  height: 1,
+                },
+                shadowOpacity: 0.72,
+                shadowRadius: 3.22,
+
+                elevation: 3,
+              }}>
+                <TouchableOpacity onPress={this._pickImage} style={
+                  {
+                    width: Dimensions.get('screen').width / 2,
+                    height: Dimensions.get('screen').width / 2,
+                    backgroundColor: "#0f0104",
+                    borderRadius: Dimensions.get('screen').width,
+                    overflow: "hidden",
+                    alignContent: "center",
+                    justifyContent: "center"
+                  }
+                }>
+                  <Video source={{ uri: this.state.video?.uri }} resizeMode="cover" style={{
+                    height: Dimensions.get('screen').width / 2,
+                    width: Dimensions.get('screen').width / 2,
+                    zIndex: 3,
+                    position: "absolute",
+                    alignSelf: "center"
+                  }} />
+                  <Ionicons
+                    name='ios-add'
+                    size={64}
+                    color='#fafafa'
+                    style={{ zIndex: 2, position: "absolute", alignSelf: "center", lineHeight: Dimensions.get('screen').width / 2 }}
+                  ></Ionicons>
+                </TouchableOpacity>
+              </View>
+
+              <Input placeholder="Descrizione del video" right icon="text-fields" family="MaterialCommunityIcons" onChangeText={text => this.onChangeText(text)} />
+
+              <SectionedMultiSelect
+                items={items}
+                uniqueKey="name"
+                subKey="children"
+                selectText="Scegli una o più categorie"
+                showDropDowns={true}
+                modalWithSafeAreaView={true}
+                readOnlyHeadings={true}
+                onSelectedItemsChange={this.onSelectedItemsChange}
+                selectedItems={this.state.selectedItems}
+                confirmText="conferma"
+                selectedText="selezionate"
+                searchPlaceholderText="Cerca categoria"
+                colors={{ primary: "#EA1043" }}
+                styles={{
+                  selectToggle: {
+                    width: 320,
+                  },
+
+                  selectToggleText: {
+                    color: '#471863',
+                    zIndex: 10
+                  }
+                }}
+
+              />
+              {this.props.route.params?.sfida && (<View style={{ width: "100%" }}>
+                <Text> Difficoltà sfida: {this.state.starAmount} star</Text>
+                <Slider
+                  maximumValue={500}
+                  minimumValue={10}
+                  value={this.state.starAmount}
+                  step={10}
+                  onValueChange={(val) => this.setState({ starAmount: val })}
+                //onSlidingComplete={(val) =>this.setState({starAmount:val})}
+                />
+              </View>)}
 
 
-          <Block center>
+              <Block center>
 
-            <Button size="small" color="#EA1043" round uppercase style={{ shadowColor: "#EA1043" }} onPress={this._uploadVideo} loading={this.state.loading}>carica</Button>
-          </Block>
+                <Button size="small" color="#EA1043" round uppercase style={{ shadowColor: "#EA1043" }} onPress={this._uploadVideo} loading={this.state.loading}>carica</Button>
+              </Block>
 
-        </View>
-        {/* <View style={{ height: Dimensions.get('screen').height, width: Dimensions.get('screen').width, position:"absolute",zIndex:-1 }}>
-          <Image source={require('../assets/giphy.gif')}
-            style={{ height: "100%", width: "100%" }} />
-        </View> */}
+            </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
       </SafeAreaView>
     );
   }
@@ -231,9 +237,11 @@ class PostScreen extends React.Component {
   }
 
   getPermissionAsync = async () => {
-    if (Constants.platform.ios) {
+    if (Constants.platform.ios)
+    {
       const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
-      if (status !== 'granted') {
+      if (status !== 'granted')
+      {
         alert('Sorry, we need camera roll permissions to make this work!');
       }
     }
@@ -249,7 +257,8 @@ class PostScreen extends React.Component {
     });
     console.log(result);
 
-    if (!result.cancelled) {
+    if (!result.cancelled)
+    {
       let v = this.state.video;
       v.uri = result.uri;
       this.setState({ video: v });
@@ -291,7 +300,8 @@ class PostScreen extends React.Component {
       // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
       var progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
       console.log('Upload is ' + progress + '% done');
-      switch (snapshot.state) {
+      switch (snapshot.state)
+      {
         case firebase.storage.TaskState.PAUSED: // or 'paused'
           console.log('Upload is paused');
           break;
@@ -312,22 +322,24 @@ class PostScreen extends React.Component {
       })
         .then(path => { return VideoThumbnails.getThumbnailAsync(path, { time: 1 }) })
         .then(res => { return fetch(res.uri); }).then(r => { return r.blob(); })
-        .then(file => { return firebase.storage().ref().child(`@thumb-${vid}`).put(file); })
+        .then(file => { return firebase.storage().ref().child(`@thumb-${ vid }`).put(file); })
         .then(snap => { return snap.ref.getDownloadURL(); })
         .then(url => {
           newvideo.thumbnail = url;
 
           // se è una sfida in fase di inizio
-          if (sfida) {
+          if (sfida)
+          {
             // come id della sfida sfruttiamo lo stesso generato per lo storage video
             newvideo.sfida = vid;
             newvideo.visible = false;
-          } 
-          else if(rispostaSfida) {
+          }
+          else if (rispostaSfida)
+          {
             // la sfida è già presente
             newvideo.sfida = rispostaSfida.id;
             newvideo.visible = true;
-            
+
             // la sfida è stata accettata, aggiorniamo la visibilità del video1
             // e la data di creazione - e la timeline dei follower (?)
             // TO-DO
@@ -339,20 +351,22 @@ class PostScreen extends React.Component {
           const us = this_.props.route.params?.utenteSfidato;
           const me = this_.props.global.user;
           // se è una sfida in fase di inizio
-          if (sfida) {
+          if (sfida)
+          {
             const newSfida = {
               video1_id: docRef.id,
               sfidante_id: user_id,
               createdAt: new Date(),
               sfidato_id: us?.id,
-              sfidato:{name:us?.name},
-              sfidante:{name:me?.name},
+              sfidato: { name: us?.name },
+              sfidante: { name: me?.name },
               status: "onCreating",
               threshold: this_.state.starAmount
             };
             firebase.firestore().collection("sfide").doc(vid).set(newSfida);
           }
-          else if (rispostaSfida) {
+          else if (rispostaSfida)
+          {
             rispostaSfida.video2_id = docRef.id;
             rispostaSfida.status = 'pending';
             firebase.firestore().collection("sfide").doc(rispostaSfida.id).set(rispostaSfida);
@@ -361,7 +375,7 @@ class PostScreen extends React.Component {
         })
         .then(() => {
           this_.setState({ loading: false });
-          sfida ?  alert("Sfida lanciata!") : alert("Caricamento riuscito");
+          sfida ? alert("Sfida lanciata!") : alert("Caricamento riuscito");
           this_.props.navigation.goBack();
         })
         .catch(err => { console.log(err) });
