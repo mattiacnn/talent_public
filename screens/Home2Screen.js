@@ -55,7 +55,8 @@ class Home2Screen extends Component {
             play: true,
             commentsSubscribed: false,
             showToast: false,
-            name: ""
+            name: "",
+            avatar:''
 
         };
         this.handleClick = this.handleClick.bind(this);
@@ -111,7 +112,6 @@ class Home2Screen extends Component {
           },
           body: JSON.stringify(message),
         });
-        Console.log("SENDED")
       };
 
        // Can use this function below, OR use Expo's Push Notification Tool-> https://expo.io/dashboard/notifications
@@ -146,16 +146,13 @@ class Home2Screen extends Component {
         var aux = [];
         var fullItem = [];
         var arrVideos = [];
-
         this._unsubscribe = this.props.navigation.addListener('blur', () => {
             // do something
-            console.log("adios")
             this.setState({ isPaused: false })
         });
 
         this.props.navigation.addListener('focus', () => {
             // do something
-            console.log("haloa")
             this.setState({ isPaused: true })
         });
 
@@ -163,7 +160,6 @@ class Home2Screen extends Component {
 
             videos.forEach(video => {
                 const v = video.data();
-                console.log(video.data());
                 const userPromise = this.fetchUser(v.owner);
                 const videoPromise = this.fetchVideo(v.idVideo);
 
@@ -174,7 +170,6 @@ class Home2Screen extends Component {
                     user_video.video = results[1].data();
                     user_video.video.id = v.idVideo;
                     user_video.user.id = v.owner;
-                    console.log('user video', user_video);
                     let currState = this.state.user.user_videos;
                     currState.push(user_video);
                     this.setState({ user: { ...this.state.user, user_video: currState } })
@@ -183,7 +178,6 @@ class Home2Screen extends Component {
         })
 
        this.getName();
-           
         
     }
 
@@ -227,12 +221,12 @@ class Home2Screen extends Component {
             videoNum: this.state.videoNum + 1
         });
     }
+
     renderLeftActions = (progress, dragX) => {
         const trans = dragX.interpolate({
             inputRange: [0, 50, 100, 101],
             outputRange: [-20, 0, 0, 1],
         });
-
         return (
             <Text>Ciao</Text>
         );
@@ -365,6 +359,23 @@ class Home2Screen extends Component {
         // posta video sfida
         this.props.navigation.push('StartSfida',
         { sfida: true, utenteSfidato: user})
+    }
+    _getprofilepic = () =>{
+        id = firebase.auth().currentUse.uid
+        const docRef = db.collection("users").doc(id);
+
+        docRef.get().then(function(doc) {
+            if (doc.exists) {
+                console.log("Document data:", doc.data());
+                this.setState({avatar: doc.data().avatar})
+            } else {
+                // doc.data() will be undefined in this case
+                console.log("No such document!");
+            }
+        }).catch(function(error) {
+            console.log("Error getting document:", error);
+        });    
+    
     }
     handleLike = (video, owner, token) => {
 

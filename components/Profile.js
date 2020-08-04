@@ -263,7 +263,7 @@ class Profile extends React.Component {
 							<View style={styles.banner}><Text style={styles.bannerText}>EMERGENTE</Text></View>
 						</View>
 						<View style={{}}><Text style={styles.nome}>{showUser?.name}{" "}{showUser?.surname}</Text></View>
-						<View style={{}}><Text style={styles.bio}>No payment history found at this moment</Text></View>
+						<View style={{}}><Text style={styles.bio}>La mia biografia su talent</Text></View>
 					</View>
 				</View>
 
@@ -585,8 +585,8 @@ const styles = StyleSheet.create({
 		alignItems: "center"
 	},
 	avatar: {
-		width: 128,
-		height: 128,
+		width: 108,
+		height: 108,
 		borderRadius: 69,
 	},
 	name: {
@@ -645,6 +645,7 @@ const styles = StyleSheet.create({
 	imageThumbnail: {
 		height: Dimensions.get("window").width / 2,
 		width: Dimensions.get("window").width / 3,
+		margin:2
 	},
 	cover: {
 		width: 300,
@@ -656,7 +657,7 @@ const styles = StyleSheet.create({
 	},
 	banner:{
 		marginTop:4,
-		backgroundColor: "#EE1D52",
+		backgroundColor: "transparent",
 		borderRadius: 6,
 		padding:3,
 		flexDirection:"row",

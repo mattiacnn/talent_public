@@ -96,25 +96,10 @@ class MessageScreen extends React.Component {
                         this.props.navigation.navigate('NewChat')
                     }}></Entypo>
                 </View>
-                <View style={styles.searchSection}>
-                    <Entypo name="magnifying-glass" size={24} color="white" style={styles.searchIcon} />
-                    <TextInput
-                        style={styles.input}
-                        placeholder="User Nickname"
-                        value={search}
-                        onEndEditing={this.searchFromDb}
-                        onChangeText={this.updateSearch}
-                        underlineColorAndroid="transparent"
-                        autoFocus={true}
-                        placeholderTextColor="white"
-
-                    />
-                </View>
                 <ScrollView style={{ width: "100%" }}>
                     <FlatList
                         data={this.state.fullChats}
                         renderItem={({ item }) => {
-
                             var i = item.otherIndex;
                             return (<TouchableOpacity style={styles.row} onPress={() => {
                                 //console.log(item);

@@ -17,6 +17,7 @@ import { Text, Button, Block, Input, Card, Radio, Slider } from 'galio-framework
 import SectionedMultiSelect from 'react-native-sectioned-multi-select';
 import Fire from '../Fire';
 import { withGlobalContext } from "../GlobalContext";
+import TagInput from 'react-native-tags-input';
 
 const items = [
   // this is the parent or 'item'
@@ -60,6 +61,10 @@ class PostScreen extends React.Component {
     super(props);
     this.state = {
       user: {},
+      tags: {
+        tag: '',
+        tagsArray: []
+      },
       video: {
         likes: 0,
         description: '',
@@ -84,6 +89,11 @@ class PostScreen extends React.Component {
     v.description = text;
     this.setState({ video: v });
   }
+  updateTagState = (state) => {
+    this.setState({
+      tags: state
+    })
+  };
 
   onSelectedItemsChange = (selectedItems) => {
     let v = this.state.video;
@@ -93,33 +103,34 @@ class PostScreen extends React.Component {
 
   componentDidMount() {
     this.getPermissionAsync();
+    this._pickImage();
     //this._pickImage();
     console.log('parametri ', this.props.route.params)
   }
 
   render() {
     return (
-      <SafeAreaView style={{ backgroundColor: "#fff", height: "100%", display: "flex", marginTop: 20, }}>
+      <SafeAreaView style={{ backgroundColor: "black", height: "100%", display: "flex", marginTop: 20, }}>
         <View style={
           {
             position: "relative",
-            backgroundColor: "#EA1043",
+            backgroundColor: "white",
             borderBottomEndRadius: 48,
             borderBottomLeftRadius: 48,
             alignSelf: "center",
             justifyContent: "center",
             alignItems: "center",
             width: 60,
-            marginBottom: 10
+            marginBottom: 20
           }}>
           {/* <Text>chiudi</Text> */}
           <MaterialCommunityIcons name="arrow-collapse-down" size={24}
-            color='#fafafa'
+            color='#black'
             style={{ margin: 10 }} />
         </View>
 
         <View style={{
-          padding: 20, flex: 1, flexDirection: "column", justifyContent: "space-evenly", alignItems: "center"
+          padding: 10, flex: 1, flexDirection: "column",justifyContent:'flex-start'
         }}>
           {
             this.props.route.params?.sfida && (<Text h4>Lancia una sfida a {this.props.route.params?.utenteSfidato?.name}</Text>)
@@ -127,24 +138,17 @@ class PostScreen extends React.Component {
           {
             this.props.route.params?.rispostaSfida && (<Text h4>Accetta la sfida di {this.props.route.params?.rispostaSfida?.sfidante?.name}</Text>)
           }
+        <View style={{flexDirection:'row', borderBottomWidth:0.4,borderColor:'grey',}}>
+        <View style={{
+            marginBottom:10
 
-          <View style={{
-            shadowColor: "#471863",
-            shadowOffset: {
-              width: 0,
-              height: 1,
-            },
-            shadowOpacity: 0.72,
-            shadowRadius: 3.22,
-
-            elevation: 3,
           }}>
             <TouchableOpacity onPress={this._pickImage} style={
               {
-                width: Dimensions.get('screen').width / 2,
-                height: Dimensions.get('screen').width / 2,
+                width: Dimensions.get('screen').width / 5,
+                height: Dimensions.get('screen').width / 5,
                 backgroundColor: "#0f0104",
-                borderRadius: Dimensions.get('screen').width,
+                borderRadius: 10,
                 overflow: "hidden",
                 alignContent: "center",
                 justifyContent: "center"
@@ -157,20 +161,17 @@ class PostScreen extends React.Component {
                 position: "absolute",
                 alignSelf: "center"
               }} />
-              <Ionicons
-                name='ios-add'
-                size={64}
-                color='#fafafa'
-                style={{ zIndex: 2, position: "absolute", alignSelf: "center", lineHeight: Dimensions.get('screen').width / 2 }}
-              ></Ionicons>
             </TouchableOpacity>
           </View>
 
-          <Input placeholder="Descrizione del video" right icon="text-fields" family="MaterialCommunityIcons" onChangeText={text => this.onChangeText(text)} />
-
+          <Input style={{marginLeft:10, width: Dimensions.get('screen').width - Dimensions.get('screen').width * 35 / 100, flex:1, borderWidth:0,backgroundColor:'black'}} placeholder="Descrizione..."    placeholderTextColor="#ffff"  right icon="text-fields" family="MaterialCommunityIcons" onChangeText={text => this.onChangeText(text)} />
+        </View>
+      
+          <View style={{borderBottomColor:'grey', borderBottomWidth:0.5,}}>
           <SectionedMultiSelect
             items={items}
             uniqueKey="name"
+            textColor="white"
             subKey="children"
             selectText="Scegli una o più categorie"
             showDropDowns={true}
@@ -181,19 +182,37 @@ class PostScreen extends React.Component {
             confirmText="conferma"
             selectedText="selezionate"
             searchPlaceholderText="Cerca categoria"
-            colors={{ primary: "#EA1043" }}
+            colors={{ primary: "black" }}
             styles={{
               selectToggle: {
-                width: 320,
+                width: '90%',
+                marginLeft:'auto',
+                marginRight:'auto'
               },
 
               selectToggleText: {
-                color: '#471863',
-                zIndex: 10
+                color: 'white',
+                zIndex: 10,
+                marginTop:20,
+                marginBottom:20,
               }
             }}
 
           />
+          </View>
+        <View style={{borderBottomWidth:0.4,borderColor:'grey', }}> 
+          <TagInput
+              updateState={this.updateTagState}
+              tags={this.state.tags}
+              placeholder="Hastags"
+              placeholderTextColor='white'
+              tagStyle={styles.tag}
+              tagTextStyle={styles.tagText}
+              inputStyle={{color: 'white'}}
+              containerStyle={{width:'97%',marginLeft:'auto',marginRight:'auto', marginTop:10,
+            }}
+            />
+          </View>
           {this.props.route.params?.sfida && (<View style={{ width: "100%" }}>
             <Text> Difficoltà sfida: {this.state.starAmount} star</Text>
             <Slider
@@ -207,9 +226,9 @@ class PostScreen extends React.Component {
           </View>)}
 
 
-          <Block center>
+          <Block center style={{marginTop:'auto'}}>
 
-            <Button size="small" color="#EA1043" round uppercase style={{ shadowColor: "#EA1043" }} onPress={this._uploadVideo} loading={this.state.loading}>carica</Button>
+          <Button  size="small" color="white" round uppercase style={{ shadowColor: "#black", }} onPress={this._uploadVideo} loading={this.state.loading} ><Text style={{fontSize:18,fontWeight:'600'}}>CARICA</Text></Button>
           </Block>
 
         </View>
@@ -371,3 +390,20 @@ class PostScreen extends React.Component {
 }
 
 export default withGlobalContext(PostScreen);
+
+const styles = StyleSheet.create({
+    textInput: {
+      height: 40,
+      borderColor: 'white',
+      borderWidth: 1,
+      marginTop: 8,
+      borderRadius: 5,
+      padding: 3,
+    },
+    tag: {
+        backgroundColor: '#fff'
+      },
+    tagText: {
+        color: 'black'
+      },
+});

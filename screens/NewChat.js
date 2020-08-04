@@ -54,20 +54,7 @@ export default class NewChat extends React.Component {
                 <View style={{ justifyContent: "center" }}>
                     <Text style={styles.title}>Nuova Chat</Text>
                 </View>
-                <View style={styles.searchSection}>
-                    <Entypo name="magnifying-glass" size={24} color="white" style={styles.searchIcon} />
-                    <TextInput
-                        style={styles.input}
-                        placeholder="A chi vuoi inviare il messaggio?"
-                        value={search}
-                        onEndEditing={this.searchFromDb}
-                        onChangeText={this.updateSearch}
-                        underlineColorAndroid="transparent"
-                        autoFocus={true}
-                        placeholderTextColor="white"
 
-                    />
-                </View>
                 <ScrollView style={{ width: "100%" }}>
                     <FlatList
                         data={this.state.usersFound}

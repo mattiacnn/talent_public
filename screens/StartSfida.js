@@ -96,7 +96,7 @@ export default class StarSfida extends React.Component {
           />
           <ImageLoader
             style={styles.sfidante}
-            source={{ uri: this.state.sfidante.avatar }}
+            source={{ uri: this.state.user }}
             navigation={this.props.navigation}
           />
         </View>
