@@ -199,6 +199,7 @@ class Profile extends React.Component {
 		firebase.firestore().collection("videos").doc(this.state.toCancel).update({
 			commentVisible: false,
 		});
+		console.log('disattivati')
 	};
 	render() {
 		const { height, width } = Dimensions.get("window");
@@ -233,7 +234,7 @@ class Profile extends React.Component {
 				contentContainerStyle={{
 					alignItems: "center",
 					justifyContent: "space-around",
-					marginTop:10
+					marginTop: 10
 				}}
 			>
 				<View style={{ flexDirection: "row" }}>
@@ -252,24 +253,24 @@ class Profile extends React.Component {
 							/>
 						</TouchableOpacity>
 					</View>
-					
-					<View style={{flex:6, display:"flex", flexDirection: "column", justifyContent:"space-evenly"}}>
+
+					<View style={{ flex: 6, display: "flex", flexDirection: "column", justifyContent: "space-evenly" }}>
 						<View style={styles.bannerView}>
-							<View  style={{ alignSelf:"center", flexDirection: "row" }}>
-								<Icon2 name="star" color="#EE1D52" style={{}} size={18}></Icon2>
-								<Icon2 name="star" color="#EE1D52" style={{}} size={18}></Icon2>
+							<View style={{ alignSelf: "center", flexDirection: "row" }}>
+								<Icon2 name="star" color="#ffff" style={{}} size={18}></Icon2>
+								<Icon2 name="star" color="#ffff" style={{}} size={18}></Icon2>
 							</View>
-							
+
 							<View style={styles.banner}><Text style={styles.bannerText}>EMERGENTE</Text></View>
 						</View>
 						<View style={{}}><Text style={styles.nome}>{showUser?.name}{" "}{showUser?.surname}</Text></View>
-						<View style={{}}><Text style={styles.bio}>La mia biografia su talent</Text></View>
+						<View style={{}}><Text style={styles.bio}>{showUser?.bio || ""}</Text></View>
 					</View>
 				</View>
 
 
 				<View
-					style={{ flexDirection: "row", justifyContent: "center", margin:10}}
+					style={{ flexDirection: "row", justifyContent: "center", margin: 10 }}
 				>
 					{this.props.guest && (
 						<>
@@ -318,7 +319,7 @@ class Profile extends React.Component {
 												<SimpleLineIcons
 													name="user-follow"
 													size={24}
-													color="#EA1043"
+													color="#ffff"
 												/>
 												<Text
 													style={{
@@ -354,7 +355,7 @@ class Profile extends React.Component {
 										this.handleNewChat(showUser);
 									}}
 								>
-									<Icon name="message-text" size={24} color="#EA1043" />
+									<Icon name="message-text" size={24} color="#ffff" />
 									<Text
 										style={{
 											color: "#C3C5CD",
@@ -597,7 +598,7 @@ const styles = StyleSheet.create({
 	statsContainer: {
 		flexDirection: "row",
 		marginBottom: 20,
-		maxWidth:300
+		maxWidth: 300
 	},
 	stat: {
 		alignItems: "center",
@@ -645,36 +646,36 @@ const styles = StyleSheet.create({
 	imageThumbnail: {
 		height: Dimensions.get("window").width / 2,
 		width: Dimensions.get("window").width / 3,
-		margin:2
+		margin: 2
 	},
 	cover: {
 		width: 300,
 		height: 300,
 	},
-	bannerView:{
-		flexDirection:"column",
-		maxWidth:160
+	bannerView: {
+		flexDirection: "column",
+		maxWidth: 160
 	},
-	banner:{
-		marginTop:4,
+	banner: {
+		marginTop: 4,
 		backgroundColor: "transparent",
 		borderRadius: 6,
-		padding:3,
-		flexDirection:"row",
-		justifyContent:"center"
+		padding: 3,
+		flexDirection: "row",
+		justifyContent: "center"
 	},
-	bannerText:{
-		color:"#FFFFFF",
-		fontSize:18,
+	bannerText: {
+		color: "#FFFFFF",
+		fontSize: 18,
 	},
-	nome:{
-		color:"#FFFFFF",
-		fontSize:24,
-		fontWeight:"500"
+	nome: {
+		color: "#FFFFFF",
+		fontSize: 24,
+		fontWeight: "500"
 	},
 
-	bio:{
-		color:"#D6D6D6",
-		fontSize:16,
+	bio: {
+		color: "#D6D6D6",
+		fontSize: 16,
 	}
 });

@@ -198,7 +198,7 @@ export default class RegisterScreen extends React.Component {
                 </TouchableOpacity>
 
                 <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : null}>
-                    <ScrollView style={{ backgroundColor: "white",}}>
+                    <ScrollView style={{ backgroundColor: "black",}}>
                             <Image
                                 source={require('../assets/authHeader.png')}
                                 style={{ top: -200, left: -50, position: "absolute" }}
@@ -315,36 +315,26 @@ export default class RegisterScreen extends React.Component {
                 source={require('../assets/logo.png')}
                 style={{ height: 150, width: 150, alignSelf: "center", top: 80, position: "absolute" }}
             />
-            <View style={{ ...styles.form, paddingTop: 160, alignItems: "stretch", alignContent: "center", flexDirection: "column", }}>
+            <View style={{ ...styles.form, paddingTop: 160, alignItems: "stretch", alignContent: "center", flexDirection: "column",backgroundColor:'black' }}>
 
                 <View >
                     <Text style={styles.inputTitle}>Username</Text>
                     <TextInput placeholder="username" style={styles.input} onChangeText={username => this.setState({ user: { ...this.state.user, username } })}></TextInput>
                 </View>
 
-                <View>
-                    <TouchableOpacity onPress={() => this.setState({ show: !this.state.show })} >
-                        <Text style={styles.inputData}>{this.state.message}</Text>
-                    </TouchableOpacity>
-                    {this.state.show && (<DateTimePicker
-                        testID="dateTimePicker"
-                        timeZoneOffsetInMinutes={0}
-                        value={this.state.date}
-                        mode={'date'}
-                        is24Hour={true}
-                        display="calendar"
-                        onChange={onChange}
-                        minimumDate={this.state.minDate}
-                        maximumDate={this.state.maxDate}
-                    />)}
+                <View >
+                    <Text style={styles.inputTitle}>Data di nascita</Text>
+                    <TextInput  placeholder="Data di nascita" style={styles.input} onChangeText={birthdate => this.setState({ user: { ...this.state.user, birthdate } })}></TextInput>
                 </View>
 
-                <View >
+                <View style={{backgroundColor:'black'}}
+>
                     <CheckBox
                         title='Accetto i temini e le condizioni di talent'
                         checked={this.state.checked}
                         onPress={() => this.condition()}
-                        checkedColor="red"
+                        checkedColor="white"
+                        containerStyle={{backgroundColor:'black'}}
                     />
                 </View>
 
@@ -389,7 +379,7 @@ const styles = StyleSheet.create({
         
     },
     inputTitle: {
-        color: '#8a8f9e',
+        color: 'white',
         fontSize: 10,
         textTransform: 'uppercase'
     },

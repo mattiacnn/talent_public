@@ -1,12 +1,12 @@
 import React, { Component } from "react";
-import { StyleSheet, Share, Dimensions, SafeAreaView, TouchableOpacity, ImageBackground, View, Text, Alert  } from "react-native";
+import { StyleSheet, Share, Dimensions, SafeAreaView, TouchableOpacity, ImageBackground, View, Text, Alert } from "react-native";
 import *as firebase from "firebase";
 import { Image } from 'react-native';
 import { Item, Input } from 'native-base';
 import { ScrollView, FlatList } from "react-native-gesture-handler";
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Icon2 from 'react-native-vector-icons/MaterialIcons';
-import Modal, {ModalContent, ModalTitle } from 'react-native-modals';
+import Modal, { ModalContent, ModalTitle } from 'react-native-modals';
 import { Ionicons } from '@expo/vector-icons';
 import VideoPlayer from 'expo-video-player';
 import * as Crypto from 'expo-crypto';
@@ -14,6 +14,7 @@ import { Snackbar } from 'react-native-paper';
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scrollview";
 import { withGlobalContext } from "../GlobalContext";
 import { Keyboard } from 'react-native'
+import {FontAwesome} from '@expo/vector-icons';
 
 const playButton = (<Icon2 name="chat-bubble" size={40} color="white" />);
 
@@ -39,7 +40,7 @@ class VideoScreen extends React.Component {
             commentsSubscribed: false,
             modalCancel: false,
             cancelComment: "Elimina Commento",
-            owner:null,
+            owner: null,
         };
     }
 
@@ -48,7 +49,8 @@ class VideoScreen extends React.Component {
     handleModalComment = () => {
         console.log(this.state.video);
         this.setState({ showComments: !this.state.showComments });
-        if (!this.state.commentsSubscribed) {
+        if (!this.state.commentsSubscribed)
+        {
             firebase.firestore().collection("comments").where("video_id", "==", this.state.video.id)
                 .onSnapshot((querySnapshot) => {
                     //console.log(querySnapshot);
@@ -61,7 +63,7 @@ class VideoScreen extends React.Component {
                         console.log(comments)
                         //console.log(doc.id, " => ", doc.data());
                     });
-                    this.setState({ video: { ...this.state.video, comments }, commentsSubscribed:true });
+                    this.setState({ video: { ...this.state.video, comments }, commentsSubscribed: true });
                     console.log(this.state.video.comments)
                 });
         }
@@ -75,25 +77,25 @@ class VideoScreen extends React.Component {
                 "Commenti disattivati",
                 "l'autore del video ha disattivato i commenti",
                 [
-                  { text: "OK", onPress: () => console.log("OK Pressed") }
+                    { text: "OK", onPress: () => console.log("OK Pressed") }
                 ],
                 { cancelable: false }
-              );
+            );
         }
         else
         {
             const newComment = {
-                video_id:this.state.video.id,
+                video_id: this.state.video.id,
                 user_id: firebase.auth().currentUser.uid,
                 user_avatar: this.props.global.user.avatar || null,
-                author: `${this.props.global.user.name || 'Senza nome'} ${this.props.global.user.surname || ''}`,
+                author: `${ this.props.global.user.name || 'Senza nome' } ${ this.props.global.user.surname || '' }`,
                 body: this.state.comment,
                 timestamp: new Date().toLocaleDateString()
             }
             let comments = this.state.video.comments;
             comments.push(newComment);
             Keyboard.dismiss();
-            this.setState({ video: { ...this.state.video, comments }, comment:'' });
+            this.setState({ video: { ...this.state.video, comments }, comment: '' });
             firebase.firestore().collection("comments").add(newComment);
             this.sendPushNotificationComment(this.state.user.token);
         }
@@ -108,23 +110,25 @@ class VideoScreen extends React.Component {
         const uId = firebase.auth().currentUser.uid;
         const vId = this.state.video?.id || 'iddidefault';
         var docRef;
-        Crypto.digestStringAsync(Crypto.CryptoDigestAlgorithm.SHA1, `${uId}${vId}` )
+        Crypto.digestStringAsync(Crypto.CryptoDigestAlgorithm.SHA1, `${ uId }${ vId }`)
             .then(hash => {
                 docRef = firebase.firestore().collection("likes").doc(hash);
                 return docRef.get();
             })
             .then((doc) => {
-                if (doc.exists) {
+                if (doc.exists)
+                {
                     console.log("Document data:", doc.data());
                     this.setState({ showToast: true, message: 'Video già piaciuto' });
-                } else {
-                    docRef.set({ user_id: uId, video_id: vId, videoOwner_id:this.state.video.owner});
+                } else
+                {
+                    docRef.set({ user_id: uId, video_id: vId, videoOwner_id: this.state.video.owner });
                     // update con transaction. Si dovrò fare con distributed counters
                     firebase.firestore().collection("videos").doc(vId)
-                    .update({
-                        likes: firebase.firestore.FieldValue.increment(1)
-                    });
-                    this.setState({video:{...this.state.video, likes: this.state.video.likes +1}});
+                        .update({
+                            likes: firebase.firestore.FieldValue.increment(1)
+                        });
+                    this.setState({ video: { ...this.state.video, likes: this.state.video.likes + 1 } });
                     this.sendPushNotification(this.state.user.token);
                 }
                 this._handleNotification
@@ -140,100 +144,119 @@ class VideoScreen extends React.Component {
         Vibration.vibrate();
         console.log(notification);
         this.setState({ notification: notification });
-      };
-    
-      deleteComment = (id) => {
-        
-          firebase.firestore().collection("comments").doc(id).delete();
-          this.setState({modalCancel:false})
-      }
-      
-      onShare = async () => {
-        try {
-          const result = await Share.share({
-            message: 'Ciao! guarda il video che ho messo su talent, ',
-            url: this.state.video.uri,
+    };
 
-          });
-    
-          if (result.action === Share.sharedAction) {
-            if (result.activityType) {
-              // shared with activity type of result.activityType
-            } else {
-              // shared
+    deleteComment = (id) => {
+
+        firebase.firestore().collection("comments").doc(id).delete();
+        this.setState({ modalCancel: false })
+    }
+
+    onShare = async () => {
+        try
+        {
+            const result = await Share.share({
+                message: 'Ciao! guarda il video che ho messo su talent, ',
+                url: this.state.video.uri,
+
+            });
+
+            if (result.action === Share.sharedAction)
+            {
+                if (result.activityType)
+                {
+                    // shared with activity type of result.activityType
+                } else
+                {
+                    // shared
+                }
+            } else if (result.action === Share.dismissedAction)
+            {
+                // dismissed
             }
-          } else if (result.action === Share.dismissedAction) {
-            // dismissed
-          }
-        } catch (error) {
-          alert(error.message);
+        } catch (error)
+        {
+            alert(error.message);
         }
-      };
-      goToUser = (user) => {
-        console.log(user, 'UTENTE')
+    };
+    goToUser = (user) => {
+        //console.log(this.state.owner, 'UTENTE')
 
         this.props.navigation.push('Esplora', {
             screen: 'Utente',
             params: {
-                user: firebase.firestore().collection("users").doc(this.state.video.owner)
+                user: this.state.owner
             },
         });
     }
+    handleSfida = (user) => {
 
-    async fetchUser() {
+        // posta video sfida
+        this.props.navigation.push('StartSfida',
+        { sfida: true, utenteSfidato: this.state.user})
+    }
+     fetchUser = async () => {
         console.log('Fetching user id:', this.state.video.owner);
-        return firebase.firestore().collection('users').doc(this.state.video.owner).get();
+        var user = await firebase.firestore().collection('users').doc(this.state.video.owner).get();
+        this.setState({owner: user});
     }
 
-          // Can use this function below, OR use Expo's Push Notification Tool-> https://expo.io/dashboard/notifications
-          sendPushNotification = async (token) => {
-            console.log("SENDING...")
-            const message = {
-              to: token,
-              sound: 'default',
-              title: `Nuovo like da: ${this.props.global.user.name}`,
-              body: 'fantastico, un nuovo like al tuo video',
-              data: { data: 'goes here' },
-              _displayInForeground: true,
-            };
-            const response = await fetch('https://exp.host/--/api/v2/push/send', {
-              method: 'POST',
-              headers: {
+    // Can use this function below, OR use Expo's Push Notification Tool-> https://expo.io/dashboard/notifications
+    sendPushNotification = async (token) => {
+        console.log("SENDING...")
+        const message = {
+            to: token,
+            sound: 'default',
+            title: `Nuovo like da: ${ this.props.global.user.name }`,
+            body: 'fantastico, un nuovo like al tuo video',
+            data: { data: 'goes here' },
+            _displayInForeground: true,
+        };
+        const response = await fetch('https://exp.host/--/api/v2/push/send', {
+            method: 'POST',
+            headers: {
                 Accept: 'application/json',
                 'Accept-encoding': 'gzip, deflate',
                 'Content-Type': 'application/json',
-              },
-              body: JSON.stringify(message),
-            });
-            Console.log("SENDED")
-          };
-    
-           // Can use this function below, OR use Expo's Push Notification Tool-> https://expo.io/dashboard/notifications
-           sendPushNotificationComment = async (token) => {
-            console.log("SENDING...")
-            const message = {
-              to: token,
-              sound: 'default',
-              title: `Nuovo commento da: ${this.props.global.user.name}`,
-              body: 'fantastico, un nuovo commento al tuo video',
-              data: { data: 'goes here' },
-              _displayInForeground: false,
-            };
-            const response = await fetch('https://exp.host/--/api/v2/push/send', {
-              method: 'POST',
-              headers: {
+            },
+            body: JSON.stringify(message),
+        });
+        Console.log("SENDED")
+    };
+
+    // Can use this function below, OR use Expo's Push Notification Tool-> https://expo.io/dashboard/notifications
+    sendPushNotificationComment = async (token) => {
+        console.log("SENDING...")
+        const message = {
+            to: token,
+            sound: 'default',
+            title: `Nuovo commento da: ${ this.props.global.user.name }`,
+            body: 'fantastico, un nuovo commento al tuo video',
+            data: { data: 'goes here' },
+            _displayInForeground: false,
+        };
+        const response = await fetch('https://exp.host/--/api/v2/push/send', {
+            method: 'POST',
+            headers: {
                 Accept: 'application/json',
                 'Accept-encoding': 'gzip, deflate',
                 'Content-Type': 'application/json',
-              },
-              body: JSON.stringify(message),
-            });
-          };
+            },
+            body: JSON.stringify(message),
+        });
+    };
 
     componentDidMount = () => {
-        const userPromise = this.fetchUser();
-        console.log("USER",userPromise);
-        this.setState({owner: userPromise})
+        var that = this;
+        firebase.firestore().collection('users').doc(this.state.video.owner)
+        .get().then(user => {
+            //console.log(user.data());
+            var owner = user.data();
+            owner.id = user.id;
+            that.setState({owner});
+        })
+        //console.log("USER", userPromise);
+        //this.setState({ owner: userPromise })
 
     }
     render() {
@@ -265,15 +288,15 @@ class VideoScreen extends React.Component {
                 >
                     {this.state.message}
                 </Snackbar>
-                <View style={{ position: "absolute", right: 10, top: Dimensions.get('screen').height/2.5, display: "flex", flexDirection: "column", justifyContent: "flex-start", alignItems: "center" }}>
+                <View style={{ position: "absolute", right: 10, top: Dimensions.get('screen').height / 4, display: "flex", flexDirection: "column", justifyContent: "flex-start", alignItems: "flex-start" }}>
 
                     <View>
-                        <TouchableOpacity onPress={ () => this.goToUser ()}>
+                        <TouchableOpacity onPress={() => this.goToUser()}>
                             <ImageBackground source={
                                 this.state.owner?.avatar
-                                    ? { uri: this.state.user.avatar }
+                                    ? { uri: this.state.owner.avatar }
                                     : require("../assets/tempAvatar.jpg")
-                            }style={{ width: 50, height: 50, borderRadius: 25, marginBottom: 8 }} imageStyle={{ borderRadius: 25 }}>
+                            } style={{ width: 50, height: 50, borderRadius: 25, marginBottom: 8 }} imageStyle={{ borderRadius: 25 }}>
                                 <View style={{ flex: 1, alignItems: 'center', justifyContent: 'flex-end' }}>
                                     <Icon2 name="add-circle" size={20} color="#fb2956" />
                                 </View>
@@ -282,18 +305,19 @@ class VideoScreen extends React.Component {
                     </View>
 
                     <View>
-                    <TouchableOpacity onPress={this.handleLike} style={styles.icon}>
+                        <TouchableOpacity onPress={this.handleLike} style={styles.icon}>
                             <Icon name="star" size={40} color={COLOR} />
                         </TouchableOpacity>
                         <Text style={styles.counter}>{this.state.video?.likes}</Text>
                         <TouchableOpacity onPress={this.handleModalComment} style={styles.icon}>
                             <Icon2 name="chat-bubble" size={40} color={COLOR} />
                         </TouchableOpacity>
-                        <Text style={styles.counter}>{this.state.video.comments?.length ? this.state.video.comments.length : 0}</Text>
                         <TouchableOpacity onPress={() => this.onShare()}>
-                                    <Icon name="share" size={40} color="white" />
+                            <Icon name="share" size={40} color="white" />
                         </TouchableOpacity>
-                        <Text style={styles.share}>share</Text>
+                        <TouchableOpacity onPress={() => this.handleSfida(this.state.user)} style={{ marginTop: 10, marginLeft: 10 }}>
+                            <FontAwesome name="flash" color="white" size={40} />
+                        </TouchableOpacity>
                     </View>
                 </View>
 
@@ -332,42 +356,42 @@ class VideoScreen extends React.Component {
                                 data={this.state.video.comments ? this.state.video.comments : []}
                                 keyExtractor={(item) => item.id}
                                 renderItem={({ item }) => (
-                                    <TouchableOpacity style={{flexDirection:"row", marginTop:10}} onLongPress={() =>   this.setState({modalCancel: true}) }>
+                                    <TouchableOpacity style={{ flexDirection: "row", marginTop: 10 }} onLongPress={() => this.setState({ modalCancel: true })}>
                                         <Modal
                                             animationType="fade"
-                                            visible={this.state.modalCancel}                                           
+                                            visible={this.state.modalCancel}
                                         >
-                                            <View  style={{height:100,width:250,backgroundColor:"white",justifyContent:"center"}}>
-                                                <TouchableOpacity style={{margin:5}} onPress={() => this.setState({modalCancel:false})}>
-                                                    <Text style={{textAlign:"center",  fontWeight:'500',fontSize:16,color:"black"}}>Annulla</Text>
+                                            <View style={{ height: 100, width: 250, backgroundColor: "white", justifyContent: "center" }}>
+                                                <TouchableOpacity style={{ margin: 5 }} onPress={() => this.setState({ modalCancel: false })}>
+                                                    <Text style={{ textAlign: "center", fontWeight: '500', fontSize: 16, color: "black" }}>Annulla</Text>
                                                 </TouchableOpacity>
-                                                <TouchableOpacity style={{margin:5}} onPress={() => this.deleteComment(item.id)}>
-                                                    <Text style={{textAlign:"center",  fontWeight:'500',fontSize:16,color:"black"}}>Cancella Commento</Text>
+                                                <TouchableOpacity style={{ margin: 5 }} onPress={() => this.deleteComment(item.id)}>
+                                                    <Text style={{ textAlign: "center", fontWeight: '500', fontSize: 16, color: "black" }}>Cancella Commento</Text>
                                                 </TouchableOpacity>
-                                                <TouchableOpacity style={{margin:5}}>
-                                                    <Text style={{textAlign:"center",  fontWeight:'500',fontSize:16,color:"black"}}>Segnala</Text>
-                                                </TouchableOpacity>                                                    
+                                                <TouchableOpacity style={{ margin: 5 }}>
+                                                    <Text style={{ textAlign: "center", fontWeight: '500', fontSize: 16, color: "black" }}>Segnala</Text>
+                                                </TouchableOpacity>
 
                                             </View>
                                         </Modal>
-                                        <Image style={{height:40,width:40,borderRadius:30}} source = {{uri:item.user_avatar}}/>
-                                        <View style={{flexDirection:"column",marginLeft:30}}>
-                                            <View style={{flexDirection:"row"}}>
-                                                <Text style={{fontWeight:"bold"}}>{item.author}</Text>
-                                                <Text style={{marginLeft:10}}>{item.body}</Text>
+                                        <Image style={{ height: 40, width: 40, borderRadius: 30 }} source={{ uri: item.user_avatar }} />
+                                        <View style={{ flexDirection: "column", marginLeft: 30 }}>
+                                            <View style={{ flexDirection: "row" }}>
+                                                <Text style={{ fontWeight: "bold" }}>{item.author}</Text>
+                                                <Text style={{ marginLeft: 10 }}>{item.body}</Text>
                                             </View>
-                                            <Text style={{fontSize:12, color:"gray"}}>{item.timestamp}</Text>
+                                            <Text style={{ fontSize: 12, color: "gray" }}>{item.timestamp}</Text>
                                         </View>
                                     </TouchableOpacity>
                                 )}
                             >
                             </FlatList>
-                            <Item rounded style={{ flexDirection: "row", justifyContent: "space-around", marginHorizontal: 5,padding:5 }}>
+                            <Item rounded style={{ flexDirection: "row", justifyContent: "space-around", marginHorizontal: 5, padding: 5 }}>
                                 <Input placeholder='Inserisci commento' onChangeText={comment => this.setState({ comment })} />
-                                <TouchableOpacity style={{ marginHorizontal: 5,marginRight:15,padding:10 }} onPress={this.handleComment}>
+                                <TouchableOpacity style={{ marginHorizontal: 5, marginRight: 15, padding: 10 }} onPress={this.handleComment}>
                                     <Text style={{ fontWeight: "bold" }}>Pubblica</Text>
                                 </TouchableOpacity>
-                                
+
                             </Item>
                         </ModalContent>
                     </KeyboardAwareScrollView>

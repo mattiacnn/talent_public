@@ -177,7 +177,6 @@ function UVStackComponent({ route }) {
 const HomeStack = createStackNavigator();
 function HomeStackComponent({ route }) {
     const { nome } = route.params;
-    console.log(`this is ${nome}`);
     return (
         <HomeStack.Navigator initialRouteName="Timeline" >
             <HomeStack.Screen name="Timeline" component={Home2Screen} initialParams={{ nome: nome }}  options={{ headerShown: false }}/>
@@ -193,7 +192,7 @@ function ChatStackComponent() {
         <ChatStack.Navigator initialRouteName="Chat">
             <ChatStack.Screen name="Chat" component={MessageScreen} options={{headerShown:false}}/>
             <ChatStack.Screen name="ChatWith" component={ChatFlavio} options={{headerTitle:"Conversazione"}}/>
-            <ChatStack.Screen name="NewChat" component={NewMessageScreen} options={{headerShown:true}}/>
+            <ChatStack.Screen name="NewChat" component={NewMessageScreen} options={{headerShown:true, headerTitle:"Nuova Chat"}}/>
             <ChatStack.Screen name="Esplora" component={UVStackComponent} />
         </ChatStack.Navigator>
     )
@@ -231,12 +230,14 @@ function HomeTabsComponent({ route, nav }) {
     const { myname } = route.params;
 
     return (
-        <HomeTabs.Navigator
+        <HomeTabs.Navigator 
             initialRouteName="Home" tabBarOptions={{
                 inactiveTintColor: '#ffff',
               }}>
+                  
             <HomeTabs.Screen name="Home" component={HomeStackComponent} initialParams={{ nome: myname }} options={{
                 tabBarLabel: 'Home',
+                tabBarVisible:false,
                 tabBarIcon: ({ color, size }) => (
                     <MaterialCommunityIcons name="home" color={color} size={size} />
                 ),
@@ -288,12 +289,9 @@ export default function App() {
     var [nome, setNome] = useState('');
 
     firebase.auth().onAuthStateChanged(user => {
-        console.log("changed");
         if (user) {
-            console.log("utente ok");
             setIsLogged(true);
         } else {
-            console.log("No user");
             setIsLogged(false);
         }
 

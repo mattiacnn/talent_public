@@ -84,7 +84,7 @@ export default class EditProfileScreen extends React.Component {
         var s = require('../style');
 
         return (
-            <View style={{ width: Dimensions.get('window').width, height: Dimensions.get('window').height,  }}>
+            <ScrollView>
                 <KeyboardAwareScrollView
                     resetScrollToCoords={{ x: 0, y: 0 }}
                     contentContainerStyle={{ width: Dimensions.get('window').width, height: Dimensions.get('window').height, }}
@@ -94,11 +94,11 @@ export default class EditProfileScreen extends React.Component {
                         <SafeAreaView >
                             <View style={{ marginHorizontal: 30, marginTop: 20 }}>
                                 <View style={{ marginBottom: 10 }}>
-                                    <Text style={{ fontSize: 12, color: "#ea1043", }}>Nome</Text>
+                                    <Text style={{ fontSize: 12, color: "#ffff", }}>Nome</Text>
                                     <Input
                                         rounded
                                         color="white"
-                                        style={{ backgroundColor: "transparent", fontSize: 18, borderColor: "#ea1043" }}
+                                        style={{ backgroundColor: "transparent", fontSize: 18, borderColor: "#ffff" }}
                                         placeholderTextColor="white"
                                         placeholder={this.state.user.name}
                                         onChangeText={name => this.setState({ user: { ...this.state.user, name } })}
@@ -106,11 +106,11 @@ export default class EditProfileScreen extends React.Component {
                                 </View>
 
                                 <View style={{ marginBottom: 10 }}>
-                                    <Text style={{ fontSize: 12, color: "#ea1043", }}>Cognome</Text>
+                                    <Text style={{ fontSize: 12, color: "#ffff", }}>Cognome</Text>
                                     <Input
                                         rounded
                                         color="white"
-                                        style={{ backgroundColor: "transparent", fontSize: 18, borderColor: "#ea1043" }}
+                                        style={{ backgroundColor: "transparent", fontSize: 18, borderColor: "#ffff" }}
                                         placeholderTextColor="white"
                                         placeholder={this.state.user.surname}
                                         onChangeText={surname => this.setState({ user: { ...this.state.user, surname } })}
@@ -119,11 +119,11 @@ export default class EditProfileScreen extends React.Component {
 
 
                                 <View style={{ marginBottom: 10 }}>
-                                    <Text style={{ fontSize: 12, color: "#ea1043", }}>Username</Text>
+                                    <Text style={{ fontSize: 12, color: "#ffff", }}>Username</Text>
                                     <Input
                                         rounded
                                         color="white"
-                                        style={{ backgroundColor: "transparent", fontSize: 18, borderColor: "#ea1043" }}
+                                        style={{ backgroundColor: "transparent", fontSize: 18, borderColor: "#ffff" }}
                                         placeholderTextColor="white"
                                         placeholder={this.state.user.username}
                                         onChangeText={username => this.setState({ user: { ...this.state.user, username } })}
@@ -131,37 +131,70 @@ export default class EditProfileScreen extends React.Component {
                                 </View>
 
                                 <View style={{ marginBottom: 10 }}>
-                                    <Text style={{ fontSize: 12, color: "#ea1043", }}>Email</Text>
+                                    <Text style={{ fontSize: 12, color: "#ffff", }}>Email</Text>
                                     <Input
                                         rounded
                                         color="white"
-                                        style={{ backgroundColor: "transparent", fontSize: 18, borderColor: "#ea1043" }}
+                                        style={{ backgroundColor: "transparent", fontSize: 18, borderColor: "#ffff" }}
                                         placeholderTextColor="white"
                                         placeholder={this.state.user.email}
                                         onChangeText={email => this.setState({ user: { ...this.state.user, email } })}
                                     />
                                 </View>
 
+                                <View style={{ marginBottom: 10 }}>
+                                    <Text style={{ fontSize: 12, color: "#ffff", }}>Biografia</Text>
+                                    <Input
+                                        rounded
+                                        color="white"
+                                        style={{ backgroundColor: "transparent", fontSize: 18, borderColor: "#ffff" }}
+                                        placeholderTextColor="white"
+                                        placeholder={this.state.user?.bio || ""}
+                                        onChangeText={bio => this.setState({ user: { ...this.state.user, bio } })}
+                                    />
+                                </View>
+                                <View style={{ marginBottom: 10 }}>
+                                    <Text style={{ fontSize: 12, color: "#ffff", }}>Sesso</Text>
+                                    <Input
+                                        rounded
+                                        color="white"
+                                        style={{ backgroundColor: "transparent", fontSize: 18, borderColor: "#ffff" }}
+                                        placeholderTextColor="white"
+                                        placeholder={this.state.user?.sesso || ""}
+                                        onChangeText={sesso => this.setState({ user: { ...this.state.user, sesso } })}
+                                    />
+                                </View>
+                                <View style={{ marginBottom: 10 }}>
+                                    <Text style={{ fontSize: 12, color: "#ffff", }}>Città</Text>
+                                    <Input
+                                        rounded
+                                        color="white"
+                                        style={{ backgroundColor: "transparent", fontSize: 18, borderColor: "#ffff" }}
+                                        placeholderTextColor="white"
+                                        placeholder={this.state.user?.città || ""}
+                                        onChangeText={città => this.setState({ user: { ...this.state.user, città } })}
+                                    />
+                                </View>
                                 <View>
-                                    <Text style={{ fontSize: 12, color: "#ea1043", marginTop: 10 }}>Sicurezza</Text>
+                                    <Text style={{ fontSize: 12, color: "#ffff", marginTop: 10 }}>Sicurezza</Text>
                                     <Input placeholder="password attuale" password viewPass
 
-                                        color="white" iconColor="#ea1043"
-                                        style={{ backgroundColor: "transparent", fontSize: 18, borderColor: "#ea1043" }}
+                                        color="white" iconColor="#ffff"
+                                        style={{ backgroundColor: "transparent", fontSize: 18, borderColor: "#ffff" }}
                                         placeholderTextColor="white"
                                         onChangeText={currentPassword => this.setState({ currentPassword })}
                                     />
                                     <Input placeholder="nuova password" password viewPass
 
-                                        color="white" iconColor="#ea1043"
-                                        style={{ backgroundColor: "transparent", fontSize: 18, borderColor: "#ea1043" }}
+                                        color="white" iconColor="#ffff"
+                                        style={{ backgroundColor: "transparent", fontSize: 18, borderColor: "#ffff" }}
                                         placeholderTextColor="white"
                                         onChangeText={newPassword => this.setState({ newPassword })}
                                     />
                                     <Input placeholder="ripeti la nuova password" password viewPass
 
-                                        color="white" iconColor="#ea1043"
-                                        style={{ backgroundColor: "transparent", fontSize: 18, borderColor: "#ea1043" }}
+                                        color="white" iconColor="#ffff"
+                                        style={{ backgroundColor: "transparent", fontSize: 18, borderColor: "#ffff" }}
                                         placeholderTextColor="white"
                                     />
                                 </View>
@@ -172,7 +205,7 @@ export default class EditProfileScreen extends React.Component {
                         </SafeAreaView>
                     </View>
                 </KeyboardAwareScrollView>
-            </View>
+            </ScrollView>
 
         )
     }

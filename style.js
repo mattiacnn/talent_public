@@ -40,13 +40,15 @@ module.exports = StyleSheet.create({
     },
     inputTitle: {
         fontSize: 10,
-        textTransform: 'uppercase'
+        textTransform: 'uppercase',
+        color:'white'
     },
     input: {
         borderBottomColor: '#8a8f9e',
         borderBottomWidth: StyleSheet.hairlineWidth,
         fontSize: 15,
-        height:30
+        height:30,
+        color:'white'
     },
     button: {
         marginHorizontal: 40,

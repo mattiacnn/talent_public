@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { View, Image, StyleSheet, SafeAreaView, TouchableOpacity, ScrollView } from "react-native";
+import { View, Image, StyleSheet, SafeAreaView, TouchableOpacity, ScrollView, KeyboardAvoidingView } from "react-native";
 import { Video } from 'expo-av';
 import * as ImagePicker from 'expo-image-picker';
 import Constants from 'expo-constants';
@@ -213,16 +213,21 @@ class PostScreen extends React.Component {
             }}
             />
           </View>
-          {this.props.route.params?.sfida && (<View style={{ width: "100%" }}>
-            <Text> Difficoltà sfida: {this.state.starAmount} star</Text>
+
+          {this.props.route.params?.sfida && (<View style={{ width: "100%", marginTop:20,marginBottom:20,borderBottomWidth:0.5, borderColor:'grey' }}>
+            <View style={{width: "92%",marginLeft:'auto',marginRight:'auto'}}>
+            <Text style={{color:'white', fontSize:16}}> Difficoltà sfida: {this.state.starAmount} stelle</Text>
             <Slider
               maximumValue={500}
               minimumValue={10}
               value={this.state.starAmount}
               step={10}
               onValueChange={(val) => this.setState({ starAmount: val })}
+              activeColor={'#ffff'}
+              thumbStyle={{color:'white',borderColor:'white'}}
             //onSlidingComplete={(val) =>this.setState({starAmount:val})}
             />
+            </View>
           </View>)}
 
 
@@ -250,9 +255,11 @@ class PostScreen extends React.Component {
   }
 
   getPermissionAsync = async () => {
-    if (Constants.platform.ios) {
+    if (Constants.platform.ios)
+    {
       const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
-      if (status !== 'granted') {
+      if (status !== 'granted')
+      {
         alert('Sorry, we need camera roll permissions to make this work!');
       }
     }
@@ -268,7 +275,8 @@ class PostScreen extends React.Component {
     });
     console.log(result);
 
-    if (!result.cancelled) {
+    if (!result.cancelled)
+    {
       let v = this.state.video;
       v.uri = result.uri;
       this.setState({ video: v });
@@ -310,7 +318,8 @@ class PostScreen extends React.Component {
       // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
       var progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
       console.log('Upload is ' + progress + '% done');
-      switch (snapshot.state) {
+      switch (snapshot.state)
+      {
         case firebase.storage.TaskState.PAUSED: // or 'paused'
           console.log('Upload is paused');
           break;
@@ -331,22 +340,24 @@ class PostScreen extends React.Component {
       })
         .then(path => { return VideoThumbnails.getThumbnailAsync(path, { time: 1 }) })
         .then(res => { return fetch(res.uri); }).then(r => { return r.blob(); })
-        .then(file => { return firebase.storage().ref().child(`@thumb-${vid}`).put(file); })
+        .then(file => { return firebase.storage().ref().child(`@thumb-${ vid }`).put(file); })
         .then(snap => { return snap.ref.getDownloadURL(); })
         .then(url => {
           newvideo.thumbnail = url;
 
           // se è una sfida in fase di inizio
-          if (sfida) {
+          if (sfida)
+          {
             // come id della sfida sfruttiamo lo stesso generato per lo storage video
             newvideo.sfida = vid;
             newvideo.visible = false;
-          } 
-          else if(rispostaSfida) {
+          }
+          else if (rispostaSfida)
+          {
             // la sfida è già presente
             newvideo.sfida = rispostaSfida.id;
             newvideo.visible = true;
-            
+
             // la sfida è stata accettata, aggiorniamo la visibilità del video1
             // e la data di creazione - e la timeline dei follower (?)
             // TO-DO
@@ -358,20 +369,22 @@ class PostScreen extends React.Component {
           const us = this_.props.route.params?.utenteSfidato;
           const me = this_.props.global.user;
           // se è una sfida in fase di inizio
-          if (sfida) {
+          if (sfida)
+          {
             const newSfida = {
               video1_id: docRef.id,
               sfidante_id: user_id,
               createdAt: new Date(),
               sfidato_id: us?.id,
-              sfidato:{name:us?.name},
-              sfidante:{name:me?.name},
+              sfidato: { name: us?.name },
+              sfidante: { name: me?.name },
               status: "onCreating",
               threshold: this_.state.starAmount
             };
             firebase.firestore().collection("sfide").doc(vid).set(newSfida);
           }
-          else if (rispostaSfida) {
+          else if (rispostaSfida)
+          {
             rispostaSfida.video2_id = docRef.id;
             rispostaSfida.status = 'pending';
             firebase.firestore().collection("sfide").doc(rispostaSfida.id).set(rispostaSfida);
@@ -380,7 +393,7 @@ class PostScreen extends React.Component {
         })
         .then(() => {
           this_.setState({ loading: false });
-          sfida ?  alert("Sfida lanciata!") : alert("Caricamento riuscito");
+          sfida ? alert("Sfida lanciata!") : alert("Caricamento riuscito");
           this_.props.navigation.goBack();
         })
         .catch(err => { console.log(err) });

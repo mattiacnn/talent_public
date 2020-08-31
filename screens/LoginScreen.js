@@ -101,7 +101,7 @@ export default class LoginScreen extends React.Component {
 
     return (
       <KeyboardAvoidingView>
-        <ScrollView style={{ height:"100%", backgroundColor: "white" }}>
+        <ScrollView style={{ height:"100%", backgroundColor: "black" }}>
           <Image
             source={require('../assets/authHeader.png')}
             style={{ top: -200, left: -50, position: "absolute" }}
@@ -146,19 +146,13 @@ export default class LoginScreen extends React.Component {
             </View>
 
             <View style={s.formItem}>
-              <TouchableOpacity style={{ ...s.button, backgroundColor: "#3b5998" }} onPress={() => this.loginWithFacebook()}>
-                <Text style={{ color: "#FFF", fontWeight: "500", letterSpacing: 2, textAlign: "center", fontSize: 15, }}>Accedi con Facebook</Text>
-              </TouchableOpacity>
-            </View>
-
-            <View style={s.formItem}>
               <TouchableOpacity
                 style={{ alignSelf: 'center' }}
                 onPress={() => {
                   this.props.navigation.navigate('Registrati');
                 }}
               >
-                <Text style={{ fontSize: 13 }}>
+                <Text style={{ fontSize: 13,color:'white' }}>
                   Sei nuovo su Talent?{' '}
                   <Text style={{ fontWeight: '500' }}>Registrati</Text>
                 </Text>

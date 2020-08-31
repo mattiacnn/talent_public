@@ -18,11 +18,9 @@ export class GlobalContextProvider extends React.Component {
     componentDidMount() {
         var that = this;
         firebase.auth().onAuthStateChanged(user => {
-            console.log("global changed");
             if (user) {
                 var unsubscribe = firebase.firestore().collection('users').doc(user.uid)
                     .onSnapshot(snapshot => {
-                        console.log("user update");
                         let utenteRicevuto = snapshot.data() || {};
                         utenteRicevuto.id = user.uid;
                         utenteRicevuto._id = user.uid;
@@ -34,9 +32,7 @@ export class GlobalContextProvider extends React.Component {
                     .onSnapshot(doc => {
                         doc.docChanges().forEach(video => {
                             if (video.type === 'added') {
-                                console.log('added');
                                 var id = video.doc.id;
-                                console.log("new video:" + id);
                                 video = video.doc.data();
                                 video.id = id;
 

@@ -401,7 +401,7 @@ const styles = StyleSheet.create({
     },
     chip:{
         margin:10,
-        borderColor:"#EE1D52",
+        borderColor:"transparent",
         borderWidth:1,
         backgroundColor:"transparent",
         paddingTop:8,
@@ -418,8 +418,8 @@ const styles = StyleSheet.create({
     btnActive:{
         margin:10,
         borderWidth:1,
-        borderColor:"#EE1D52",
-        backgroundColor:"#EE1D52",
+        borderColor:"white",
+        backgroundColor:"transparent",
         paddingTop:8,
         paddingBottom:8,
         paddingRight:15,
