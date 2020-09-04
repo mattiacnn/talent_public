@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Text, View, StyleSheet, ScrollView, TouchableOpacity, ImageBackground, Share, Image, Alert, FlatList } from 'react-native';
-import Modal, { ModalContent, ModalTitle } from 'react-native-modals';
+import Modal, { ModalContent, ModalTitle, BottomModal } from 'react-native-modals';
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scrollview";
 import { Item, Input } from 'native-base';
 import firebase from 'firebase';
@@ -10,8 +10,7 @@ import { Keyboard } from 'react-native'
 import 'firebase/firestore';
 import * as Crypto from 'expo-crypto';
 import { useNavigation } from '@react-navigation/native';
-import {FontAwesome} from '@expo/vector-icons';
-
+import { FontAwesome } from '@expo/vector-icons';
 const Container = styled.View`
 	width: 60px;
 	height: 90%;
@@ -99,39 +98,25 @@ const Sidebar = ({ avatarSrc, count, videoId, user, Esplora }) => {
 	const [showComments, setShowComments] = useState(false);
 	const [comments, setComments] = useState([]);
 	const [modalCancel, setModalCancel] = useState(false);
-	const [comment, setComment] = useState([]);
+	const [comment, setComment] = useState();
+	const [commentLength, setCommentLength] = useState(0);
 	const navigation = useNavigation();
 
-    handleSfida = (user) => {
 
-        // posta video sfida
-        navigation.push('StartSfida',
-        { sfida: true, utenteSfidato: user})
+	const handleSfida = () => {
+
+		// posta video sfida
+		navigation.push('StartSfida',
+			{ sfida: true, utenteSfidato: user, ali: "shshzad" })
 	}
-	
-	handleModalComment = (videoId) => {
-		//console.log(this.state.video);
+	const handleModalComment = async () => {
 		setShowComments(true);
-		firebase.firestore().collection("comments").where("video_id", "==", videoId)
-			.get()
-			.then((querySnapshot) => {
-				//console.log(querySnapshot);
-				var comments = [];
-				querySnapshot.forEach(function (doc) {
-					// doc.data() is never undefined for query doc snapshots
-					let commentsC = doc.data();
-					commentsC.id = doc.id;
-					comments.push(commentsC);
-					console.log(comments)
-					//console.log(doc.id, " => ", doc.data());
-				});
-				setComments(comments)
-				//this.setState({ video: { ...video, comments }, commentsSubscribed: true });
-				console.log(comments)
-			});
+		console.log(videoId)
+		const commentsList = await (await firebase.firestore().collection("comments").where("video_id", "==", videoId).get()).docs.map(d => ({ id: d.id, ...d.data() }))
+		setComments(commentsList)
 	}
 
-	handleLike = (video, user, token) => {
+	const handleLike = (video, user, token) => {
 		const uId = firebase.auth().currentUser.uid;
 		const vId = video;
 		var docRef;
@@ -164,11 +149,70 @@ const Sidebar = ({ avatarSrc, count, videoId, user, Esplora }) => {
 
 	}
 
+	const sendPushNotificationComment = async (token) => {
+		console.log("SENDING...")
+		const message = {
+			to: token,
+			sound: 'default',
+			title: `Nuovo commento da: ${ user.username }`,
+			body: 'fantastico, un nuovo commento al tuo video',
+			data: { data: 'goes here' },
+			_displayInForeground: false,
+		};
+		const response = await fetch('https://exp.host/--/api/v2/push/send', {
+			method: 'POST',
+			headers: {
+				Accept: 'application/json',
+				'Accept-encoding': 'gzip, deflate',
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify(message),
+		});
+	};
 
+	const handleComment = async () => {
+		if (showComments == false)
+		{
+			Alert.alert(
+				"Commenti disattivati",
+				"l'autore del video ha disattivato i commenti",
+				[
+					{ text: "OK", onPress: () => console.log("OK Pressed") }
+				],
+				{ cancelable: false }
+			);
+		}
+		else
+		{
+			const newComment = {
+				video_id: videoId,
+				user_id: user.id,
+				user_avatar: user.avatar || null,
+				author: `${ user.username || null } ${ user.surname || null }`,
+				body: comment,
+				timestamp: new Date().toLocaleDateString()
+			}
+			Keyboard.dismiss();
+			setComment("")
+			await firebase.firestore().collection("comments").add(newComment);
+			handleModalComment()
+			sendPushNotificationComment(user.token)
+			await firebase.firestore().collection("videos").doc(videoId).update({ comments: firebase.firestore.FieldValue.increment(1) })
+		}
+	}
+
+	const goToUser = () => {
+		navigation.push('Esplora', {
+			screen: 'Utente',
+			params: {
+				user: user
+			},
+		});
+	}
 
 	return (
 		<Container >
-			<Menu onPress={() => this.goToUser(user)}>
+			<Menu onPress={goToUser}>
 				<User key={videoId}>
 					<Avatar resizeMode='cover' source={{ uri: avatarSrc }} />
 				</User>
@@ -179,10 +223,10 @@ const Sidebar = ({ avatarSrc, count, videoId, user, Esplora }) => {
 				<Count>{count.like}</Count>
 			</Menu>
 
-			<Menu onPress={() => this.handleSfida(user)}>
+			<Menu onPress={handleSfida}>
 				<FontAwesome name="flash" color="white" size={40} />
 			</Menu>
-			<Menu onPress={() => handleModalComment(videoId)}>
+			<Menu onPress={handleModalComment}>
 				<Icon
 					resizeMode='contain'
 					source={require('../assets/icons/comment.png')}
@@ -194,12 +238,15 @@ const Sidebar = ({ avatarSrc, count, videoId, user, Esplora }) => {
 				<Icon resizeMode='contain' source={require('../assets/icons/share.png')} />
 			</Menu>
 
-			<Modal.BottomModal
+			<BottomModal
+
 				visible={showComments}
 				onTouchOutside={() => setShowComments(false)}
 				height={0.8}
 				width={1}
 				onSwipeOut={() => setShowComments(false)}
+				swipeDirection={['up', 'down']} // can be string or an array
+				swipeThreshold={200}
 				modalTitle={
 					<ModalTitle
 						title="Commenti"
@@ -254,8 +301,8 @@ const Sidebar = ({ avatarSrc, count, videoId, user, Esplora }) => {
 						>
 						</FlatList>
 						<Item rounded style={{ flexDirection: "row", justifyContent: "space-around", marginHorizontal: 5, padding: 5 }}>
-							<Input placeholder='Inserisci commento' />
-							<TouchableOpacity style={{ marginHorizontal: 5, marginRight: 15, padding: 10 }} onPress={() => handleComment(videoId)}>
+							<Input placeholder='Inserisci commento' value={comment} onChangeText={setComment} />
+							<TouchableOpacity style={{ marginHorizontal: 5, marginRight: 15, padding: 10 }} onPress={handleComment}>
 								<Text style={{ fontWeight: "bold" }}>Pubblica</Text>
 							</TouchableOpacity>
 
@@ -263,7 +310,7 @@ const Sidebar = ({ avatarSrc, count, videoId, user, Esplora }) => {
 					</ModalContent>
 				</KeyboardAwareScrollView>
 
-			</Modal.BottomModal>
+			</BottomModal>
 		</Container>
 	)
 }

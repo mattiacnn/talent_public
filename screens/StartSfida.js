@@ -1,8 +1,9 @@
 import React, { Component } from "react";
 import { Text, Image, View, StyleSheet, ImageBackground, Animated } from "react-native";
-import *as firebase from "firebase";
+import * as firebase from "firebase";
 import 'firebase/firestore';
 
+const bgImage = require('../assets/sfida.png');
 
 class ImageLoader extends Component {
   constructor(props) {
@@ -18,7 +19,7 @@ class ImageLoader extends Component {
     if (this.props.navigation)
     {
       this.props.navigation.navigate('Carica',
-        { sfida: true })
+        { sfida: true, utenteSfidato: this.props.user })
     }
 
   }
@@ -61,21 +62,23 @@ export default class StarSfida extends React.Component {
     super(props);
     this.state = {
       sfidante: this.props.route.params.utenteSfidato,
-      user: null,
+      userAvatar: null,
+
     };
   }
 
 
 
   async componentDidMount() {
-    var docRef = db.collection("users").doc(firebase.auth().currentUser.uid);
+    const uid = firebase.auth().currentUser.uid;
+    console.log("uid---->:", uid)
+    var docRef = db.collection("users").doc(uid);
     var that = this;
     docRef.get().then(function (doc) {
       if (doc.exists)
       {
-        const user = doc.data().avatar
-        that.setState({ user: user })
-        console.log(user)
+        const avatar = doc.data().avatar
+        that.setState({ userAvatar: avatar })
       } else
       {
         // doc.data() will be undefined in this case
@@ -88,17 +91,18 @@ export default class StarSfida extends React.Component {
 
   render() {
     return (
-      <ImageBackground style={styles.container} source={require('../assets/sfida.png')}>
+      <ImageBackground style={styles.container} source={bgImage}>
         <View style={styles.boxSfida}>
           <ImageLoader
             style={styles.sfidante}
             source={{ uri: this.state.sfidante.avatar }}
-          />
-          <ImageLoader
-            style={styles.sfidante}
-            source={{ uri: this.state.user }}
             navigation={this.props.navigation}
+            user={this.props.route.params?.utenteSfidato}
           />
+          {this.state.userAvatar && <ImageLoader
+            style={styles.sfidante}
+            source={{ uri: this.state.userAvatar }}
+          />}
         </View>
       </ImageBackground>
     )

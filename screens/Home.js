@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Text, View, StyleSheet, ScrollView, TouchableOpacity, ImageBackground, Share, Image,Alert} from 'react-native';
+import { Text, View, StyleSheet, ScrollView, TouchableOpacity, ImageBackground, Share, Image, Alert } from 'react-native';
 import { Video } from 'expo-av';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Icon2 from 'react-native-vector-icons/MaterialIcons';
@@ -19,7 +19,7 @@ import { Item, Input } from 'native-base';
 import { Snackbar } from 'react-native-paper';
 import { withGlobalContext } from "../GlobalContext";
 import { Keyboard } from 'react-native'
-import {FontAwesome} from '@expo/vector-icons';
+import { FontAwesome } from '@expo/vector-icons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 const dublicateItems = (arr, numberOfRepetitions) =>
@@ -56,7 +56,7 @@ class Home2Screen extends Component {
             commentsSubscribed: false,
             showToast: false,
             name: "",
-            avatar:''
+            avatar: ''
 
         };
         this.handleClick = this.handleClick.bind(this);
@@ -67,74 +67,80 @@ class Home2Screen extends Component {
 
     _onDismissSnackBar = () => this.setState({ showToast: false });
     deleteComment = (id) => {
-        
+
         firebase.firestore().collection("comments").doc(id).delete();
-        this.setState({modalCancel:false})
+        this.setState({ modalCancel: false })
     }
     onShare = async (uri) => {
-        try {
+        try
+        {
             const result = await Share.share({
                 message: 'Ciao! guarda il video che ho messo su talent',
                 url: uri,
 
             });
 
-            if (result.action === Share.sharedAction) {
-                if (result.activityType) {
+            if (result.action === Share.sharedAction)
+            {
+                if (result.activityType)
+                {
                     // shared with activity type of result.activityType
-                } else {
+                } else
+                {
                     // shared
                 }
-            } else if (result.action === Share.dismissedAction) {
+            } else if (result.action === Share.dismissedAction)
+            {
                 // dismissed
             }
-        } catch (error) {
+        } catch (error)
+        {
             alert(error.message);
         }
     };
-      // Can use this function below, OR use Expo's Push Notification Tool-> https://expo.io/dashboard/notifications
-      sendPushNotification = async (token) => {
+    // Can use this function below, OR use Expo's Push Notification Tool-> https://expo.io/dashboard/notifications
+    sendPushNotification = async (token) => {
         console.log("SENDING...")
         const message = {
-          to: token,
-          sound: 'default',
-          title: `Nuovo like da: ${this.state.name}`,
-          body: 'fantastico, un nuovo like al tuo video',
-          data: { data: 'goes here' },
-          _displayInForeground: true,
+            to: token,
+            sound: 'default',
+            title: `Nuovo like da: ${ this.state.name }`,
+            body: 'fantastico, un nuovo like al tuo video',
+            data: { data: 'goes here' },
+            _displayInForeground: true,
         };
         const response = await fetch('https://exp.host/--/api/v2/push/send', {
-          method: 'POST',
-          headers: {
-            Accept: 'application/json',
-            'Accept-encoding': 'gzip, deflate',
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(message),
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'Accept-encoding': 'gzip, deflate',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(message),
         });
-      };
+    };
 
-       // Can use this function below, OR use Expo's Push Notification Tool-> https://expo.io/dashboard/notifications
-       sendPushNotificationComment = async (token) => {
+    // Can use this function below, OR use Expo's Push Notification Tool-> https://expo.io/dashboard/notifications
+    sendPushNotificationComment = async (token) => {
         console.log("SENDING...")
         const message = {
-          to: token,
-          sound: 'default',
-          title: `Nuovo commento da: ${this.state.name}`,
-          body: 'fantastico, un nuovo commento al tuo video',
-          data: { data: 'goes here' },
-          _displayInForeground: false,
+            to: token,
+            sound: 'default',
+            title: `Nuovo commento da: ${ this.state.name }`,
+            body: 'fantastico, un nuovo commento al tuo video',
+            data: { data: 'goes here' },
+            _displayInForeground: false,
         };
         const response = await fetch('https://exp.host/--/api/v2/push/send', {
-          method: 'POST',
-          headers: {
-            Accept: 'application/json',
-            'Accept-encoding': 'gzip, deflate',
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(message),
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'Accept-encoding': 'gzip, deflate',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(message),
         });
-      };
+    };
 
     async componentDidMount() {
 
@@ -177,24 +183,26 @@ class Home2Screen extends Component {
             })
         })
 
-       this.getName();
-        
+        this.getName();
+
     }
 
     async getName() {
         const id = firebase.auth().currentUser.uid;
         const that = this;
-        firebase.firestore().collection("users").doc(id).get().then(function(doc) {
-            if (doc.exists) {
+        firebase.firestore().collection("users").doc(id).get().then(function (doc) {
+            if (doc.exists)
+            {
                 console.log("Document data:", doc.data());
                 that.setState({
                     name: doc.data().name
                 });
-            } else {
+            } else
+            {
                 // doc.data() will be undefined in this case
                 console.log("No such document!");
             }
-        }).catch(function(error) {
+        }).catch(function (error) {
             console.log("Error getting document:", error);
         });
     }
@@ -235,15 +243,17 @@ class Home2Screen extends Component {
     onSwipeUp(gestureState) {
         console.log("Swipe up"); console.log(this.state.currentIndex); console.log(this.state.user?.user_videos?.length);
 
-        if(this.state.currentIndex > 0) {
+        if (this.state.currentIndex > 0)
+        {
             this.setState({ currentIndex: this.state.currentIndex - 1 });
         }
-        
+
     }
 
     onSwipeDown(gestureState) {
         console.log("Swipe down"); console.log(this.state.currentIndex); console.log(this.state.user?.user_videos?.length);
-        if(this.state.currentIndex + 1 < this.state.user.user_videos.length) {
+        if (this.state.currentIndex + 1 < this.state.user.user_videos.length)
+        {
             this.setState({ currentIndex: this.state.currentIndex + 1 });
         }
     }
@@ -257,10 +267,12 @@ class Home2Screen extends Component {
     }
 
     onSwipe = (gestureName, gestureState) => {
-        if (!this.state.user.user_videos) {
+        if (!this.state.user.user_videos)
+        {
             return
         }
-        if (this.state.currentIndex >= this.state.user.user_videos.length) {
+        if (this.state.currentIndex >= this.state.user.user_videos.length)
+        {
             this.setState({ currentIndex: 0 });
         }
     }
@@ -330,10 +342,10 @@ class Home2Screen extends Component {
                 "Commenti disattivati",
                 "l'autore del video ha disattivato i commenti",
                 [
-                  { text: "OK", onPress: () => console.log("OK Pressed") }
+                    { text: "OK", onPress: () => console.log("OK Pressed") }
                 ],
                 { cancelable: false }
-              );
+            );
         }
         else
         {
@@ -341,7 +353,7 @@ class Home2Screen extends Component {
                 video_id: video.id,
                 user_id: firebase.auth().currentUser.uid,
                 user_avatar: this.props.global.user.avatar || null,
-                author: `${this.props.global.user.name || null} ${this.props.global.user.surname || null}`,
+                author: `${ this.props.global.user.name || null } ${ this.props.global.user.surname || null }`,
                 body: this.state.comment,
                 timestamp: new Date().toLocaleDateString()
             }
@@ -358,48 +370,52 @@ class Home2Screen extends Component {
 
         // posta video sfida
         this.props.navigation.push('StartSfida',
-        { sfida: true, utenteSfidato: user})
+            { sfida: true, utenteSfidato: user })
     }
-    _getprofilepic = () =>{
+    _getprofilepic = () => {
         id = firebase.auth().currentUse.uid
         const docRef = db.collection("users").doc(id);
 
-        docRef.get().then(function(doc) {
-            if (doc.exists) {
+        docRef.get().then(function (doc) {
+            if (doc.exists)
+            {
                 console.log("Document data:", doc.data());
-                this.setState({avatar: doc.data().avatar})
-            } else {
+                this.setState({ avatar: doc.data().avatar })
+            } else
+            {
                 // doc.data() will be undefined in this case
                 console.log("No such document!");
             }
-        }).catch(function(error) {
+        }).catch(function (error) {
             console.log("Error getting document:", error);
-        });    
-    
+        });
+
     }
     handleLike = (video, owner, token) => {
         const uId = firebase.auth().currentUser.uid;
         const vId = video;
         var docRef;
-        Crypto.digestStringAsync(Crypto.CryptoDigestAlgorithm.SHA1, `${uId}${vId}`)
+        Crypto.digestStringAsync(Crypto.CryptoDigestAlgorithm.SHA1, `${ uId }${ vId }`)
             .then(hash => {
                 docRef = firebase.firestore().collection("likes").doc(hash);
                 return docRef.get();
             })
             .then((doc) => {
-                if (doc.exists) {
+                if (doc.exists)
+                {
                     console.log("Document data:", doc.data());
                     this.setState({ showToast: true, message: 'Video già piaciuto' });
-                } else {
+                } else
+                {
                     docRef.set({ user_id: uId, video_id: vId, videoOwner_id: owner });
                     // update con transaction. Si dovrò fare con distributed counters
                     firebase.firestore().collection("videos").doc(vId)
                         .update({
                             likes: firebase.firestore.FieldValue.increment(1)
                         });
-                        console.log("THE TOKEN", token)
+                    console.log("THE TOKEN", token)
 
-                        this.sendPushNotification(token)
+                    this.sendPushNotification(token)
                 }
             })
             .catch(function (error) {
@@ -427,7 +443,8 @@ class Home2Screen extends Component {
 
         var item = {};
 
-        if (videos && !this.state.refreshing) {
+        if (videos && !this.state.refreshing)
+        {
             item = videos[currentIndex];
         }
 
@@ -446,7 +463,7 @@ class Home2Screen extends Component {
                     // onSwipeLeft={(state) => this.onSwipeLeft(state)}
                     // onSwipeRight={(state) => this.onSwipeRight(state)}
                     config={config}
-                    style={{ flex: 1}}
+                    style={{ flex: 1 }}
                 >
                     {/* <Image source={require('../assets/tempImage1.jpg')}></Image> */}
 
@@ -472,7 +489,7 @@ class Home2Screen extends Component {
                         <View style={{ flex: .5, justifyContent: 'flex-end', alignItems: 'flex-end' }}>
                             <View>
                                 <TouchableOpacity onPress={() => this.goToUser(item.user)}>
-                                    <ImageBackground source={item?.user.avatar ? { uri: item.user.avatar } : require("../assets/tempAvatar.jpg")} style={{ width: 50, height: 50, borderRadius: 25, marginBottom: 8,marginLeft:-5 }} imageStyle={{ borderRadius: 25 }}>
+                                    <ImageBackground source={item?.user.avatar ? { uri: item.user.avatar } : require("../assets/tempAvatar.jpg")} style={{ width: 50, height: 50, borderRadius: 25, marginBottom: 8, marginLeft: -5 }} imageStyle={{ borderRadius: 25 }}>
                                         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'flex-end' }}>
                                             <Icon2 name="add-circle" size={20} color="#fb2956" />
                                         </View>
@@ -488,13 +505,13 @@ class Home2Screen extends Component {
                                 <TouchableOpacity onPress={() => this.onShare(item?.video.uri)}>
                                     <Icon name="share" size={40} color="white" />
                                 </TouchableOpacity>
-                                <TouchableOpacity onPress={() => this.handleSfida(item?.user)} style={{marginTop:10,marginLeft:10}}>
-                                    <FontAwesome name="flash" color="white" size={40}/>
+                                <TouchableOpacity onPress={() => this.handleSfida(item?.user)} style={{ marginTop: 10, marginLeft: 10 }}>
+                                    <FontAwesome name="flash" color="white" size={40} />
                                 </TouchableOpacity>
                             </View>
                         </View>
                     </View>
-                    
+
                     <View style={{ flex: .5, flexDirection: 'row', }}>
                         <View >
                             <View style={styles.tag}>
@@ -569,7 +586,7 @@ class Home2Screen extends Component {
                             </FlatList>
                             <Item rounded style={{ flexDirection: "row", justifyContent: "space-around", marginHorizontal: 5, padding: 5 }}>
                                 <Input placeholder='Inserisci commento' onChangeText={comment => this.setState({ comment })} />
-                                <TouchableOpacity style={{ marginHorizontal: 5, marginRight: 15, padding: 10 }} onPress={() => this.handleComment (this.state.video)}>
+                                <TouchableOpacity style={{ marginHorizontal: 5, marginRight: 15, padding: 10 }} onPress={() => this.handleComment(this.state.video)}>
                                     <Text style={{ fontWeight: "bold" }}>Pubblica</Text>
                                 </TouchableOpacity>
 
@@ -637,7 +654,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         borderRadius: 8,
-        marginTop:100        
+        marginTop: 100
     },
     username: {
         fontWeight: 'bold',

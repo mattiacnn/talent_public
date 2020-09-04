@@ -50,7 +50,7 @@ class Profile extends React.Component {
 	}
 
 	componentDidMount() {
-		this.setState({ followed: this.isFollowed() });
+		// this.setState({ followed: this.isFollowed() });
 		this.checkStatus();
 	}
 
@@ -106,7 +106,7 @@ class Profile extends React.Component {
 		this.setState({ loadingIndicator: true });
 		setTimeout(() => {
 			this.setState({
-				followed: !this.state.followed,
+				// followed: !this.state.followed,
 				loadingIndicator: false,
 			});
 		}, 500);
@@ -296,7 +296,7 @@ class Profile extends React.Component {
 										size="small"
 										animating={this.state.loadingIndicator}
 									/>
-									{this.state.followed ? (
+									{this.props.isFollowed ? (
 										<>
 											<SimpleLineIcons
 												name="user-unfollow"

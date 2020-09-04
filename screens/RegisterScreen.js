@@ -1,6 +1,6 @@
 import React from "react";
 import { KeyboardAvoidingView, View, Text, Modal, StatusBar, TouchableOpacity, Image, AsyncStorage, SafeAreaView, ImageBackground } from "react-native";
-import { Animated, Dimensions, Keyboard, StyleSheet, TextInput, UIManager,ScrollView } from 'react-native';
+import { Animated, Dimensions, Keyboard, StyleSheet, TextInput, UIManager, ScrollView } from 'react-native';
 
 import Fire from "../Fire";
 import { CheckBox } from 'react-native-elements'
@@ -29,7 +29,7 @@ export default class RegisterScreen extends React.Component {
                 email: "",
                 password: "",
                 birthdate: "",
-                user_videos:[],
+                user_videos: [],
                 avatar: null,
                 followed: { id_users: [] },
                 followers: { id_users: [] },
@@ -48,20 +48,24 @@ export default class RegisterScreen extends React.Component {
 
     registerForPushNotificationsAsync = async () => {
         var token;
-        if (Constants.isDevice) {
+        if (Constants.isDevice)
+        {
             const { status: existingStatus } = await Permissions.getAsync(Permissions.NOTIFICATIONS);
             let finalStatus = existingStatus;
-            if (existingStatus !== 'granted') {
+            if (existingStatus !== 'granted')
+            {
                 const { status } = await Permissions.askAsync(Permissions.NOTIFICATIONS);
                 finalStatus = status;
             }
-            if (finalStatus !== 'granted') {
+            if (finalStatus !== 'granted')
+            {
                 alert('Failed to get push token for push notification!');
                 return;
             }
             token = await Notifications.getExpoPushTokenAsync();
             console.log(token);
-            if (Platform.OS === 'android') {
+            if (Platform.OS === 'android')
+            {
                 Notifications.createChannelAndroidAsync('default', {
                     name: 'default',
                     sound: true,
@@ -70,7 +74,8 @@ export default class RegisterScreen extends React.Component {
                 });
             };
         }
-        else {
+        else
+        {
             alert('Must use physical device for Push Notifications');
         }
         return token;
@@ -78,26 +83,32 @@ export default class RegisterScreen extends React.Component {
 
     // CREATE NEW USER AND STORE IT ON FIRESTORE
     handleSignUp = async () => {
-        console.log(this.state.user);
         var newUser = this.state.user;
         var uid = '';
         // registra utente
-        this.registerForPushNotificationsAsync()
-            .then((token) => {
-                newUser.token = token;
-                return Fire.createUser(newUser)
-            })
+
+        // UN-COMMENT THESE LINES 
+        // this.registerForPushNotificationsAsync()
+        //     .then((token) => {
+        //         newUser.token = token;
+        //         console.log("token", token)
+        //         return Fire.createUser(newUser)
+        //     })
+        newUser.token = "token";
+        Fire.createUser(newUser)
             .then((res) => {
                 uid = res.user.uid;
                 delete newUser.password;
+                console.log("uid", uid, "data", newUser)
                 return firebase.firestore().collection("users").doc(uid).set(newUser)
             })
             .then(async () => {
                 // se c'è avatar lo salviamo nello storage
-                if (newUser.avatar) {
+                if (newUser.avatar)
+                {
                     const uri = newUser.avatar;
                     // avatar avrà sempre lo stesso nome - ne salviamo uno per utente
-                    const id_avatar = `@avatar-${uid}`;
+                    const id_avatar = `@avatar-${ uid }`;
                     // Why are we using XMLHttpRequest? See:
                     // https://github.com/expo/expo/issues/2402#issuecomment-443726662
                     var blob = await new Promise((resolve, reject) => {
@@ -141,7 +152,8 @@ export default class RegisterScreen extends React.Component {
     // REDIRECT THE USER TO THE HOMESCREEN IF IS LOGGED
     checkIfLoggedIn = () => {
         firebase.auth().onAuthStateChanged(function (user) {
-            if (user) {
+            if (user)
+            {
                 this.props.navigation.navigate('Home');
             }
         }.bind(this)
@@ -158,7 +170,8 @@ export default class RegisterScreen extends React.Component {
         });
         console.log(result);
 
-        if (!result.cancelled) {
+        if (!result.cancelled)
+        {
             const source = result.uri;
             AsyncStorage.setItem("profilePic", source);
             this.setState({ user: { ...this.state.user, avatar: source } });
@@ -167,10 +180,12 @@ export default class RegisterScreen extends React.Component {
     };
 
     condition = () => {
-        if (this.state.checked == false) {
+        if (this.state.checked == false)
+        {
             this.setState({ checked: true })
         }
-        else {
+        else
+        {
             this.setState({ checked: false })
 
         }
@@ -198,15 +213,15 @@ export default class RegisterScreen extends React.Component {
                 </TouchableOpacity>
 
                 <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : null}>
-                    <ScrollView style={{ backgroundColor: "black",}}>
-                            <Image
-                                source={require('../assets/authHeader.png')}
-                                style={{ top: -200, left: -50, position: "absolute" }}
-                            />
-                            <Image
-                                source={require('../assets/authFooter.png')}
-                                style={{ position: 'absolute', bottom: -300, right: -225 }}
-                            />
+                    <ScrollView style={{ backgroundColor: "black", }}>
+                        <Image
+                            source={require('../assets/authHeader.png')}
+                            style={{ top: -200, left: -50, position: "absolute" }}
+                        />
+                        <Image
+                            source={require('../assets/authFooter.png')}
+                            style={{ position: 'absolute', bottom: -300, right: -225 }}
+                        />
 
                         <View style={styles.form}>
 
@@ -272,91 +287,91 @@ export default class RegisterScreen extends React.Component {
                                     disabled={!this.state.user.email || !this.state.user.password ? true : false}
                                     onPress={() => this.setState({ visible: true })}>
                                     <View style={{ display: "flex", flexDirection: "row", alignItems: "stretch", justifyContent: "space-around", }}>
-                                        <Text style={{ color: "#FFF", fontWeight: "500", letterSpacing: 2, alignSelf: "center", fontSize: 15}}>Avanti</Text>
+                                        <Text style={{ color: "#FFF", fontWeight: "500", letterSpacing: 2, alignSelf: "center", fontSize: 15 }}>Avanti</Text>
                                     </View>
                                 </TouchableOpacity>
                             </View>
                         </View>
-                        </ScrollView>
+                    </ScrollView>
                 </KeyboardAvoidingView>
-            
-            <Modal
-        animationType="fade"
-        visible={this.state.visible}
-    >
-        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : null}>
 
-            <Image
-                source={require('../assets/authHeader.png')}
-                style={{ position: 'absolute', top: -146, left: -50 }}
-            ></Image>
-            <Image
-                source={require('../assets/authFooter.png')}
-                style={{ position: 'absolute', bottom: -325, right: -225 }}
-            ></Image>
-            <TouchableOpacity
-                style={styles.back}
-                onPress={() => this.setState({ ...this.state, visible: false })}
-            >
-                <Ionicons
-                    name='ios-arrow-round-back'
-                    size={42}
-                    color='#FFF'
-                ></Ionicons>
-            </TouchableOpacity>
+                <Modal
+                    animationType="fade"
+                    visible={this.state.visible}
+                >
+                    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : null}>
 
-
-            <View style={styles.errorMessage}>
-                {this.state.errorMessage && (
-                    <Text style={styles.error}>{this.state.errorMessage}</Text>
-                )}
-            </View>
-            <Image
-                source={require('../assets/logo.png')}
-                style={{ height: 150, width: 150, alignSelf: "center", top: 80, position: "absolute" }}
-            />
-            <View style={{ ...styles.form, paddingTop: 160, alignItems: "stretch", alignContent: "center", flexDirection: "column",backgroundColor:'black' }}>
-
-                <View >
-                    <Text style={styles.inputTitle}>Username</Text>
-                    <TextInput placeholder="username" style={styles.input} onChangeText={username => this.setState({ user: { ...this.state.user, username } })}></TextInput>
-                </View>
-
-                <View >
-                    <Text style={styles.inputTitle}>Data di nascita</Text>
-                    <TextInput  placeholder="Data di nascita" style={styles.input} onChangeText={birthdate => this.setState({ user: { ...this.state.user, birthdate } })}></TextInput>
-                </View>
-
-                <View style={{backgroundColor:'black'}}
->
-                    <CheckBox
-                        title='Accetto i temini e le condizioni di talent'
-                        checked={this.state.checked}
-                        onPress={() => this.condition()}
-                        checkedColor="white"
-                        containerStyle={{backgroundColor:'black'}}
-                    />
-                </View>
-
-                <TouchableOpacity
-                    style={!this.state.user.username || !this.state.user.birthdate || !this.state.checked ? styles.disabled : styles.button}
-                    disabled={!this.state.user.username || !this.state.user.birthdate || !this.state.checked ? true : false}
-                    onPress={this.handleSignUp} >
-                    <View style={{ display: "flex", flexDirection: "row", alignItems: "stretch", justifyContent: "space-around", }}>
-                        <Text style={{ color: "#FFF", fontWeight: "500", letterSpacing: 2, alignSelf: "center", fontSize: 15, marginTop: -3 }}>Registrati</Text>
-                    </View>
-                </TouchableOpacity>
-                <Text style={{ alignSelf: "center", marginTop: 30 }}>Condizioni e termini di servizio di talent</Text>
-            </View>
+                        <Image
+                            source={require('../assets/authHeader.png')}
+                            style={{ position: 'absolute', top: -146, left: -50 }}
+                        ></Image>
+                        <Image
+                            source={require('../assets/authFooter.png')}
+                            style={{ position: 'absolute', bottom: -325, right: -225 }}
+                        ></Image>
+                        <TouchableOpacity
+                            style={styles.back}
+                            onPress={() => this.setState({ ...this.state, visible: false })}
+                        >
+                            <Ionicons
+                                name='ios-arrow-round-back'
+                                size={42}
+                                color='#FFF'
+                            ></Ionicons>
+                        </TouchableOpacity>
 
 
-        </KeyboardAvoidingView>
-    </Modal>
+                        <View style={styles.errorMessage}>
+                            {this.state.errorMessage && (
+                                <Text style={styles.error}>{this.state.errorMessage}</Text>
+                            )}
+                        </View>
+                        <Image
+                            source={require('../assets/logo.png')}
+                            style={{ height: 150, width: 150, alignSelf: "center", top: 80, position: "absolute" }}
+                        />
+                        <View style={{ ...styles.form, paddingTop: 160, alignItems: "stretch", alignContent: "center", flexDirection: "column", backgroundColor: 'black' }}>
+
+                            <View >
+                                <Text style={styles.inputTitle}>Username</Text>
+                                <TextInput placeholder="username" style={styles.input} onChangeText={username => this.setState({ user: { ...this.state.user, username } })}></TextInput>
+                            </View>
+
+                            <View >
+                                <Text style={styles.inputTitle}>Data di nascita</Text>
+                                <TextInput placeholder="Data di nascita" style={styles.input} onChangeText={birthdate => this.setState({ user: { ...this.state.user, birthdate } })}></TextInput>
+                            </View>
+
+                            <View style={{ backgroundColor: 'black' }}
+                            >
+                                <CheckBox
+                                    title='Accetto i temini e le condizioni di talent'
+                                    checked={this.state.checked}
+                                    onPress={() => this.condition()}
+                                    checkedColor="white"
+                                    containerStyle={{ backgroundColor: 'black' }}
+                                />
+                            </View>
+
+                            <TouchableOpacity
+                                style={!this.state.user.username || !this.state.user.birthdate || !this.state.checked ? styles.disabled : styles.button}
+                                disabled={!this.state.user.username || !this.state.user.birthdate || !this.state.checked ? true : false}
+                                onPress={this.handleSignUp} >
+                                <View style={{ display: "flex", flexDirection: "row", alignItems: "stretch", justifyContent: "space-around", }}>
+                                    <Text style={{ color: "#FFF", fontWeight: "500", letterSpacing: 2, alignSelf: "center", fontSize: 15, marginTop: -3 }}>Registrati</Text>
+                                </View>
+                            </TouchableOpacity>
+                            <Text style={{ alignSelf: "center", marginTop: 30 }}>Condizioni e termini di servizio di talent</Text>
+                        </View>
+
+
+                    </KeyboardAvoidingView>
+                </Modal>
             </>
         )
     }
 
-    
+
 }
 
 const styles = StyleSheet.create({
@@ -369,14 +384,14 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
     form: {
-        
-            paddingTop:100,
-            paddingHorizontal: 40,
-            height:Dimensions.get('window').height,
-            display:"flex",
-            flexDirection:"column",
-            justifyContent:"space-around"
-        
+
+        paddingTop: 100,
+        paddingHorizontal: 40,
+        height: Dimensions.get('window').height,
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "space-around"
+
     },
     inputTitle: {
         color: 'white',
@@ -412,7 +427,7 @@ const styles = StyleSheet.create({
         borderRadius: 4,
         alignItems: 'center',
         justifyContent: 'center',
-        padding:20
+        padding: 20
     },
     error: {
         color: '#e9446a',

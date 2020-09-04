@@ -60,15 +60,17 @@ function objToAPI(obj) {
         video: obj.uri,
         poster: obj.thumbnail,
         user: {
+            email: obj.email,
             username: obj.username,
             description: obj.description,
             avatar: obj.avatar,
             id: obj.userDocId,
             token: obj.token,
+            name: obj.name
         },
         count: {
             like: obj.likes,
-            comment: 4800,
+            comment: obj.comments || 0,
             share: 2800
         }
     };
@@ -85,7 +87,8 @@ class Home extends Component {
             datas: [],
             selected: 0,
             videos: [],
-            users: []
+            users: [],
+            shouldPlay: false
         };
     }
 
@@ -138,7 +141,7 @@ class Home extends Component {
                     {
                         const userData = { userDocId: userDoc.id, ...userDoc.data() };
                         const mergeData = { ...userData, ...videoData };
-                       
+
                         const reqObj = objToAPI(mergeData);
                         return reqObj;
                     } else
@@ -160,8 +163,71 @@ class Home extends Component {
         }
         // xecute it
     };
+    globalFeedSnapshot = async () => {
+        try
+        {
+            //QUERY ALL THE VIDEOS 
+            await firebase
+                .firestore()
+                .collection("videos").onSnapshot(async videoSnapshot => {
 
+                    const videosArr = await Promise.all(
+                        videoSnapshot.docs.map(async videoDoc => {
+                            const videoData = { videoDocId: videoDoc.id, ...videoDoc.data() };
+                            //QUERY THE AUTHOR DATA FOR EVERY VIDEO
+                            const userDoc = await firebase
+                                .firestore()
+                                .collection("users")
+                                .doc(videoData.owner)
+                                .get();
+
+                            if (userDoc.exists)
+                            {
+                                const userData = { userDocId: userDoc.id, ...userDoc.data() };
+                                const mergeData = { ...userData, ...videoData };
+
+                                const reqObj = objToAPI(mergeData);
+                                return reqObj;
+                            } else
+                            {
+                                return false;
+                            }
+                        })
+                    );
+                    const filteredVideos = await videosArr.filter(obj => {
+                        if (obj)
+                        {
+                            return true;
+                        }
+                    });
+                    this.setState({ datas: filteredVideos }, () => { });
+                });
+
+        } catch (err)
+        {
+            console.log("err", err);
+        }
+        // xecute it
+    };
+
+    componentDidMount() {
+        this.globalFeedSnapshot();
+        this.navBlur = this.props.navigation.addListener("blur", () => {
+            this.setState({ shouldPlay: false })
+        });
+        this.navFocus = this.props.navigation.addListener("focus", () => {
+            setTimeout(() => {
+                this.setState({ shouldPlay: true })
+            }, 200)
+        });
+
+    }
     //
+    componentWillUnmount() {
+        console.log(this.navBlur(), "navBlur")
+        this.navBlur();
+        this.navFocus();
+    }
     render() {
         if (this.state.datas.length > 0)
         {
@@ -198,9 +264,10 @@ class Home extends Component {
                                             isMuted={false}
                                             isLooping
                                             resizeMode="cover"
-                                            shouldPlay={this.state.selected == index}
+                                            shouldPlay={this.state.selected == index && this.state.shouldPlay}
                                             style={{ width: "100%", height: "100%" }}
                                             posterSource={{ uri: item.poster }}
+                                            onTouchEnd={() => this.setState((p) => ({ shouldPlay: !p.shouldPlay }))}
                                         />
                                         <Gradient
                                             locations={[0, 0.26, 0.6, 1]}
@@ -217,7 +284,7 @@ class Home extends Component {
                                                     videoId={item.id}
                                                     avatarSrc={avatar}
                                                     count={item.count}
-                                                    user = {item.user}
+                                                    user={item.user}
                                                 />
                                             </Center>
                                         </Gradient>
@@ -231,7 +298,7 @@ class Home extends Component {
             );
         } else
         {
-            this.globalFeed();
+
             return (
                 <View style={styles.container}>
                     <ActivityIndicator></ActivityIndicator>

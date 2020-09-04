@@ -1,6 +1,8 @@
 import React from "react";
-import { View, ActivityIndicator, StyleSheet, TouchableOpacity, 
-    Image, FlatList, Dimensions, ScrollView, SafeAreaView,Button } from "react-native";
+import {
+    View, ActivityIndicator, StyleSheet, TouchableOpacity,
+    Image, FlatList, Dimensions, ScrollView, SafeAreaView, Button
+} from "react-native";
 import { Text } from 'galio-framework';
 import firebase from "firebase";
 import LoginScreen from "./LoginScreen";
@@ -33,7 +35,7 @@ class ListItem extends React.Component {
                 </TouchableOpacity>
                 <View style={styles.separator}></View>
             </View>
-    
+
         );
     }
 }
@@ -44,14 +46,17 @@ class UserScreen extends React.Component {
         super(props);
 
         this.props.navigation.setOptions({
-            title:"",
-            headerStyle:{display:"flex",alignSelf: 'flex-start', flexDirection:"row", textAlign:"left"},
-            headerTitleStyle:{fontWeight: '500', fontSize:24, alignSelf: 'flex-start'},
-            headerLeft: () => {return (<Text style={{color:"white",fontWeight: '800', fontSize:28, paddingLeft:20}}>Profilo</Text>)},
+            title: "",
+            headerStyle: { display: "flex", alignSelf: 'flex-start', flexDirection: "row", textAlign: "left" },
+            headerTitleStyle: { fontWeight: '500', fontSize: 24, alignSelf: 'flex-start' },
+            headerLeft: () => { return (<Text style={{ color: "white", fontWeight: '800', fontSize: 28, paddingLeft: 20 }}>Profilo</Text>) },
             headerRight: () => this.triggerBottomModal()
         });
 
         this.state = {
+            isFollowAlready: false,
+            isFollowDocId: "",
+
             user: this.props.route.params?.user || {},
             isMine: this.props.route.params?.isMine ?? false,
             showOptions: false,
@@ -75,26 +80,26 @@ class UserScreen extends React.Component {
         };
     }
 
-     
-    
+
+
     editProfile = () => {
-        this.setState({showOptions:false});
-            this.props.navigation.navigate("Modifica", {
-                editingUser: this.props.global.user,
-            })
+        this.setState({ showOptions: false });
+        this.props.navigation.navigate("Modifica", {
+            editingUser: this.props.global.user,
+        })
     }
 
     triggerBottomModal = () => {
         return (
-            <TouchableOpacity style={{marginRight:20}} onPress={()=> this.setState({showOptions: true})}>
+            <TouchableOpacity style={{ marginRight: 20 }} onPress={() => this.setState({ showOptions: true })}>
                 <Entypo name="dots-three-horizontal" size={28} color="white"></Entypo>
             </TouchableOpacity>
         )
-        
+
     }
 
     componentDidMount() {
-        
+
         //console.log(this.props.route.params);
         console.log("started user screen");
 
@@ -134,6 +139,7 @@ class UserScreen extends React.Component {
                 );
         }
 
+        this.checkFollowStatus()
         //this.signOut();
     }
 
@@ -214,36 +220,89 @@ class UserScreen extends React.Component {
 
     }
 
-    follow = () => {
+    checkFollowStatus = async () => {
+        const me = firebase.auth().currentUser.uid;
+        const hisEmail = this.state.user.email;
+
+        const { id } = this.state.user;
+        const followDoc = await (await firebase.firestore().collection("following").where("follower", "==", me).where("followed", "==", id).get()).docs;
+        if (followDoc.length !== 0 && followDoc[0])
+        {
+            this.setState({
+                isFollowAlready: true,
+                isFollowDocId: followDoc[0].id
+            });
+        } else if (followDoc.length === 0 && !followDoc[0])
+        {
+            this.setState({
+                isFollowAlready: false,
+                isFollowDocId: followDoc[0].id
+            });
+        }
+    }
+    follow = async () => {
+        // console.log("FOllow Func", this.state.user)
         if (!this.state.isMine && this.state.user.email)
         {
             const me = firebase.auth().currentUser.uid;
             const hisEmail = this.state.user.email;
+
+            const { id } = this.state.user;
+
+            // return;
             if (this.state.user.id)
             {
-                firebase.firestore().collection("following")
-                    .add({ follower: me, followed: this.state.user.id });
+                if (this.state.isFollowAlready)
+                {
+                    await firebase.firestore().collection("following").doc(this.state.isFollowDocId).delete();
+                    this.setState({
+                        isFollowAlready: false,
+                        isFollowDocId: ""
+                    });
+                } else
+                {
+                    const newDocRef = firebase.firestore().collection("following").doc();
+                    await newDocRef.set({ follower: me, followed: id });
+                    this.setState({
+                        isFollowAlready: true,
+                        isFollowDocId: newDocRef.id
+                    });
+                }
             } else
             {
-                firebase.firestore().collection("users").where("email", "==", hisEmail)
-                    .get()
-                    .then(function (querySnapshot) {
-                        querySnapshot.forEach(function (doc) {
-                            // doc.data() is never undefined for query doc snapshots
-                            console.log(doc.id, " => ", doc.data());
-                            firebase.firestore().collection("following")
-                                .add({ follower: me, followed: doc.id });
-                        });
-                    })
-                    .catch(function (error) {
-                        console.log("Error getting documents: ", error);
-                    });
+                const querySnapshot = await firebase.firestore().collection("users").where("email", "==", hisEmail).get();
+                const { docs } = querySnapshot;
+                if (docs[0])
+                {
+                    (async () => {
+
+                        const { id } = doc[0];
+                        if (this.state.isFollowAlready)
+                        {
+                            await firebase.firestore().collection("following").doc(this.state.isFollowDocId).delete();
+                            this.setState({
+                                isFollowAlready: false,
+                                isFollowDocId: ""
+                            });
+                        } else
+                        {
+
+                            const newDocRef = firebase.firestore().collection("following").doc();
+                            await newDocRef.set({ follower: me, followed: id });
+                            this.setState({
+                                isFollowAlready: true,
+                                isFollowDocId: newDocRef.id
+                            });
+                        }
+                    })()
+                }
+
             }
         }
     }
 
     handleSfida = () => {
-        this.setState({showOptions:false});
+        this.setState({ showOptions: false });
         if (this.state.isMine)
         {
             // vai a visualizza sfide
@@ -259,13 +318,13 @@ class UserScreen extends React.Component {
     RenderItems = () => {
         var nav = this.props.navigation;
         return (
-                <FlatList
-                    keyExtractor={(item, index) => index.toString()}
-                    data={this.state.itemList}
-                    renderItem={({ item }) => (
-                        <ListItem icon={item.icon} title={item.title} navigation={nav} action={item.action}/>
-                    )}
-                />
+            <FlatList
+                keyExtractor={(item, index) => index.toString()}
+                data={this.state.itemList}
+                renderItem={({ item }) => (
+                    <ListItem icon={item.icon} title={item.title} navigation={nav} action={item.action} />
+                )}
+            />
         );
     }
 
@@ -275,7 +334,7 @@ class UserScreen extends React.Component {
             <SafeAreaView>
                 {/* <Text h1 color="white">Is online: {this.props.global.user.name}</Text> */}
                 {this.props.global.user ? (
-                    <> 
+                    <>
 
                         <Profile
                             user={this.state.user}
@@ -285,6 +344,7 @@ class UserScreen extends React.Component {
                             signout={this.signOut}
                             guest={!this.state.isMine}
                             follow={this.follow}
+                            isFollowed={this.state.isFollowAlready}
                         />
 
                         <Modal.BottomModal
@@ -297,8 +357,8 @@ class UserScreen extends React.Component {
                                 <ModalTitle
                                     title="Opzioni"
                                     hasTitleBar={false}
-                                    style={{backgroundColor: '#2b2b2b', }}
-                                    textStyle={{color: "#EE1D52"}}
+                                    style={{ backgroundColor: '#2b2b2b', }}
+                                    textStyle={{ color: "#EE1D52" }}
                                 />
                             }
                         >
@@ -310,7 +370,7 @@ class UserScreen extends React.Component {
                             >
                                 {this.RenderItems()}
                                 <Modal>
-                                    
+
                                 </Modal>
                             </ModalContent>
                         </Modal.BottomModal>
@@ -471,7 +531,7 @@ const styles = StyleSheet.create({
     text: {
         color: '#fff',
         fontSize: 16,
-        marginLeft:20,
+        marginLeft: 20,
     },
     separator: {
         height: 1.5,

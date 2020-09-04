@@ -11,19 +11,19 @@ const Poster = styled.ImageBackground`
 	height: 100%;
 `
 
-const VideoPlayer = ({ video, poster, isPlay }) => {
+const VideoPlayer = ({ video, poster, isPlay, shouldPlay }) => {
 	return isPlay ? (
 		<Play
 			rate={1.0}
 			volume={1.0}
 			isMuted={false}
-			shouldPlay
+			shouldPlay={shouldPlay}
 			useNativeControls={false}
 			posterSource={poster}
 			source={video}
 			resizeMode='cover'
 		/>
 	) : (
-		<Poster source={poster} />
-	)
+			<Poster source={poster} />
+		)
 }

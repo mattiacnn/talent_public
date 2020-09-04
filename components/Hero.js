@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 
 import { Dimensions, View } from 'react-native'
 
@@ -11,11 +11,12 @@ import ViewPager from '@react-native-community/viewpager'
 import VideoPlayer from '../components/VideoPlayer'
 import Info from '../components/Info'
 import Sidebar from '../components/Sidebar'
+import { useNavigation } from '@react-navigation/native'
 
 const { height } = Dimensions.get('window')
 
 const Container = styled(ViewPager)`
-	height: ${height}px;
+	height: ${height }px;
 `
 const Gradient = styled(LinearGradient)`
 	height: 100%;

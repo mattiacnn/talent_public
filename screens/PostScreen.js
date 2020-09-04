@@ -130,7 +130,7 @@ class PostScreen extends React.Component {
         </View>
 
         <View style={{
-          padding: 10, flex: 1, flexDirection: "column",justifyContent:'flex-start'
+          padding: 10, flex: 1, flexDirection: "column", justifyContent: 'flex-start'
         }}>
           {
             this.props.route.params?.sfida && (<Text h4>Lancia una sfida a {this.props.route.params?.utenteSfidato?.name}</Text>)
@@ -138,102 +138,103 @@ class PostScreen extends React.Component {
           {
             this.props.route.params?.rispostaSfida && (<Text h4>Accetta la sfida di {this.props.route.params?.rispostaSfida?.sfidante?.name}</Text>)
           }
-        <View style={{flexDirection:'row', borderBottomWidth:0.4,borderColor:'grey',}}>
-        <View style={{
-            marginBottom:10
+          <View style={{ flexDirection: 'row', borderBottomWidth: 0.4, borderColor: 'grey', }}>
+            <View style={{
+              marginBottom: 10
 
-          }}>
-            <TouchableOpacity onPress={this._pickImage} style={
-              {
-                width: Dimensions.get('screen').width / 5,
-                height: Dimensions.get('screen').width / 5,
-                backgroundColor: "#0f0104",
-                borderRadius: 10,
-                overflow: "hidden",
-                alignContent: "center",
-                justifyContent: "center"
-              }
-            }>
-              <Video source={{ uri: this.state.video?.uri }} resizeMode="cover" style={{
-                height: Dimensions.get('screen').width / 2,
-                width: Dimensions.get('screen').width / 2,
-                zIndex: 3,
-                position: "absolute",
-                alignSelf: "center"
-              }} />
-            </TouchableOpacity>
+            }}>
+              <TouchableOpacity onPress={this._pickImage} style={
+                {
+                  width: Dimensions.get('screen').width / 5,
+                  height: Dimensions.get('screen').width / 5,
+                  backgroundColor: "#0f0104",
+                  borderRadius: 10,
+                  overflow: "hidden",
+                  alignContent: "center",
+                  justifyContent: "center"
+                }
+              }>
+                <Video source={{ uri: this.state.video?.uri }} resizeMode="cover" style={{
+                  height: Dimensions.get('screen').width / 2,
+                  width: Dimensions.get('screen').width / 2,
+                  zIndex: 3,
+                  position: "absolute",
+                  alignSelf: "center"
+                }} />
+              </TouchableOpacity>
+            </View>
+
+            <Input style={{ marginLeft: 10, width: Dimensions.get('screen').width - Dimensions.get('screen').width * 35 / 100, flex: 1, borderWidth: 0, backgroundColor: 'black' }} placeholder="Descrizione..." placeholderTextColor="#ffff" right icon="text-fields" family="MaterialCommunityIcons" onChangeText={text => this.onChangeText(text)} />
           </View>
 
-          <Input style={{marginLeft:10, width: Dimensions.get('screen').width - Dimensions.get('screen').width * 35 / 100, flex:1, borderWidth:0,backgroundColor:'black'}} placeholder="Descrizione..."    placeholderTextColor="#ffff"  right icon="text-fields" family="MaterialCommunityIcons" onChangeText={text => this.onChangeText(text)} />
-        </View>
-      
-          <View style={{borderBottomColor:'grey', borderBottomWidth:0.5,}}>
-          <SectionedMultiSelect
-            items={items}
-            uniqueKey="name"
-            textColor="white"
-            subKey="children"
-            selectText="Scegli una o più categorie"
-            showDropDowns={true}
-            modalWithSafeAreaView={true}
-            readOnlyHeadings={true}
-            onSelectedItemsChange={this.onSelectedItemsChange}
-            selectedItems={this.state.selectedItems}
-            confirmText="conferma"
-            selectedText="selezionate"
-            searchPlaceholderText="Cerca categoria"
-            colors={{ primary: "black" }}
-            styles={{
-              selectToggle: {
-                width: '90%',
-                marginLeft:'auto',
-                marginRight:'auto'
-              },
+          <View style={{ borderBottomColor: 'grey', borderBottomWidth: 0.5, }}>
+            <SectionedMultiSelect
+              items={items}
+              uniqueKey="name"
+              textColor="white"
+              subKey="children"
+              selectText="Scegli una o più categorie"
+              showDropDowns={true}
+              modalWithSafeAreaView={true}
+              readOnlyHeadings={true}
+              onSelectedItemsChange={this.onSelectedItemsChange}
+              selectedItems={this.state.selectedItems}
+              confirmText="conferma"
+              selectedText="selezionate"
+              searchPlaceholderText="Cerca categoria"
+              colors={{ primary: "black" }}
+              styles={{
+                selectToggle: {
+                  width: '90%',
+                  marginLeft: 'auto',
+                  marginRight: 'auto'
+                },
 
-              selectToggleText: {
-                color: 'white',
-                zIndex: 10,
-                marginTop:20,
-                marginBottom:20,
-              }
-            }}
+                selectToggleText: {
+                  color: 'white',
+                  zIndex: 10,
+                  marginTop: 20,
+                  marginBottom: 20,
+                }
+              }}
 
-          />
+            />
           </View>
-        <View style={{borderBottomWidth:0.4,borderColor:'grey', }}> 
-          <TagInput
+          <View style={{ borderBottomWidth: 0.4, borderColor: 'grey', }}>
+            <TagInput
               updateState={this.updateTagState}
               tags={this.state.tags}
               placeholder="Hastags"
               placeholderTextColor='white'
               tagStyle={styles.tag}
               tagTextStyle={styles.tagText}
-              inputStyle={{color: 'white'}}
-              containerStyle={{width:'97%',marginLeft:'auto',marginRight:'auto', marginTop:10,
-            }}
+              inputStyle={{ color: 'white' }}
+              containerStyle={{
+                width: '97%', marginLeft: 'auto', marginRight: 'auto', marginTop: 10,
+              }}
             />
           </View>
 
-          {this.props.route.params?.sfida && (<View style={{ width: "100%", marginTop:20,marginBottom:20,borderBottomWidth:0.5, borderColor:'grey' }}>
-            <View style={{width: "92%",marginLeft:'auto',marginRight:'auto'}}>
-            <Text style={{color:'white', fontSize:16}}> Difficoltà sfida: {this.state.starAmount} stelle</Text>
-            <Slider
-              maximumValue={500}
-              minimumValue={10}
-              value={this.state.starAmount}
-              step={10}
-              onValueChange={(val) => this.setState({ starAmount: val })}
-              activeColor={'#ffff'}
-              thumbStyle={{color:'white',borderColor:'white'}}
-            //onSlidingComplete={(val) =>this.setState({starAmount:val})}
-            />
+          {this.props.route.params?.sfida && (<View style={{ width: "100%", marginTop: 20, marginBottom: 20, borderBottomWidth: 0.5, borderColor: 'grey' }}>
+            <View style={{ width: "92%", marginLeft: 'auto', marginRight: 'auto' }}>
+              <Text style={{ color: 'white', fontSize: 16 }}> Difficoltà sfida: {this.state.starAmount} stelle</Text>
+              <Slider
+                maximumValue={500}
+                minimumValue={10}
+                value={this.state.starAmount}
+                step={10}
+                onValueChange={(val) => this.setState({ starAmount: val })}
+                activeColor={'#ffff'}
+                thumbStyle={{ color: 'white', borderColor: 'white' }}
+              //onSlidingComplete={(val) =>this.setState({starAmount:val})}
+              />
             </View>
           </View>)}
 
 
-          <Block center style={{marginTop:'auto'}}>
+          <Block center style={{ marginTop: 'auto' }}>
 
-          <Button  size="small" color="white" round uppercase style={{ shadowColor: "#black", }} onPress={this._uploadVideo} loading={this.state.loading} ><Text style={{fontSize:18,fontWeight:'600'}}>CARICA</Text></Button>
+            <Button size="small" color="white" round uppercase style={{ shadowColor: "#black", }} onPress={this._uploadVideo} loading={this.state.loading} ><Text style={{ fontSize: 18, fontWeight: '600' }}>CARICA</Text></Button>
           </Block>
 
         </View>
@@ -362,7 +363,7 @@ class PostScreen extends React.Component {
             // e la data di creazione - e la timeline dei follower (?)
             // TO-DO
           }
-
+          newvideo.hashtags = [...this_.state.tags.tagsArray];
           return firebase.firestore().collection("videos").add(newvideo);
         })
         .then(docRef => {
@@ -375,12 +376,13 @@ class PostScreen extends React.Component {
               video1_id: docRef.id,
               sfidante_id: user_id,
               createdAt: new Date(),
-              sfidato_id: us?.id,
+              sfidato_id: us?.id || "",
               sfidato: { name: us?.name },
               sfidante: { name: me?.name },
               status: "onCreating",
               threshold: this_.state.starAmount
             };
+            console.log(newSfida, "newSfida-postscreen")
             firebase.firestore().collection("sfide").doc(vid).set(newSfida);
           }
           else if (rispostaSfida)
@@ -405,18 +407,18 @@ class PostScreen extends React.Component {
 export default withGlobalContext(PostScreen);
 
 const styles = StyleSheet.create({
-    textInput: {
-      height: 40,
-      borderColor: 'white',
-      borderWidth: 1,
-      marginTop: 8,
-      borderRadius: 5,
-      padding: 3,
-    },
-    tag: {
-        backgroundColor: '#fff'
-      },
-    tagText: {
-        color: 'black'
-      },
+  textInput: {
+    height: 40,
+    borderColor: 'white',
+    borderWidth: 1,
+    marginTop: 8,
+    borderRadius: 5,
+    padding: 3,
+  },
+  tag: {
+    backgroundColor: '#fff'
+  },
+  tagText: {
+    color: 'black'
+  },
 });
